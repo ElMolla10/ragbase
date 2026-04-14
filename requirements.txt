@@ -1,0 +1,33 @@
+# Core
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-multipart>=0.0.6
+
+# Database
+sqlalchemy[asyncio]>=2.0.25
+asyncpg>=0.29.0
+pgvector>=0.2.4
+
+# PDF processing
+pymupdf>=1.23.0
+
+# Embeddings
+sentence-transformers>=2.3.0
+# torch installed separately with CPU-only in Dockerfile
+
+# LLM
+groq>=0.4.0
+
+# Frontend
+streamlit>=1.30.0
+requests>=2.31.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+httpx>=0.26.0
+
+# Linting
+ruff>=0.1.0

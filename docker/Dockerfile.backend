@@ -1,0 +1,33 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Set Python path so imports work
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install CPU-only torch first to avoid CUDA dependencies
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
+# Install remaining requirements
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Pre-download the embedding model during build
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
+# Copy application code
+COPY backend/ ./backend/
+
+# Expose port
+EXPOSE 8000
+
+# Run the application
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
