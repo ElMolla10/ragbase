@@ -1,6 +1,7 @@
 """Pytest configuration and fixtures."""
 
 import asyncio
+import os
 from collections.abc import AsyncGenerator, Generator
 
 import pytest
@@ -9,15 +10,15 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from backend.config import get_settings
 from backend.database import get_session
 from backend.main import app
 from backend.models import Base
 
-settings = get_settings()
-
-# Use test database URL
-TEST_DATABASE_URL = settings.database_url.replace("/ragbase", "/ragbase_test")
+# Use DATABASE_URL from environment (set by CI) or default to local test database
+TEST_DATABASE_URL = os.environ.get(
+    "DATABASE_URL",
+    "postgresql+asyncpg://ragbase:ragbase@localhost:5432/ragbase_test",
+)
 
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 test_session_maker = async_sessionmaker(
