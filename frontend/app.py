@@ -4,8 +4,34 @@ import os
 
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+
+
+def copy_button(text: str, key: str) -> None:
+    """Render a copy to clipboard button."""
+    # Escape text for JavaScript
+    escaped_text = text.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
+
+    components.html(
+        f"""
+        <button onclick="navigator.clipboard.writeText(`{escaped_text}`).then(() => {{
+            this.innerText = 'Copied!';
+            setTimeout(() => this.innerText = 'Copy to Clipboard', 2000);
+        }})" style="
+            background-color: #262730;
+            color: #fafafa;
+            border: 1px solid #4a4a5a;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        ">Copy to Clipboard</button>
+        """,
+        height=40,
+        key=key,
+    )
 
 
 def init_session_state() -> None:
@@ -76,11 +102,12 @@ def render_chat_page() -> None:
     selected_doc_id = doc_options[selected_doc]
 
     # Display chat history
-    for message in st.session_state.messages:
+    for idx, message in enumerate(st.session_state.messages):
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             if "metadata" in message:
                 meta = message["metadata"]
+                copy_button(message["content"], key=f"copy_history_{idx}")
                 st.caption(
                     f"Latency: {meta['latency_ms']}ms | "
                     f"Tokens: {meta['token_count']} | "
@@ -110,6 +137,7 @@ def render_chat_page() -> None:
 
             if result:
                 st.markdown(result["answer"])
+                copy_button(result["answer"], key="copy_live_response")
                 st.caption(
                     f"Latency: {result['latency_ms']}ms | "
                     f"Tokens: {result['token_count']} | "
