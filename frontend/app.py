@@ -85,6 +85,20 @@ def query_documents(query: str, document_id: int | None = None) -> dict | None:
         return None
 
 
+def delete_document(document_id: int) -> dict | None:
+    """Delete a document from the backend."""
+    try:
+        response = requests.delete(
+            f"{BACKEND_URL}/documents/{document_id}",
+            timeout=30,
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        st.error(f"Failed to delete document: {e}")
+        return None
+
+
 def render_chat_page() -> None:
     """Render the chat interface."""
     st.header("Chat with Research Papers")
@@ -101,7 +115,7 @@ def render_chat_page() -> None:
     selected_doc_id = doc_options[selected_doc]
 
     # Display chat history
-    for idx, message in enumerate(st.session_state.messages):
+    for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             if "metadata" in message:
@@ -197,7 +211,7 @@ def render_documents_page() -> None:
     else:
         for doc in documents:
             with st.container():
-                col1, col2, col3 = st.columns([3, 1, 1])
+                col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
                 with col1:
                     st.text(doc["filename"])
                 with col2:
@@ -205,6 +219,16 @@ def render_documents_page() -> None:
                 with col3:
                     status_color = "green" if doc["status"] == "completed" else "orange"
                     st.markdown(f":{status_color}[{doc['status']}]")
+                with col4:
+                    if st.button(
+                        "🗑️ Delete",
+                        key=f"delete_{doc['id']}",
+                        type="secondary",
+                    ):
+                        result = delete_document(doc["id"])
+                        if result:
+                            st.success(f"Deleted '{doc['filename']}'")
+                            st.rerun()
                 st.divider()
 
 
