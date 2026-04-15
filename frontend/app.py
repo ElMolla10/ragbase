@@ -9,7 +9,7 @@ import streamlit.components.v1 as components
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 
-def copy_button(text: str, key: str) -> None:
+def copy_button(text: str) -> None:
     """Render a copy to clipboard button."""
     # Escape text for JavaScript
     escaped_text = text.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
@@ -30,7 +30,6 @@ def copy_button(text: str, key: str) -> None:
         ">Copy to Clipboard</button>
         """,
         height=40,
-        key=key,
     )
 
 
@@ -107,7 +106,7 @@ def render_chat_page() -> None:
             st.markdown(message["content"])
             if "metadata" in message:
                 meta = message["metadata"]
-                copy_button(message["content"], key=f"copy_history_{idx}")
+                copy_button(message["content"])
                 st.caption(
                     f"Latency: {meta['latency_ms']}ms | "
                     f"Tokens: {meta['token_count']} | "
@@ -137,7 +136,7 @@ def render_chat_page() -> None:
 
             if result:
                 st.markdown(result["answer"])
-                copy_button(result["answer"], key="copy_live_response")
+                copy_button(result["answer"])
                 st.caption(
                     f"Latency: {result['latency_ms']}ms | "
                     f"Tokens: {result['token_count']} | "
