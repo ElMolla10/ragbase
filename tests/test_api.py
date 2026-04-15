@@ -248,3 +248,40 @@ class TestDeleteEndpoint:
         stats_after = await client.get("/stats")
         chunks_after = stats_after.json()["total_chunks"]
         assert chunks_after == chunks_before - initial_chunks
+
+    async def test_upload_and_delete_lifecycle(
+        self, client: AsyncClient, sample_pdf_bytes: bytes
+    ) -> None:
+        """Test complete lifecycle: upload document, verify exists, delete, verify gone."""
+        # Step 1: Upload a document
+        files = {"file": ("lifecycle_test.pdf", sample_pdf_bytes, "application/pdf")}
+        ingest_response = await client.post("/ingest", files=files)
+        assert ingest_response.status_code == 200
+        doc_id = ingest_response.json()["document_id"]
+        num_chunks = ingest_response.json()["num_chunks"]
+        assert num_chunks > 0
+
+        # Step 2: Verify document exists in database
+        docs_response = await client.get("/documents")
+        assert docs_response.status_code == 200
+        doc_ids = [doc["id"] for doc in docs_response.json()]
+        assert doc_id in doc_ids
+
+        # Step 3: Verify stats reflect the document
+        stats_response = await client.get("/stats")
+        assert stats_response.json()["total_documents"] >= 1
+        assert stats_response.json()["total_chunks"] >= num_chunks
+
+        # Step 4: Delete the document
+        delete_response = await client.delete(f"/documents/{doc_id}")
+        assert delete_response.status_code == 200
+        assert delete_response.json()["document_id"] == doc_id
+
+        # Step 5: Verify document no longer exists
+        docs_after = await client.get("/documents")
+        doc_ids_after = [doc["id"] for doc in docs_after.json()]
+        assert doc_id not in doc_ids_after
+
+        # Step 6: Verify deleting again returns 404
+        delete_again = await client.delete(f"/documents/{doc_id}")
+        assert delete_again.status_code == 404
