@@ -4,11 +4,14 @@ import logging
 import time
 from contextlib import asynccontextmanager
 
+import boto3
+from botocore.exceptions import ClientError
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.config import get_settings
 from backend.database import get_session, init_db
 from backend.ingest import ingest_pdf
 from backend.llm import generate_answer
@@ -101,6 +104,14 @@ class HealthResponse(BaseModel):
 
     status: str
     message: str
+
+
+class DeleteResponse(BaseModel):
+    """Response model for document deletion."""
+
+    message: str
+    document_id: int
+    filename: str
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -279,4 +290,62 @@ async def get_stats(
         avg_latency_ms=round(float(query_row.avg_latency), 2),
         total_documents=total_docs,
         total_chunks=total_chunks,
+    )
+
+
+@app.delete("/documents/{document_id}", response_model=DeleteResponse)
+async def delete_document(
+    document_id: int,
+    session: AsyncSession = Depends(get_session),
+) -> DeleteResponse:
+    """Delete a document and its associated data.
+
+    Args:
+        document_id: ID of the document to delete.
+        session: Database session.
+
+    Returns:
+        Confirmation of deletion with document details.
+    """
+    settings = get_settings()
+
+    # Find the document
+    result = await session.execute(select(Document).where(Document.id == document_id))
+    document = result.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Document with id {document_id} not found",
+        )
+
+    filename = document.filename
+    file_path = document.file_path
+
+    # Delete from S3 if bucket is configured and file_path exists
+    if settings.s3_bucket and file_path:
+        try:
+            s3_client = boto3.client("s3", region_name=settings.aws_region)
+            s3_client.delete_object(Bucket=settings.s3_bucket, Key=file_path)
+            logger.info(f"Deleted S3 object: {file_path}")
+        except ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "")
+            if error_code != "NoSuchKey":
+                logger.error(f"Failed to delete S3 object: {e}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to delete file from S3: {e}",
+                ) from e
+            logger.warning(f"S3 object not found (already deleted?): {file_path}")
+
+    # Delete document from database (chunks cascade automatically)
+    await session.delete(document)
+    await session.commit()
+
+    logger.info(f"Deleted document '{filename}' (id={document_id})")
+
+    return DeleteResponse(
+        message="Document deleted successfully",
+        document_id=document_id,
+        filename=filename,
     )

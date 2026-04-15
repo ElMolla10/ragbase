@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     llm_model: str = "llama-3.3-70b-versatile"
     llm_max_tokens: int = 1024
 
+    # AWS S3 settings
+    s3_bucket: str = ""
+    aws_region: str = "eu-central-1"
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -192,3 +192,59 @@ class TestQueryEndpoint:
             # All sources should be from the specified document
             for source in response.json()["sources"]:
                 assert source["id"] is not None
+
+
+@pytest.mark.asyncio
+class TestDeleteEndpoint:
+    """Tests for delete document endpoint."""
+
+    async def test_delete_nonexistent_document(self, client: AsyncClient) -> None:
+        """Test that deleting a non-existent document returns 404."""
+        response = await client.delete("/documents/99999")
+        assert response.status_code == 404
+        assert "not found" in response.json()["detail"].lower()
+
+    async def test_delete_document_success(
+        self, client: AsyncClient, sample_pdf_bytes: bytes
+    ) -> None:
+        """Test successful document deletion."""
+        # First ingest a document
+        files = {"file": ("to_delete.pdf", sample_pdf_bytes, "application/pdf")}
+        ingest_response = await client.post("/ingest", files=files)
+        doc_id = ingest_response.json()["document_id"]
+
+        # Delete the document
+        response = await client.delete(f"/documents/{doc_id}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["document_id"] == doc_id
+        assert data["filename"] == "to_delete.pdf"
+        assert "deleted successfully" in data["message"].lower()
+
+        # Verify document no longer exists
+        docs_response = await client.get("/documents")
+        doc_ids = [doc["id"] for doc in docs_response.json()]
+        assert doc_id not in doc_ids
+
+    async def test_delete_removes_chunks(
+        self, client: AsyncClient, sample_pdf_bytes: bytes
+    ) -> None:
+        """Test that deleting a document also removes its chunks."""
+        # Ingest a document
+        files = {"file": ("chunked.pdf", sample_pdf_bytes, "application/pdf")}
+        ingest_response = await client.post("/ingest", files=files)
+        doc_id = ingest_response.json()["document_id"]
+        initial_chunks = ingest_response.json()["num_chunks"]
+        assert initial_chunks > 0
+
+        # Get initial stats
+        stats_before = await client.get("/stats")
+        chunks_before = stats_before.json()["total_chunks"]
+
+        # Delete the document
+        await client.delete(f"/documents/{doc_id}")
+
+        # Verify chunks are removed
+        stats_after = await client.get("/stats")
+        chunks_after = stats_after.json()["total_chunks"]
+        assert chunks_after == chunks_before - initial_chunks
