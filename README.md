@@ -29,30 +29,21 @@ A production RAG (Retrieval-Augmented Generation) platform that lets you upload 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                        User                             │
-│                   (Streamlit UI)                        │
-└───────────────────────┬─────────────────────────────────┘
-                        │ HTTP
-┌───────────────────────▼─────────────────────────────────┐
-│                   FastAPI Backend                       │
-│   /ingest  /query  /documents  /stats  /health          │
-└──────┬─────────────────────────────┬────────────────────┘
-       │                             │
-┌──────▼──────────┐       ┌──────────▼──────────┐
-│   AWS RDS       │       │    Groq API          │
-│   Postgres 16   │       │  llama-3.3-70b       │
-│   + pgvector    │       │  (LLM inference)     │
-│                 │       └─────────────────────┘
+┌──────▼──────────┐         ┌──────────▼──────────┐
+│   AWS RDS       │         │    Groq API         │
+│   Postgres 16   │         │   llama-3.3-70b     │
+│   + pgvector    │         │  (LLM inference)    │
+│                 │         └─────────────────────┘
 │  - documents    │
-│  - chunks       │       ┌─────────────────────┐
-│  - query_logs   │       │    AWS S3            │
-└─────────────────┘       │  (PDF storage)       │
-                          └─────────────────────┘
-┌─────────────────────────────────────────────────────────┐
-│                   Metabase Dashboard                    │
-│         Query monitoring, latency tracking              │
-└─────────────────────────────────────────────────────────┘
+│  - chunks       │         ┌─────────────────────┐
+│  - query_logs   │◀──┐     │    AWS S3           │
+└──────┬──────────┘   │     │  (PDF storage)      │
+       │              │     └─────────────────────┘
+       │ Read Logs    │
+┌──────▼──────────────┴───────────────────────────┐
+│                  Metabase Dashboard             │
+│        Query monitoring, latency tracking       │
+└─────────────────────────────────────────────────┘
 ```
 
 ---
@@ -327,4 +318,4 @@ POSTGRES_DB=ragbase
 
 ## Author
 
-**Mohamed El Molla** — [LinkedIn](https://www.linkedin.com/in/mohamed-el-molla/) | [GitHub](https://github.com/ElMolla10)
+**Mohamed El Molla** — Final Year AI Student @ ESLSCA University (Graduating June 2026) Focus: MLOps, RAG Architecture, and Cloud Deployment - [LinkedIn](https://www.linkedin.com/in/mohamed-el-molla/) | [GitHub](https://github.com/ElMolla10)
