@@ -335,7 +335,9 @@ def render_documents_page() -> None:
         label_visibility="collapsed",
         help="Any PDF with selectable text",
     )
-    if uploaded and st.button("Index document", type="primary", use_container_width=True):
+    if uploaded and st.button(
+        "Index document", type="primary", use_container_width=True
+    ):
         with st.spinner("Extracting · chunking · embedding…"):
             res = upload_document(uploaded)
         if res:
@@ -361,9 +363,10 @@ def render_documents_page() -> None:
                 unsafe_allow_html=True,
             )
         with c3:
-            if st.button("Delete", key=f"d{doc['id']}", type="secondary"):
-                if delete_document(doc["id"]):
-                    st.rerun()
+            if st.button(
+                "Delete", key=f"d{doc['id']}", type="secondary"
+            ) and delete_document(doc["id"]):
+                st.rerun()
         st.divider()
 
 
