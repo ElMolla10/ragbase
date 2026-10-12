@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,6 +17,15 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = "postgresql+asyncpg://ragbase:ragbase@localhost:5432/ragbase"
+
+    @field_validator("database_url")
+    @classmethod
+    def use_asyncpg(cls, value: str) -> str:
+        """Accept provider URLs while keeping the async SQLAlchemy driver."""
+        for prefix in ("postgres://", "postgresql://"):
+            if value.startswith(prefix):
+                return "postgresql+asyncpg://" + value[len(prefix) :]
+        return value
 
     # Groq API
     groq_api_key: str = ""
@@ -34,10 +44,6 @@ class Settings(BaseSettings):
     # LLM settings
     llm_model: str = "llama-3.3-70b-versatile"
     llm_max_tokens: int = 1024
-
-    # AWS S3 settings
-    s3_bucket: str = ""
-    aws_region: str = "eu-central-1"
 
 
 @lru_cache

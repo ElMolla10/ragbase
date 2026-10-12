@@ -4,14 +4,11 @@ import logging
 import time
 from contextlib import asynccontextmanager
 
-import boto3
-from botocore.exceptions import ClientError
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.config import get_settings
 from backend.database import get_session, init_db
 from backend.ingest import ingest_pdf
 from backend.llm import generate_answer
@@ -307,8 +304,6 @@ async def delete_document(
     Returns:
         Confirmation of deletion with document details.
     """
-    settings = get_settings()
-
     # Find the document
     result = await session.execute(select(Document).where(Document.id == document_id))
     document = result.scalar_one_or_none()
@@ -320,24 +315,8 @@ async def delete_document(
         )
 
     filename = document.filename
-    file_path = document.file_path
-
-    # Delete from S3 if bucket is configured and file_path exists
-    if settings.s3_bucket and file_path:
-        try:
-            s3_client = boto3.client("s3", region_name=settings.aws_region)
-            s3_client.delete_object(Bucket=settings.s3_bucket, Key=file_path)
-            logger.info(f"Deleted S3 object: {file_path}")
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "")
-            if error_code != "NoSuchKey":
-                logger.error(f"Failed to delete S3 object: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Failed to delete file from S3: {e}",
-                ) from e
-            logger.warning(f"S3 object not found (already deleted?): {file_path}")
-
+    # Original PDFs are not persisted; optional file_path metadata is retained
+    # for schema compatibility. External PDF storage can be added separately.
     # Delete document from database (chunks cascade automatically)
     await session.delete(document)
     await session.commit()

@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green?style=flat-square&logo=fastapi)
-![AWS](https://img.shields.io/badge/AWS-EC2%20%2B%20RDS%20%2B%20S3-orange?style=flat-square&logo=amazonaws)
+![Railway](https://img.shields.io/badge/Deployment-Railway-black?style=flat-square)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker)
 ![pgvector](https://img.shields.io/badge/pgvector-Postgres%2016-336791?style=flat-square&logo=postgresql)
 ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-181717?style=flat-square&logo=githubactions)
@@ -10,7 +10,7 @@
 
 A production RAG (Retrieval-Augmented Generation) platform that lets you upload research papers and chat with them. Ask questions in **any language** — Arabic, English, or mixed — and get cited answers pulled from the actual document content, with full ML observability built in.
 
-**Live demo:** `http://3.75.213.162:8501`
+**Live demo:** Deploy on Railway and share the frontend's generated HTTPS URL.
 
 ---
 
@@ -28,23 +28,21 @@ A production RAG (Retrieval-Augmented Generation) platform that lets you upload 
 
 ## Architecture
 
+```text
+Browser → Streamlit (Railway public HTTPS URL)
+                ↓ BACKEND_URL
+          FastAPI (Railway) → Groq API (server-side key)
+                ↓
+          Postgres + pgvector (Railway)
+          documents · chunks · query_logs
+                ↑
+          Metabase (optional)
 ```
-┌──────▼──────────┐         ┌──────────▼──────────┐
-│   AWS RDS       │         │    Groq API         │
-│   Postgres 16   │         │   llama-3.3-70b     │
-│   + pgvector    │         │  (LLM inference)    │
-│                 │         └─────────────────────┘
-│  - documents    │
-│  - chunks       │         ┌─────────────────────┐
-│  - query_logs   │◀──┐     │    AWS S3           │
-└──────┬──────────┘   │     │  (PDF storage)      │
-       │              │     └─────────────────────┘
-       │ Read Logs    │
-┌──────▼──────────────┴───────────────────────────┐
-│                  Metabase Dashboard             │
-│        Query monitoring, latency tracking       │
-└─────────────────────────────────────────────────┘
-```
+
+PDFs are processed in memory. Filenames, metadata, extracted text, embeddings,
+and query logs persist in Postgres; original PDF files are not stored.
+The nullable `file_path` column remains for compatibility with existing databases.
+External PDF storage is optional and is not part of this deployment.
 
 ---
 
@@ -54,44 +52,13 @@ A production RAG (Retrieval-Augmented Generation) platform that lets you upload 
 |-------|-----------|
 | Backend | Python, FastAPI, async SQLAlchemy |
 | Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
-| Vector DB | pgvector on AWS RDS Postgres 16 |
+| Vector DB | pgvector on Railway Postgres |
 | LLM | Groq API — llama-3.3-70b-versatile |
 | Frontend | Streamlit |
 | Observability | Metabase + query_logs table |
-| Infrastructure | AWS EC2 (t4g.small) + RDS + S3 |
+| Infrastructure | Railway backend + frontend + Postgres |
 | Containers | Docker Compose |
 | CI | GitHub Actions (ruff lint + pytest) |
-
----
-
-## Radical Pragmatism: The t4g.small Story
-
-The entire stack runs on a **t4g.small instance — 2GB RAM, $5/month**.
-
-During deployment, the PyTorch installation inside the Docker build consumed every byte of available memory and froze the OS. The standard move would have been to upgrade to a t3.medium ($40/month). Instead:
-
-1. Force rebooted the instance to clear the deadlock
-2. Connected via EC2 Instance Connect (browser terminal) immediately after reboot while the system was quiet
-3. Created a 4GB swap file on the SSD:
-
-```bash
-sudo dd if=/dev/zero of=/swapfile bs=128M count=32
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
-```
-
-4. Made it persistent via `/etc/fstab` so it survives reboots
-
-Result: 2GB RAM + 4GB SSD-backed swap = 6GB effective memory. The build finished. The swap is still active.
-
-```
-Mem:   1.8Gi   used: 1.4Gi
-Swap:  4.0Gi   used: 314Mi
-```
-
-A $5/month server doing the work of a $40/month server. Sometimes the right answer is infrastructure engineering, not a bigger budget.
 
 ---
 
@@ -108,7 +75,7 @@ A $5/month server doing the work of a $40/month server. Sometimes the right answ
 ### Example: Ingest a PDF
 
 ```bash
-curl -X POST http://3.75.213.162:8000/ingest \
+curl -X POST http://localhost:8000/ingest \
   -F "file=@paper.pdf"
 ```
 
@@ -124,7 +91,7 @@ Response:
 ### Example: Query (Arabic)
 
 ```bash
-curl -X POST http://3.75.213.162:8000/query \
+curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
   -d '{"query": "ما هي المنهجية المستخدمة في هذا البحث؟"}'
 ```
@@ -132,7 +99,7 @@ curl -X POST http://3.75.213.162:8000/query \
 ### Example: Query (English)
 
 ```bash
-curl -X POST http://3.75.213.162:8000/query \
+curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
   -d '{"query": "What is the main contribution of this paper?"}'
 ```
@@ -170,7 +137,7 @@ cp .env.example .env
 # Add your GROQ_API_KEY to .env
 
 # Start all services
-docker-compose up -d
+docker compose up -d --build
 
 # Services:
 # localhost:8000  → FastAPI (API + docs at /docs)
@@ -180,68 +147,81 @@ docker-compose up -d
 
 ---
 
-## AWS Deployment
+## Deploy to Railway
 
-This project is deployed on AWS free tier. Here's the full setup:
+1. Create an **Empty Project** in [Railway](https://railway.com).
+2. Add a **Postgres service with pgvector installed**, using a pgvector template
+   from Railway's template marketplace. Name it `Postgres`.
+   Railway's standard Postgres image does **not** include pgvector; running SQL
+   alone cannot install a missing extension. Keep the database's persistent volume.
+3. Connect to that database with a SQL client or `railway connect Postgres`
+   (requires the Railway CLI and `psql`), then run:
 
-### Infrastructure
+   ```sql
+   CREATE EXTENSION IF NOT EXISTS vector;
+   SELECT extversion FROM pg_extension WHERE extname = 'vector';
+   ```
 
-| Resource | Service | Config |
-|----------|---------|--------|
-| Compute | EC2 t4g.small | Amazon Linux 2023, arm64 |
-| Database | RDS Postgres 16 | db.t3.micro, 20GB, pgvector enabled |
-| Storage | S3 | PDF storage |
-| Region | eu-central-1 | Frankfurt |
+   Backend startup also enables the extension and creates `documents`, `chunks`,
+   and `query_logs` via `init_db()`. The database role must have permission to
+   create the extension. No separate schema setup script is required.
+4. Add a GitHub service from this repository, name it `backend`, and select the
+   branch containing these changes. Keep **Root Directory** at the repository root
+   so Docker can copy `requirements.txt` and `backend/`.
+   Set these service variables:
 
-### Deploy from scratch
+   | Variable | Value |
+   |----------|-------|
+   | `RAILWAY_DOCKERFILE_PATH` | `docker/Dockerfile.backend` |
+   | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (adjust the service name if different) |
+   | `GROQ_API_KEY` | Your real Groq API key |
 
-1. **Create RDS instance**
-```bash
-aws rds create-db-instance \
-  --db-instance-identifier ragbase-db \
-  --db-instance-class db.t3.micro \
-  --engine postgres \
-  --engine-version 16.6 \
-  --master-username ragbase \
-  --master-user-password <password> \
-  --allocated-storage 20 \
-  --publicly-accessible \
-  --db-name ragbase \
-  --region eu-central-1
-```
+   Use the private database URL. The app accepts `postgres://`, `postgresql://`,
+   and `postgresql+asyncpg://` URLs and selects the asyncpg driver automatically.
+   Leave the start command unset to use the Dockerfile.
+   Set the deployment healthcheck path to `/health`.
+   Generate a public domain under **Settings → Networking** and verify
+   `https://<backend-domain>/health` returns `"status": "healthy"`.
+5. Add a second GitHub service from the same repository and branch, name it
+   `frontend`, and keep its Root Directory at the repository root.
+   Set these service variables:
 
-2. **Create S3 bucket**
-```bash
-aws s3api create-bucket \
-  --bucket ragbase-pdfs-<account-id> \
-  --region eu-central-1 \
-  --create-bucket-configuration LocationConstraint=eu-central-1
-```
+   | Variable | Value |
+   |----------|-------|
+   | `RAILWAY_DOCKERFILE_PATH` | `docker/Dockerfile.frontend` |
+   | `BACKEND_URL` | `https://<backend-domain>` (no trailing slash) |
 
-3. **Launch EC2 instance** (t4g.small, arm64, Amazon Linux 2023)
+   Leave the start command unset. Both Dockerfiles bind to `0.0.0.0` and use
+   Railway's `PORT` at runtime; local defaults remain 8000 and 8501.
+   Set the frontend healthcheck path to `/_stcore/health`.
+   Generate a public domain for the frontend.
+6. Open the frontend HTTPS URL, upload a PDF, ask a question, and check that
+   citations and query statistics appear. Share that URL with your friend.
+   **Visitors do not need a Groq API key**: only the backend has the deployer's key;
+   Streamlit sends queries to it on the server. Groq usage uses that key's quota.
 
-4. **SSH in and deploy**
-```bash
-ssh -i ~/.ssh/ragbase-key.pem ec2-user@<ec2-ip>
-git clone https://github.com/ElMolla10/ragbase.git
-cd ragbase
-# Create .env with RDS connection string and GROQ_API_KEY
-docker-compose up -d --build
-```
+The backend runs sentence-transformers and CPU PyTorch locally, using
+`all-MiniLM-L6-v2`; allocate enough backend memory for model loading and ingestion.
+The model is downloaded during the Docker build. No GPU or embedding API key is
+required. Metabase is optional: deploy it separately and connect it to the same
+Postgres database if you want dashboards.
 
-5. **Add swap space** (required on t4g.small for PyTorch install)
-```bash
-sudo dd if=/dev/zero of=/swapfile bs=128M count=32
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
-```
+Service-specific variables select the two Dockerfiles, so no shared
+`railway.toml` is needed. See Railway's
+[Dockerfile configuration](https://docs.railway.com/builds/dockerfiles),
+[Postgres extension guidance](https://docs.railway.com/databases/postgresql), and
+[variable references](https://docs.railway.com/variables).
 
-6. **Enable auto-restart**
-```bash
-docker update --restart unless-stopped ragbase-backend ragbase-frontend ragbase-metabase
-```
+### Existing data and cutover
+
+A new Railway database starts empty. To keep existing documents, chunks, and
+query logs, back up the source Postgres database and restore it into the
+pgvector-enabled destination using `pg_dump` / `pg_restore` before switching URLs.
+Pause writes during the final copy, verify row counts and a document query, then
+share the new frontend URL. Original PDFs in external storage are not migrated or
+deleted by this app. Keep the source database and deployment until the new
+deployment and data have been verified; switching back to the old URL remains
+possible during that period.
 
 ---
 
@@ -264,7 +244,7 @@ GitHub Actions runs on every push to master:
 Every query is logged to the `query_logs` table:
 
 ```sql
-SELECT query_text, latency_ms, tokens_used, created_at
+SELECT query, latency_ms, token_count, created_at
 FROM query_logs
 ORDER BY created_at DESC;
 ```
@@ -278,7 +258,7 @@ Connect Metabase to the same Postgres instance to build dashboards on top of thi
 ```
 ragbase/
 ├── backend/
-│   ├── main.py        # FastAPI app, 5 endpoints
+│   ├── main.py        # FastAPI app, 6 endpoints
 │   ├── ingest.py      # PDF parsing, chunking, embedding
 │   ├── retrieval.py   # pgvector similarity search
 │   ├── llm.py         # Groq API call with context injection
@@ -308,7 +288,8 @@ ragbase/
 ```bash
 # .env.example
 GROQ_API_KEY=your_key_here
-DATABASE_URL=postgresql+asyncpg://user:password@host:5432/ragbase
+DATABASE_URL=postgresql://user:password@host:5432/ragbase
+BACKEND_URL=http://localhost:8000
 POSTGRES_USER=ragbase
 POSTGRES_PASSWORD=ragbase
 POSTGRES_DB=ragbase
