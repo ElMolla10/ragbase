@@ -5,6 +5,7 @@ import time
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +17,6 @@ from backend.logger import log_query
 from backend.models import Chunk, Document, QueryLog
 from backend.retrieval import search_chunks
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize database on startup."""
     logger.info("Initializing database...")
     await init_db()
     logger.info("Database initialized")
@@ -40,18 +39,21 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Pydantic models for request/response
+
 class QueryRequest(BaseModel):
-    """Request model for query endpoint."""
-
     query: str
     document_id: int | None = None
 
 
 class SourceChunk(BaseModel):
-    """A source chunk in the response."""
-
     id: int
     content: str
     page_number: int
@@ -59,8 +61,6 @@ class SourceChunk(BaseModel):
 
 
 class QueryResponse(BaseModel):
-    """Response model for query endpoint."""
-
     answer: str
     sources: list[SourceChunk]
     latency_ms: int
@@ -69,8 +69,6 @@ class QueryResponse(BaseModel):
 
 
 class DocumentResponse(BaseModel):
-    """Response model for document info."""
-
     id: int
     filename: str
     num_chunks: int
@@ -79,8 +77,6 @@ class DocumentResponse(BaseModel):
 
 
 class IngestResponse(BaseModel):
-    """Response model for ingest endpoint."""
-
     document_id: int
     filename: str
     num_chunks: int
@@ -88,8 +84,6 @@ class IngestResponse(BaseModel):
 
 
 class StatsResponse(BaseModel):
-    """Response model for stats endpoint."""
-
     total_queries: int
     avg_latency_ms: float
     total_documents: int
@@ -97,15 +91,11 @@ class StatsResponse(BaseModel):
 
 
 class HealthResponse(BaseModel):
-    """Response model for health check."""
-
     status: str
     message: str
 
 
 class DeleteResponse(BaseModel):
-    """Response model for document deletion."""
-
     message: str
     document_id: int
     filename: str
@@ -113,7 +103,6 @@ class DeleteResponse(BaseModel):
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check() -> HealthResponse:
-    """Health check endpoint."""
     return HealthResponse(status="healthy", message="RAGBase is running")
 
 
@@ -122,22 +111,12 @@ async def ingest_document(
     file: UploadFile = File(...),
     session: AsyncSession = Depends(get_session),
 ) -> IngestResponse:
-    """Upload and ingest a PDF document.
-
-    Args:
-        file: PDF file to upload.
-        session: Database session.
-
-    Returns:
-        Document information with chunk count.
-    """
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
 
     try:
         pdf_bytes = await file.read()
         document = await ingest_pdf(session, pdf_bytes, file.filename)
-
         return IngestResponse(
             document_id=document.id,
             filename=document.filename,
@@ -156,37 +135,22 @@ async def query_documents(
     request: QueryRequest,
     session: AsyncSession = Depends(get_session),
 ) -> QueryResponse:
-    """Query documents and get an answer.
-
-    Args:
-        request: Query request with question and optional document filter.
-        session: Database session.
-
-    Returns:
-        Answer with sources and metrics.
-    """
     start_time = time.time()
-
     try:
-        # Retrieve relevant chunks
         chunks = await search_chunks(
             session,
             request.query,
             document_id=request.document_id,
         )
-
         if not chunks:
             raise HTTPException(
                 status_code=404,
                 detail="No relevant content found. Please upload documents first.",
             )
 
-        # Generate answer
         llm_response = await generate_answer(request.query, chunks)
-
         latency_ms = int((time.time() - start_time) * 1000)
 
-        # Log the query
         await log_query(
             session,
             query=request.query,
@@ -200,7 +164,7 @@ async def query_documents(
         sources = [
             SourceChunk(
                 id=chunk.id,
-                content=chunk.content[:500],  # Truncate for response
+                content=chunk.content[:500],
                 page_number=chunk.page_number,
                 similarity_score=round(chunk.similarity_score, 4),
             )
@@ -214,7 +178,6 @@ async def query_documents(
             token_count=llm_response.total_tokens,
             model_used=llm_response.model,
         )
-
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except HTTPException:
@@ -228,19 +191,10 @@ async def query_documents(
 async def list_documents(
     session: AsyncSession = Depends(get_session),
 ) -> list[DocumentResponse]:
-    """List all uploaded documents.
-
-    Args:
-        session: Database session.
-
-    Returns:
-        List of document information.
-    """
     result = await session.execute(
         select(Document).order_by(Document.uploaded_at.desc())
     )
     documents = result.scalars().all()
-
     return [
         DocumentResponse(
             id=doc.id,
@@ -257,15 +211,6 @@ async def list_documents(
 async def get_stats(
     session: AsyncSession = Depends(get_session),
 ) -> StatsResponse:
-    """Get aggregate statistics.
-
-    Args:
-        session: Database session.
-
-    Returns:
-        Statistics about queries, documents, and chunks.
-    """
-    # Count queries and average latency
     query_stats = await session.execute(
         select(
             func.count(QueryLog.id).label("total"),
@@ -274,11 +219,9 @@ async def get_stats(
     )
     query_row = query_stats.one()
 
-    # Count documents
     doc_count = await session.execute(select(func.count(Document.id)))
     total_docs = doc_count.scalar() or 0
 
-    # Count chunks
     chunk_count = await session.execute(select(func.count(Chunk.id)))
     total_chunks = chunk_count.scalar() or 0
 
@@ -295,16 +238,6 @@ async def delete_document(
     document_id: int,
     session: AsyncSession = Depends(get_session),
 ) -> DeleteResponse:
-    """Delete a document and its associated data.
-
-    Args:
-        document_id: ID of the document to delete.
-        session: Database session.
-
-    Returns:
-        Confirmation of deletion with document details.
-    """
-    # Find the document
     result = await session.execute(select(Document).where(Document.id == document_id))
     document = result.scalar_one_or_none()
 
@@ -315,14 +248,10 @@ async def delete_document(
         )
 
     filename = document.filename
-    # Original PDFs are not persisted; optional file_path metadata is retained
-    # for schema compatibility. External PDF storage can be added separately.
-    # Delete document from database (chunks cascade automatically)
     await session.delete(document)
     await session.commit()
 
     logger.info(f"Deleted document '{filename}' (id={document_id})")
-
     return DeleteResponse(
         message="Document deleted successfully",
         document_id=document_id,

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAGBase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            surface: '#0c0c0e',
+            card: '#141416',
+            border: '#27272a',
+            accent: '#818cf8',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+    .msg-user { background: linear-gradient(180deg, #1e1b4b 0%, #141416 100%); }
+  </style>
+</head>
+<body class="bg-surface text-zinc-100 min-h-screen">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 border-r border-border bg-card flex flex-col p-5">
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">RAGBase</h1>
+        <p class="text-xs text-zinc-500 mt-1">Research paper Q&A</p>
+      </div>
+
+      <nav class="space-y-1 mb-8">
+        <button id="nav-chat" class="nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium bg-zinc-800 text-white">Chat</button>
+        <button id="nav-docs" class="nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:bg-zinc-800/60">Documents</button>
+      </nav>
+
+      <div class="mt-auto space-y-3 text-xs">
+        <div class="bg-zinc-900/80 rounded-xl p-3 border border-border">
+          <div class="text-zinc-500 uppercase tracking-wider text-[10px]">Queries</div>
+          <div id="stat-queries" class="text-lg font-semibold text-indigo-300">—</div>
+        </div>
+        <div class="bg-zinc-900/80 rounded-xl p-3 border border-border">
+          <div class="text-zinc-500 uppercase tracking-wider text-[10px]">Avg latency</div>
+          <div id="stat-latency" class="text-lg font-semibold text-indigo-300">—</div>
+        </div>
+        <div class="bg-zinc-900/80 rounded-xl p-3 border border-border">
+          <div class="text-zinc-500 uppercase tracking-wider text-[10px]">Documents</div>
+          <div id="stat-docs" class="text-lg font-semibold text-indigo-300">—</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 flex flex-col">
+      <!-- Chat view -->
+      <div id="view-chat" class="flex-1 flex flex-col">
+        <div class="border-b border-border px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 class="font-semibold">Ask your papers</h2>
+            <p class="text-xs text-zinc-500">English, Arabic, or mixed · cited answers</p>
+          </div>
+          <select id="doc-select" class="bg-zinc-900 border border-border rounded-lg px-3 py-1.5 text-sm text-zinc-300">
+            <option value="">All papers</option>
+          </select>
+        </div>
+
+        <div id="messages" class="flex-1 overflow-y-auto px-6 py-6 space-y-4 scrollbar-thin">
+          <div class="text-center text-zinc-500 text-sm mt-20">
+            Upload a paper, then ask anything.<br/>Answers include page citations.
+          </div>
+        </div>
+
+        <div class="border-t border-border p-4">
+          <form id="chat-form" class="flex gap-2 max-w-3xl mx-auto">
+            <input id="chat-input" type="text" placeholder="Ask a question…"
+              class="flex-1 bg-zinc-900 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500" />
+            <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 rounded-xl text-sm font-medium">Send</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Documents view -->
+      <div id="view-docs" class="flex-1 hidden flex-col">
+        <div class="border-b border-border px-6 py-4">
+          <h2 class="font-semibold">Library</h2>
+          <p class="text-xs text-zinc-500">Upload PDFs to index them</p>
+        </div>
+        <div class="p-6 max-w-2xl">
+          <div class="border-2 border-dashed border-border rounded-2xl p-8 text-center mb-6">
+            <input type="file" id="file-input" accept=".pdf" class="hidden" />
+            <button id="upload-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium">
+              Upload PDF
+            </button>
+            <p class="text-xs text-zinc-500 mt-3">Any PDF with selectable text</p>
+          </div>
+          <div id="doc-list" class="space-y-2"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Backend URL — set via Railway env or fallback
+    const BACKEND = window.BACKEND_URL || 'https://backend-production-xxxx.up.railway.app';
+
+    // Navigation
+    const navChat = document.getElementById('nav-chat');
+    const navDocs = document.getElementById('nav-docs');
+    const viewChat = document.getElementById('view-chat');
+    const viewDocs = document.getElementById('view-docs');
+
+    function show(view) {
+      viewChat.classList.toggle('hidden', view !== 'chat');
+      viewChat.classList.toggle('flex', view === 'chat');
+      viewDocs.classList.toggle('hidden', view !== 'docs');
+      viewDocs.classList.toggle('flex', view === 'docs');
+      navChat.classList.toggle('bg-zinc-800', view === 'chat');
+      navChat.classList.toggle('text-white', view === 'chat');
+      navChat.classList.toggle('text-zinc-400', view !== 'chat');
+      navDocs.classList.toggle('bg-zinc-800', view === 'docs');
+      navDocs.classList.toggle('text-white', view === 'docs');
+      navDocs.classList.toggle('text-zinc-400', view !== 'docs');
+    }
+    navChat.onclick = () => show('chat');
+    navDocs.onclick = () => { show('docs'); loadDocs(); };
+
+    // Stats
+    async function loadStats() {
+      try {
+        const r = await fetch(BACKEND + '/stats');
+        const s = await r.json();
+        document.getElementById('stat-queries').textContent = s.total_queries;
+        document.getElementById('stat-latency').textContent = Math.round(s.avg_latency_ms) + ' ms';
+        document.getElementById('stat-docs').textContent = s.total_documents;
+      } catch (e) {}
+    }
+    loadStats();
+    setInterval(loadStats, 15000);
+
+    // Documents
+    async function loadDocs() {
+      const sel = document.getElementById('doc-select');
+      const list = document.getElementById('doc-list');
+      try {
+        const r = await fetch(BACKEND + '/documents');
+        const docs = await r.json();
+        sel.innerHTML = '<option value="">All papers</option>' +
+          docs.map(d => `<option value="${d.id}">${d.filename}</option>`).join('');
+        list.innerHTML = docs.length ? docs.map(d => `
+          <div class="flex items-center justify-between bg-card border border-border rounded-xl px-4 py-3">
+            <div>
+              <div class="font-medium text-sm">${d.filename}</div>
+              <div class="text-xs text-zinc-500">${d.num_chunks} chunks · ${d.status}</div>
+            </div>
+            <button onclick="deleteDoc(${d.id})" class="text-xs text-zinc-500 hover:text-red-400">Delete</button>
+          </div>
+        `).join('') : '<p class="text-sm text-zinc-500">No papers yet.</p>';
+      } catch (e) {
+        list.innerHTML = '<p class="text-sm text-red-400">Could not load documents</p>';
+      }
+    }
+
+    window.deleteDoc = async (id) => {
+      if (!confirm('Delete this document?')) return;
+      await fetch(BACKEND + '/documents/' + id, { method: 'DELETE' });
+      loadDocs();
+      loadStats();
+    };
+
+    document.getElementById('upload-btn').onclick = () => document.getElementById('file-input').click();
+    document.getElementById('file-input').onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const fd = new FormData();
+      fd.append('file', file);
+      const btn = document.getElementById('upload-btn');
+      btn.textContent = 'Indexing…';
+      btn.disabled = true;
+      try {
+        await fetch(BACKEND + '/ingest', { method: 'POST', body: fd });
+        loadDocs();
+        loadStats();
+      } catch (err) {
+        alert('Upload failed');
+      }
+      btn.textContent = 'Upload PDF';
+      btn.disabled = false;
+      e.target.value = '';
+    };
+
+    // Chat
+    const messagesEl = document.getElementById('messages');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+
+    function addMessage(role, content, meta) {
+      const div = document.createElement('div');
+      div.className = role === 'user'
+        ? 'msg-user border border-indigo-900/50 rounded-2xl px-4 py-3 max-w-2xl ml-auto'
+        : 'bg-card border border-border rounded-2xl px-4 py-3 max-w-2xl';
+      let html = `<div class="text-sm whitespace-pre-wrap">${content}</div>`;
+      if (meta) {
+        html += `<div class="text-[11px] text-zinc-500 mt-2">${meta.latency_ms} ms · ${meta.token_count} tokens</div>`;
+        if (meta.sources?.length) {
+          html += `<details class="mt-2 text-xs"><summary class="cursor-pointer text-zinc-400">Sources (${meta.sources.length})</summary><div class="mt-2 space-y-2">`;
+          meta.sources.forEach(s => {
+            html += `<div class="bg-zinc-900/50 rounded-lg p-2"><span class="text-indigo-300">Page ${s.page_number}</span> · ${s.similarity_score.toFixed(3)}<div class="text-zinc-400 mt-1">${s.content.slice(0,220)}…</div></div>`;
+          });
+          html += '</div></details>';
+        }
+      }
+      div.innerHTML = html;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = '';
+      addMessage('user', q);
+      const docId = document.getElementById('doc-select').value;
+      const payload = { query: q };
+      if (docId) payload.document_id = parseInt(docId);
+
+      const thinking = document.createElement('div');
+      thinking.className = 'text-sm text-zinc-500 italic';
+      thinking.textContent = 'Thinking…';
+      messagesEl.appendChild(thinking);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      try {
+        const r = await fetch(BACKEND + '/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        thinking.remove();
+        if (!r.ok) {
+          addMessage('assistant', data.detail || 'Query failed');
+          return;
+        }
+        addMessage('assistant', data.answer, data);
+        loadStats();
+      } catch (err) {
+        thinking.remove();
+        addMessage('assistant', 'Network error');
+      }
+    };
+
+    // Initial load
+    loadDocs();
+  </script>
+</body>
+</html>
