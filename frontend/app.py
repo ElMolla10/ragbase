@@ -1,4 +1,4 @@
-"""Streamlit chat UI for RAGBase — modern redesign."""
+"""Streamlit UI for RAGBase — premium redesign."""
 
 import os
 
@@ -8,149 +8,194 @@ import streamlit.components.v1 as components
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
-# ---------------------------------------------------------------------------
-# Custom CSS — dark, clean, modern
-# ---------------------------------------------------------------------------
 CUSTOM_CSS = """
 <style>
-    /* Base */
-    .stApp {
-        background: #0f1117;
-        color: #e6e6e6;
-    }
-    .main .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        max-width: 1100px;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: #161922;
-        border-right: 1px solid #2a2d3a;
-    }
-    section[data-testid="stSidebar"] .stRadio > label {
-        font-weight: 600;
-        color: #a0a4b8;
-    }
+:root {
+    --bg: #09090b;
+    --surface: #121214;
+    --surface-2: #1c1c1f;
+    --border: #27272a;
+    --border-strong: #3f3f46;
+    --text: #fafafa;
+    --text-muted: #a1a1aa;
+    --accent: #6366f1;
+    --accent-soft: rgba(99, 102, 241, 0.15);
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
 
-    /* Titles */
-    h1, h2, h3 {
-        font-family: "Inter", system-ui, -apple-system, sans-serif;
-        font-weight: 650;
-        letter-spacing: -0.02em;
-    }
-    h1 {
-        background: linear-gradient(90deg, #7c9cff, #a78bfa);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-size: 2.4rem;
-        margin-bottom: 0.25rem;
-    }
+.stApp {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
 
-    /* Chat messages */
-    .stChatMessage {
-        background: #1a1d27 !important;
-        border: 1px solid #2a2d3a;
-        border-radius: 12px;
-        padding: 0.75rem 1rem;
-        margin-bottom: 0.75rem;
-    }
-    .stChatMessage[data-testid="stChatMessage-user"] {
-        background: #1e2433 !important;
-        border-color: #3b4a6b;
-    }
+.main .block-container {
+    padding-top: 1.75rem;
+    padding-bottom: 3rem;
+    max-width: 980px;
+}
 
-    /* Metrics */
-    [data-testid="stMetric"] {
-        background: #1a1d27;
-        border: 1px solid #2a2d3a;
-        border-radius: 10px;
-        padding: 0.75rem;
-    }
-    [data-testid="stMetricValue"] {
-        font-size: 1.4rem;
-        font-weight: 600;
-        color: #7c9cff;
-    }
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+}
+section[data-testid="stSidebar"] > div {
+    padding-top: 1.5rem;
+}
 
-    /* Buttons */
-    .stButton > button {
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.15s ease;
-    }
-    .stButton > button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(124, 156, 255, 0.25);
-    }
+/* Hide default Streamlit branding noise */
+#MainMenu, footer, header {visibility: hidden;}
 
-    /* File uploader */
-    [data-testid="stFileUploader"] {
-        background: #1a1d27;
-        border: 1px dashed #3b4a6b;
-        border-radius: 12px;
-        padding: 1.5rem;
-    }
+/* Titles */
+h1 {
+    font-size: 2.6rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.03em !important;
+    background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 0.15rem 0 !important;
+}
+h2, h3 {
+    font-weight: 600 !important;
+    letter-spacing: -0.02em !important;
+    color: var(--text) !important;
+}
 
-    /* Expanders */
-    .streamlit-expanderHeader {
-        background: #1a1d27;
-        border-radius: 8px;
-        font-weight: 500;
-    }
+/* Chat messages */
+.stChatMessage {
+    background: var(--surface) !important;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 0.85rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.stChatMessage[data-testid="stChatMessage-user"] {
+    background: linear-gradient(180deg, #1a1a2e 0%, var(--surface) 100%) !important;
+    border-color: #3730a3;
+}
 
-    /* Captions & small text */
-    .stCaption {
-        color: #8b90a0 !important;
-    }
+/* Metrics */
+[data-testid="stMetric"] {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.85rem 0.9rem;
+}
+[data-testid="stMetricLabel"] {
+    color: var(--text-muted) !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+[data-testid="stMetricValue"] {
+    font-size: 1.55rem !important;
+    font-weight: 650 !important;
+    color: #a5b4fc !important;
+}
 
-    /* Dividers */
-    hr {
-        border-color: #2a2d3a;
-    }
+/* Buttons */
+.stButton > button {
+    border-radius: 10px;
+    font-weight: 550;
+    border: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--text);
+    transition: all 0.12s ease;
+}
+.stButton > button:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-1px);
+}
+.stButton > button[kind="primary"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+.stButton > button[kind="primary"]:hover {
+    background: #4f46e5;
+}
 
-    /* Selectbox */
-    .stSelectbox > div > div {
-        background: #1a1d27;
-        border-radius: 8px;
-    }
+/* File uploader */
+[data-testid="stFileUploader"] {
+    background: var(--surface);
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 14px;
+    padding: 1.75rem 1.25rem;
+}
+[data-testid="stFileUploader"]:hover {
+    border-color: var(--accent);
+}
 
-    /* Success / info / error */
-    .stSuccess, .stInfo, .stError, .stWarning {
-        border-radius: 10px;
-    }
+/* Select */
+.stSelectbox > div > div {
+    background: var(--surface-2);
+    border-radius: 10px;
+    border-color: var(--border);
+}
+
+/* Expander */
+.streamlit-expanderHeader {
+    background: var(--surface-2);
+    border-radius: 10px;
+    font-weight: 550;
+    border: 1px solid var(--border);
+}
+
+/* Captions */
+.stCaption, [data-testid="stCaption"] {
+    color: var(--text-muted) !important;
+}
+
+/* Dividers */
+hr { border-color: var(--border); opacity: 0.6; }
+
+/* Success / info */
+.stSuccess, .stInfo {
+    border-radius: 12px;
+    border: none;
+}
+
+/* Custom card class via markdown */
+.doc-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.6rem;
+}
 </style>
 """
 
 
 def copy_button(text: str) -> None:
-    """Render a copy to clipboard button."""
-    escaped_text = text.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
-
+    escaped = text.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
     components.html(
         f"""
-        <button onclick="navigator.clipboard.writeText(`{escaped_text}`).then(() => {{
+        <button onclick="navigator.clipboard.writeText(`{escaped}`).then(() => {{
+            const orig = this.innerText;
             this.innerText = '✓ Copied';
-            this.style.background = '#22c55e';
+            this.style.background = '#166534';
+            this.style.borderColor = '#22c55e';
             setTimeout(() => {{
-                this.innerText = 'Copy';
-                this.style.background = '#1a1d27';
-            }}, 1800);
+                this.innerText = orig;
+                this.style.background = '#1c1c1f';
+                this.style.borderColor = '#3f3f46';
+            }}, 1600);
         }})" style="
-            background: #1a1d27;
-            color: #c4c8d4;
-            border: 1px solid #3b4a6b;
-            border-radius: 6px;
-            padding: 5px 14px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.15s;
+            background:#1c1c1f; color:#e4e4e7; border:1px solid #3f3f46;
+            border-radius:8px; padding:6px 14px; cursor:pointer;
+            font-size:13px; font-weight:500; font-family:Inter,system-ui,sans-serif;
         ">Copy</button>
         """,
-        height=38,
+        height=36,
     )
 
 
@@ -161,26 +206,22 @@ def init_session_state() -> None:
 
 def get_documents() -> list[dict]:
     try:
-        response = requests.get(f"{BACKEND_URL}/documents", timeout=10)
-        response.raise_for_status()
-        return response.json()
+        r = requests.get(f"{BACKEND_URL}/documents", timeout=10)
+        r.raise_for_status()
+        return r.json()
     except requests.RequestException as e:
-        st.error(f"Failed to fetch documents: {e}")
+        st.error(f"Could not load documents: {e}")
         return []
 
 
 def upload_document(file) -> dict | None:
     try:
         files = {"file": (file.name, file.getvalue(), "application/pdf")}
-        response = requests.post(
-            f"{BACKEND_URL}/ingest",
-            files=files,
-            timeout=120,
-        )
-        response.raise_for_status()
-        return response.json()
+        r = requests.post(f"{BACKEND_URL}/ingest", files=files, timeout=120)
+        r.raise_for_status()
+        return r.json()
     except requests.RequestException as e:
-        st.error(f"Failed to upload document: {e}")
+        st.error(f"Upload failed: {e}")
         return None
 
 
@@ -189,14 +230,9 @@ def query_documents(query: str, document_id: int | None = None) -> dict | None:
         payload = {"query": query}
         if document_id is not None:
             payload["document_id"] = document_id
-
-        response = requests.post(
-            f"{BACKEND_URL}/query",
-            json=payload,
-            timeout=60,
-        )
-        response.raise_for_status()
-        return response.json()
+        r = requests.post(f"{BACKEND_URL}/query", json=payload, timeout=60)
+        r.raise_for_status()
+        return r.json()
     except requests.RequestException as e:
         st.error(f"Query failed: {e}")
         return None
@@ -204,79 +240,74 @@ def query_documents(query: str, document_id: int | None = None) -> dict | None:
 
 def delete_document(document_id: int) -> dict | None:
     try:
-        response = requests.delete(
-            f"{BACKEND_URL}/documents/{document_id}",
-            timeout=30,
-        )
-        response.raise_for_status()
-        return response.json()
+        r = requests.delete(f"{BACKEND_URL}/documents/{document_id}", timeout=30)
+        r.raise_for_status()
+        return r.json()
     except requests.RequestException as e:
-        st.error(f"Failed to delete document: {e}")
+        st.error(f"Delete failed: {e}")
         return None
 
 
 def render_chat_page() -> None:
-    st.markdown("### Chat with your papers")
-    st.caption("Ask in English, Arabic, or mixed. Answers include source citations.")
+    st.markdown("#### Ask your papers")
+    st.caption("English, Arabic, or mixed. Every answer cites the source pages.")
 
     documents = get_documents()
-    doc_options = {"All documents": None}
-    doc_options.update({doc["filename"]: doc["id"] for doc in documents})
+    doc_options = {"All papers": None}
+    doc_options.update({d["filename"]: d["id"] for d in documents})
 
-    col_sel, _ = st.columns([2, 3])
-    with col_sel:
-        selected_doc = st.selectbox(
+    c1, _ = st.columns([1.6, 3])
+    with c1:
+        selected = st.selectbox(
             "Scope",
-            options=list(doc_options.keys()),
+            list(doc_options.keys()),
             label_visibility="collapsed",
         )
-    selected_doc_id = doc_options[selected_doc]
+    doc_id = doc_options[selected]
 
-    # Chat history
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-            if "metadata" in message:
-                meta = message["metadata"]
-                copy_button(message["content"])
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+            if "metadata" in msg:
+                m = msg["metadata"]
+                copy_button(msg["content"])
                 st.caption(
-                    f"{meta['latency_ms']} ms · {meta['token_count']} tokens · {meta['model_used']}"
+                    f"{m['latency_ms']} ms  ·  {m['token_count']} tokens  ·  {m['model_used']}"
                 )
-                if "sources" in meta and meta["sources"]:
-                    with st.expander(f"Sources ({len(meta['sources'])})"):
-                        for source in meta["sources"]:
+                sources = m.get("sources") or []
+                if sources:
+                    with st.expander(f"Sources · {len(sources)}"):
+                        for s in sources:
                             st.markdown(
-                                f"**Page {source['page_number']}**  ·  "
-                                f"similarity `{source['similarity_score']:.3f}`"
+                                f"**Page {s['page_number']}**  ·  "
+                                f"`{s['similarity_score']:.3f}`"
                             )
-                            st.markdown(f"> {source['content'][:280]}...")
+                            st.markdown(f"> {s['content'][:260]}…")
                             st.divider()
 
-    # Input
-    if prompt := st.chat_input("Ask anything about the papers…"):
+    if prompt := st.chat_input("Ask a question…"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("Retrieving and generating…"):
-                result = query_documents(prompt, selected_doc_id)
-
+            with st.spinner("Thinking…"):
+                result = query_documents(prompt, doc_id)
             if result:
                 st.markdown(result["answer"])
                 copy_button(result["answer"])
                 st.caption(
-                    f"{result['latency_ms']} ms · {result['token_count']} tokens · {result['model_used']}"
+                    f"{result['latency_ms']} ms  ·  {result['token_count']} tokens  ·  {result['model_used']}"
                 )
-
-                if result.get("sources"):
-                    with st.expander(f"Sources ({len(result['sources'])})"):
-                        for source in result["sources"]:
+                sources = result.get("sources") or []
+                if sources:
+                    with st.expander(f"Sources · {len(sources)}"):
+                        for s in sources:
                             st.markdown(
-                                f"**Page {source['page_number']}**  ·  "
-                                f"similarity `{source['similarity_score']:.3f}`"
+                                f"**Page {s['page_number']}**  ·  "
+                                f"`{s['similarity_score']:.3f}`"
                             )
-                            st.markdown(f"> {source['content'][:280]}...")
+                            st.markdown(f"> {s['content'][:260]}…")
                             st.divider()
 
                 st.session_state.messages.append(
@@ -287,61 +318,53 @@ def render_chat_page() -> None:
                             "latency_ms": result["latency_ms"],
                             "token_count": result["token_count"],
                             "model_used": result["model_used"],
-                            "sources": result["sources"],
+                            "sources": sources,
                         },
                     }
                 )
 
 
 def render_documents_page() -> None:
-    st.markdown("### Documents")
-    st.caption("Upload research papers. They are chunked, embedded, and ready for questions.")
+    st.markdown("#### Your library")
+    st.caption("Upload a PDF. It’s chunked, embedded, and ready to query.")
 
-    st.markdown("#### Upload")
-    uploaded_file = st.file_uploader(
-        "Drop a PDF",
+    st.markdown("##### Upload")
+    uploaded = st.file_uploader(
+        "PDF",
         type=["pdf"],
-        help="Research paper or any PDF with selectable text",
         label_visibility="collapsed",
+        help="Any PDF with selectable text",
     )
+    if uploaded and st.button("Index document", type="primary", use_container_width=True):
+        with st.spinner("Extracting · chunking · embedding…"):
+            res = upload_document(uploaded)
+        if res:
+            st.success(f"**{res['filename']}** indexed · {res['num_chunks']} chunks")
+            st.rerun()
 
-    if uploaded_file is not None:
-        if st.button("Process document", type="primary", use_container_width=True):
-            with st.spinner("Extracting, chunking, embedding…"):
-                result = upload_document(uploaded_file)
-            if result:
-                st.success(
-                    f"**{result['filename']}** — {result['num_chunks']} chunks indexed"
-                )
-                st.rerun()
-
-    st.markdown("#### Library")
-    documents = get_documents()
-
-    if not documents:
-        st.info("No papers yet. Upload one above to get started.")
+    st.markdown("##### Papers")
+    docs = get_documents()
+    if not docs:
+        st.info("No papers yet. Upload one above.")
         return
 
-    for doc in documents:
-        with st.container():
-            c1, c2, c3, c4 = st.columns([4, 1.2, 1.2, 1])
-            with c1:
-                st.markdown(f"**{doc['filename']}**")
-            with c2:
-                st.caption(f"{doc['num_chunks']} chunks")
-            with c3:
-                status = doc["status"]
-                color = "#22c55e" if status == "completed" else "#f59e0b"
-                st.markdown(
-                    f"<span style='color:{color}; font-weight:500;'>{status}</span>",
-                    unsafe_allow_html=True,
-                )
-            with c4:
-                if st.button("Delete", key=f"del_{doc['id']}", type="secondary"):
-                    if delete_document(doc["id"]):
-                        st.success(f"Deleted {doc['filename']}")
-                        st.rerun()
-            st.divider()
+    for doc in docs:
+        status = doc["status"]
+        color = "#22c55e" if status == "completed" else "#f59e0b"
+        c1, c2, c3 = st.columns([5, 1.4, 1])
+        with c1:
+            st.markdown(f"**{doc['filename']}**")
+            st.caption(f"{doc['num_chunks']} chunks")
+        with c2:
+            st.markdown(
+                f"<span style='color:{color};font-weight:600;font-size:0.9rem;'>{status}</span>",
+                unsafe_allow_html=True,
+            )
+        with c3:
+            if st.button("Delete", key=f"d{doc['id']}", type="secondary"):
+                if delete_document(doc["id"]):
+                    st.rerun()
+        st.divider()
 
 
 def main() -> None:
@@ -351,15 +374,16 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
-
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
     # Header
     st.markdown(
         """
-        <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:0.5rem;">
-            <h1 style="margin:0;">RAGBase</h1>
-            <span style="color:#8b90a0; font-size:1rem;">Research paper Q&A</span>
+        <div style="margin-bottom:1.25rem;">
+            <h1>RAGBase</h1>
+            <p style="color:#a1a1aa;margin:0;font-size:1.05rem;">
+                Research paper Q&A with citations and observability
+            </p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -367,33 +391,31 @@ def main() -> None:
 
     init_session_state()
 
-    # Sidebar
     with st.sidebar:
-        st.markdown("### Navigation")
+        st.markdown("##### Navigation")
         page = st.radio(
-            "Go to",
-            options=["Chat", "Documents"],
-            index=0,
+            "nav",
+            ["Chat", "Documents"],
             label_visibility="collapsed",
         )
 
         st.divider()
-        st.markdown("### Stats")
+        st.markdown("##### Stats")
         try:
-            response = requests.get(f"{BACKEND_URL}/stats", timeout=5)
-            if response.ok:
-                stats = response.json()
-                st.metric("Queries", stats["total_queries"])
-                st.metric("Avg latency", f"{stats['avg_latency_ms']:.0f} ms")
-                st.metric("Documents", stats["total_documents"])
-                st.metric("Chunks", stats["total_chunks"])
+            r = requests.get(f"{BACKEND_URL}/stats", timeout=5)
+            if r.ok:
+                s = r.json()
+                st.metric("Queries", s["total_queries"])
+                st.metric("Avg latency", f"{s['avg_latency_ms']:.0f} ms")
+                st.metric("Documents", s["total_documents"])
+                st.metric("Chunks", s["total_chunks"])
             else:
                 st.caption("Stats unavailable")
         except requests.RequestException:
             st.caption("Could not load stats")
 
         st.divider()
-        st.caption("Powered by FastAPI · pgvector · Groq")
+        st.caption("FastAPI · pgvector · Groq")
 
     if page == "Chat":
         render_chat_page()
