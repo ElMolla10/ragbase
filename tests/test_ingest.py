@@ -65,6 +65,40 @@ class TestChunking:
         chunks = chunk_text(pages)
         assert len(chunks) == 0
 
+    def test_sentence_boundaries_and_final_tail_are_preserved(self) -> None:
+        text = "First short sentence. Second short sentence. Final tail."
+        chunks = chunk_text(
+            [PageText(page_number=7, text=text)], chunk_size=10, overlap=0
+        )
+        assert [c.content for c in chunks] == [
+            "First short sentence.",
+            "Second short sentence. Final tail.",
+        ]
+        assert all(c.page_number == 7 for c in chunks)
+
+    def test_arabic_sentence_boundary(self) -> None:
+        chunks = chunk_text(
+            [PageText(page_number=1, text="هذا سؤال قصير؟ هذا سؤال آخر طويل قليلا؟")],
+            chunk_size=6,
+            overlap=0,
+        )
+        assert chunks[0].content == "هذا سؤال قصير؟"
+
+    def test_overlap_and_hard_cut_keep_unbroken_text(self) -> None:
+        chunks = chunk_text(
+            [PageText(page_number=2, text="A" * 95 + "TAIL")],
+            chunk_size=10,
+            overlap=2,
+        )
+        assert all(len(c.content) <= 40 for c in chunks)
+        assert chunks[0].content[-8:] == chunks[1].content[:8]
+        assert chunks[-1].content.endswith("TAIL")
+
+    @pytest.mark.parametrize("size,overlap", [(0, 0), (10, -1), (10, 10), (10, 11)])
+    def test_invalid_chunk_settings_raise(self, size: int, overlap: int) -> None:
+        with pytest.raises(ValueError):
+            chunk_text([PageText(page_number=1, text="text")], size, overlap)
+
 
 class TestEmbedding:
     """Tests for embedding generation."""

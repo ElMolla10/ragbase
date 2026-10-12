@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.ingest import TextChunk, embed_chunks
 from backend.models import Chunk, Document
 from backend.retrieval import embed_query, search_chunks
+from backend.retrieval import settings as retrieval_settings
 
 
 class TestEmbedQuery:
@@ -110,3 +111,65 @@ class TestSearchChunks:
         """Test search on empty database returns empty list."""
         results = await search_chunks(db_session, "test query")
         assert results == []
+
+    async def test_hybrid_promotes_keyword_result_outside_vector_candidates(
+        self, db_session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = Document(filename="hybrid.pdf", status="completed", num_chunks=10)
+        other = Document(filename="other.pdf", status="completed", num_chunks=1)
+        db_session.add_all([doc, other])
+        await db_session.flush()
+        chunks = []
+        for i in range(10):
+            chunk = Chunk(
+                document_id=doc.id,
+                content=(
+                    "rareterm " * 8 if i == 9 else "rareterm" if i == 0 else "filler"
+                ),
+                embedding=[1.0 - i / 5, i / 5] + [0.0] * 382,
+                chunk_index=i,
+                page_number=1,
+            )
+            db_session.add(chunk)
+            chunks.append(chunk)
+        db_session.add(
+            Chunk(
+                document_id=other.id,
+                content="rareterm " * 20,
+                embedding=[1.0] + [0.0] * 383,
+                chunk_index=0,
+                page_number=2,
+            )
+        )
+        await db_session.commit()
+        monkeypatch.setattr(
+            "backend.retrieval.embed_query", lambda _: [1.0] + [0.0] * 383
+        )
+        monkeypatch.setattr(retrieval_settings, "use_hybrid_search", False)
+        vector = await search_chunks(
+            db_session, "rareterm", document_id=doc.id, top_k=2
+        )
+        assert chunks[-1].id not in [r.id for r in vector]
+
+        monkeypatch.setattr(retrieval_settings, "use_hybrid_search", True)
+        hybrid = await search_chunks(
+            db_session, "rareterm", document_id=doc.id, top_k=2
+        )
+        assert [r.id for r in hybrid] == [chunks[0].id, chunks[-1].id]
+        assert len({r.id for r in hybrid}) == 2
+        assert all(r.document_id == doc.id for r in hybrid)
+
+    async def test_hybrid_without_keyword_matches_returns_vector_order(
+        self,
+        db_session: AsyncSession,
+        populated_db: Document,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(retrieval_settings, "use_hybrid_search", False)
+        vector = await search_chunks(db_session, "xyznonexistent", top_k=3)
+        monkeypatch.setattr(retrieval_settings, "use_hybrid_search", True)
+        hybrid = await search_chunks(db_session, "xyznonexistent", top_k=3)
+        assert [r.id for r in hybrid] == [r.id for r in vector]
+        assert [r.similarity_score for r in hybrid] == sorted(
+            [r.similarity_score for r in hybrid], reverse=True
+        )

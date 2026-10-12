@@ -40,6 +40,7 @@ class Settings(BaseSettings):
 
     # Retrieval settings
     top_k: int = 5
+    use_hybrid_search: bool = False
 
     # LLM settings
     llm_model: str = "llama-3.3-70b-versatile"

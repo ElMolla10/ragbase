@@ -14,9 +14,27 @@ A production RAG (Retrieval-Augmented Generation) platform that lets you upload 
 
 ---
 
+## Quick Start with Docker
+
+Install Docker with Compose, then run:
+
+```bash
+git clone https://github.com/ElMolla10/ragbase.git
+cd ragbase
+./start.sh
+```
+
+The script creates `.env` from `.env.example` only when it is missing, preserves
+existing configuration, and builds/starts the services. Set `GROQ_API_KEY` in
+`.env` and run `./start.sh` again to enable answers. The UI is at
+http://localhost:8501, API docs at http://localhost:8000/docs, and optional
+Metabase at http://localhost:3000. The first build downloads the embedding model.
+
+---
+
 ## Features
 
-- **Cross-lingual retrieval** — ask in Arabic, get answers in Arabic. The embedding model (all-MiniLM-L6-v2) maps Arabic and English into the same 384-dimensional latent space. No translation layer. No Arabic-specific index. Cosine similarity handles the rest.
+- **Multilingual questions** — ask in Arabic, English, or mixed language and get cited answers. Arabic retrieval quality is limited by the current embedding model; see the limitations below.
 - **PDF ingestion** — upload any PDF, chunks are embedded and stored in pgvector
 - **Semantic search** — queries use cosine similarity to retrieve the most relevant chunks
 - **Cited answers** — every answer references the exact source pages it used
@@ -244,6 +262,33 @@ GitHub Actions runs on every push to master:
 ```
 
 ---
+
+## Known Limitations & Next Steps
+
+- **Arabic embeddings:** `all-MiniLM-L6-v2` is primarily an English model, so
+  Arabic and cross-language retrieval can miss relevant passages. A stronger
+  multilingual model such as
+  [`intfloat/multilingual-e5-small`](https://huggingface.co/intfloat/multilingual-e5-small)
+  can be selected later via `settings.embedding_model` / `EMBEDDING_MODEL`.
+  Re-embed all existing documents after changing models. E5 also requires
+  `query: ` / `passage: ` input prefixes; add that preprocessing when adopting it.
+  Its 384-dimensional output fits the current schema; other dimensions require
+  a schema change. Docker Compose must explicitly pass `EMBEDDING_MODEL` if used.
+- **Chunking:** splitting now prefers paragraph/sentence endings, falls back to
+  whitespace or hard cuts for long sentences, and keeps every chunk on its source
+  page. `CHUNK_SIZE` and `CHUNK_OVERLAP` retain the legacy approximate token units
+  (four characters per unit); overlap is bounded and may be smaller to avoid
+  starting inside a word. This is not semantic chunking or PDF layout analysis.
+  Existing chunks stay unchanged; re-ingest documents to use the new splitter.
+- **No reranking yet:** a cross-encoder reranker remains a possible next step.
+- **Optional hybrid search:** set `USE_HYBRID_SEARCH=true` in `.env` and rerun
+  `./start.sh`. The default is `false` (pure cosine search). Hybrid mode combines
+  pgvector and PostgreSQL full-text search using reciprocal rank fusion, with
+  document filters applied to both. Returned scores are fusion scores rather
+  than cosine similarities. It uses the `simple` text-search configuration,
+  without Arabic stemming or language-specific normalization; it does not
+  translate queries. Full-text vectors are computed at query time; a GIN index
+  is a future optimization for larger collections. No schema migration is needed.
 
 ## Observability
 

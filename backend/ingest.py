@@ -1,6 +1,7 @@
 """PDF ingestion pipeline: parsing, chunking, embedding, and storing."""
 
 import logging
+import re
 from dataclasses import dataclass
 
 import fitz  # PyMuPDF
@@ -69,28 +70,39 @@ def chunk_text(
     chunk_size: int = settings.chunk_size,
     overlap: int = settings.chunk_overlap,
 ) -> list[TextChunk]:
-    """Chunk text using a sliding window approach.
+    """Split each page at sentence/paragraph boundaries where possible.
 
     Args:
         pages: List of PageText objects from PDF extraction.
-        chunk_size: Target size of each chunk in characters (approximating tokens).
-        overlap: Number of characters to overlap between chunks.
+        chunk_size: Approximate token budget (four characters per token).
+        overlap: Maximum overlap budget in the same approximate token units.
 
     Returns:
         List of TextChunk objects.
     """
+    if chunk_size <= 0 or not 0 <= overlap < chunk_size:
+        raise ValueError("chunk_size must be positive and 0 <= overlap < chunk_size")
+
     chunks: list[TextChunk] = []
     chunk_index = 0
 
     for page in pages:
         text = page.text
-        # Use character-based chunking (roughly 4 chars per token)
+        # Keep legacy size units, prefer sentence/paragraph endings, and fall
+        # back to words or hard cuts for oversized sentences/unbroken text.
         char_chunk_size = chunk_size * 4
         char_overlap = overlap * 4
 
         start = 0
         while start < len(text):
-            end = start + char_chunk_size
+            end = min(start + char_chunk_size, len(text))
+            if end < len(text):
+                window = text[start:end]
+                boundaries = list(re.finditer(r"\n\s*\n|(?<=[.!?؟。])\s+", window))
+                if not boundaries:
+                    boundaries = list(re.finditer(r"\s+", window))
+                if boundaries and boundaries[-1].end() > char_overlap:
+                    end = start + boundaries[-1].end()
             chunk_content = text[start:end].strip()
 
             if chunk_content:
@@ -103,11 +115,14 @@ def chunk_text(
                 )
                 chunk_index += 1
 
-            start += char_chunk_size - char_overlap
-
-            # Avoid tiny final chunks
-            if len(text) - start < char_overlap:
+            if end == len(text):
                 break
+            next_start = max(start + 1, end - char_overlap)
+            if char_overlap and next_start > 0 and not text[next_start - 1].isspace():
+                boundary = re.search(r"\s+", text[next_start:end])
+                if boundary:
+                    next_start += boundary.end()
+            start = next_start
 
     logger.info(f"Created {len(chunks)} chunks from {len(pages)} pages")
     return chunks
