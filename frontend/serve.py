@@ -9,6 +9,16 @@ PORT = int(os.getenv("PORT", "8080"))
 
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
+        # Healthcheck for Railway (and old Streamlit path for compatibility)
+        if self.path in ("/health", "/_stcore/health"):
+            data = b'{"status":"healthy"}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
         if self.path in ("/", "/index.html"):
             try:
                 with open("index.html", "r", encoding="utf-8") as f:
