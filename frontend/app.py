@@ -1,4 +1,4 @@
-"""Streamlit chat UI for RAGBase."""
+"""Streamlit chat UI for RAGBase — modern redesign."""
 
 import os
 
@@ -8,39 +8,158 @@ import streamlit.components.v1 as components
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
+# ---------------------------------------------------------------------------
+# Custom CSS — dark, clean, modern
+# ---------------------------------------------------------------------------
+CUSTOM_CSS = """
+<style>
+    /* Base */
+    .stApp {
+        background: #0f1117;
+        color: #e6e6e6;
+    }
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 1100px;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background: #161922;
+        border-right: 1px solid #2a2d3a;
+    }
+    section[data-testid="stSidebar"] .stRadio > label {
+        font-weight: 600;
+        color: #a0a4b8;
+    }
+
+    /* Titles */
+    h1, h2, h3 {
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+    }
+    h1 {
+        background: linear-gradient(90deg, #7c9cff, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 2.4rem;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Chat messages */
+    .stChatMessage {
+        background: #1a1d27 !important;
+        border: 1px solid #2a2d3a;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .stChatMessage[data-testid="stChatMessage-user"] {
+        background: #1e2433 !important;
+        border-color: #3b4a6b;
+    }
+
+    /* Metrics */
+    [data-testid="stMetric"] {
+        background: #1a1d27;
+        border: 1px solid #2a2d3a;
+        border-radius: 10px;
+        padding: 0.75rem;
+    }
+    [data-testid="stMetricValue"] {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #7c9cff;
+    }
+
+    /* Buttons */
+    .stButton > button {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.15s ease;
+    }
+    .stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(124, 156, 255, 0.25);
+    }
+
+    /* File uploader */
+    [data-testid="stFileUploader"] {
+        background: #1a1d27;
+        border: 1px dashed #3b4a6b;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    /* Expanders */
+    .streamlit-expanderHeader {
+        background: #1a1d27;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    /* Captions & small text */
+    .stCaption {
+        color: #8b90a0 !important;
+    }
+
+    /* Dividers */
+    hr {
+        border-color: #2a2d3a;
+    }
+
+    /* Selectbox */
+    .stSelectbox > div > div {
+        background: #1a1d27;
+        border-radius: 8px;
+    }
+
+    /* Success / info / error */
+    .stSuccess, .stInfo, .stError, .stWarning {
+        border-radius: 10px;
+    }
+</style>
+"""
+
 
 def copy_button(text: str) -> None:
     """Render a copy to clipboard button."""
-    # Escape text for JavaScript
     escaped_text = text.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
 
     components.html(
         f"""
         <button onclick="navigator.clipboard.writeText(`{escaped_text}`).then(() => {{
-            this.innerText = 'Copied!';
-            setTimeout(() => this.innerText = 'Copy to Clipboard', 2000);
+            this.innerText = '✓ Copied';
+            this.style.background = '#22c55e';
+            setTimeout(() => {{
+                this.innerText = 'Copy';
+                this.style.background = '#1a1d27';
+            }}, 1800);
         }})" style="
-            background-color: #262730;
-            color: #fafafa;
-            border: 1px solid #4a4a5a;
-            border-radius: 4px;
-            padding: 6px 12px;
+            background: #1a1d27;
+            color: #c4c8d4;
+            border: 1px solid #3b4a6b;
+            border-radius: 6px;
+            padding: 5px 14px;
             cursor: pointer;
-            font-size: 14px;
-        ">Copy to Clipboard</button>
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.15s;
+        ">Copy</button>
         """,
-        height=40,
+        height=38,
     )
 
 
 def init_session_state() -> None:
-    """Initialize session state variables."""
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
 
 def get_documents() -> list[dict]:
-    """Fetch list of documents from backend."""
     try:
         response = requests.get(f"{BACKEND_URL}/documents", timeout=10)
         response.raise_for_status()
@@ -51,7 +170,6 @@ def get_documents() -> list[dict]:
 
 
 def upload_document(file) -> dict | None:
-    """Upload a document to the backend."""
     try:
         files = {"file": (file.name, file.getvalue(), "application/pdf")}
         response = requests.post(
@@ -67,7 +185,6 @@ def upload_document(file) -> dict | None:
 
 
 def query_documents(query: str, document_id: int | None = None) -> dict | None:
-    """Send a query to the backend."""
     try:
         payload = {"query": query}
         if document_id is not None:
@@ -86,7 +203,6 @@ def query_documents(query: str, document_id: int | None = None) -> dict | None:
 
 
 def delete_document(document_id: int) -> dict | None:
-    """Delete a document from the backend."""
     try:
         response = requests.delete(
             f"{BACKEND_URL}/documents/{document_id}",
@@ -100,21 +216,23 @@ def delete_document(document_id: int) -> dict | None:
 
 
 def render_chat_page() -> None:
-    """Render the chat interface."""
-    st.header("Chat with Research Papers")
+    st.markdown("### Chat with your papers")
+    st.caption("Ask in English, Arabic, or mixed. Answers include source citations.")
 
-    # Document selector
     documents = get_documents()
-    doc_options = {"All Documents": None}
+    doc_options = {"All documents": None}
     doc_options.update({doc["filename"]: doc["id"] for doc in documents})
 
-    selected_doc = st.selectbox(
-        "Select document to query",
-        options=list(doc_options.keys()),
-    )
+    col_sel, _ = st.columns([2, 3])
+    with col_sel:
+        selected_doc = st.selectbox(
+            "Scope",
+            options=list(doc_options.keys()),
+            label_visibility="collapsed",
+        )
     selected_doc_id = doc_options[selected_doc]
 
-    # Display chat history
+    # Chat history
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
@@ -122,51 +240,45 @@ def render_chat_page() -> None:
                 meta = message["metadata"]
                 copy_button(message["content"])
                 st.caption(
-                    f"Latency: {meta['latency_ms']}ms | "
-                    f"Tokens: {meta['token_count']} | "
-                    f"Model: {meta['model_used']}"
+                    f"{meta['latency_ms']} ms · {meta['token_count']} tokens · {meta['model_used']}"
                 )
-                if "sources" in meta:
-                    with st.expander("View Sources"):
+                if "sources" in meta and meta["sources"]:
+                    with st.expander(f"Sources ({len(meta['sources'])})"):
                         for source in meta["sources"]:
                             st.markdown(
-                                f"**Page {source['page_number']}** "
-                                f"(similarity: {source['similarity_score']:.4f})"
+                                f"**Page {source['page_number']}**  ·  "
+                                f"similarity `{source['similarity_score']:.3f}`"
                             )
-                            st.text(source["content"][:300] + "...")
+                            st.markdown(f"> {source['content'][:280]}...")
                             st.divider()
 
-    # Chat input
-    if prompt := st.chat_input("Ask a question about the research papers..."):
-        # Add user message
+    # Input
+    if prompt := st.chat_input("Ask anything about the papers…"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Get response
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
+            with st.spinner("Retrieving and generating…"):
                 result = query_documents(prompt, selected_doc_id)
 
             if result:
                 st.markdown(result["answer"])
                 copy_button(result["answer"])
                 st.caption(
-                    f"Latency: {result['latency_ms']}ms | "
-                    f"Tokens: {result['token_count']} | "
-                    f"Model: {result['model_used']}"
+                    f"{result['latency_ms']} ms · {result['token_count']} tokens · {result['model_used']}"
                 )
 
-                with st.expander("View Sources"):
-                    for source in result["sources"]:
-                        st.markdown(
-                            f"**Page {source['page_number']}** "
-                            f"(similarity: {source['similarity_score']:.4f})"
-                        )
-                        st.text(source["content"][:300] + "...")
-                        st.divider()
+                if result.get("sources"):
+                    with st.expander(f"Sources ({len(result['sources'])})"):
+                        for source in result["sources"]:
+                            st.markdown(
+                                f"**Page {source['page_number']}**  ·  "
+                                f"similarity `{source['similarity_score']:.3f}`"
+                            )
+                            st.markdown(f"> {source['content'][:280]}...")
+                            st.divider()
 
-                # Add to history
                 st.session_state.messages.append(
                     {
                         "role": "assistant",
@@ -182,90 +294,107 @@ def render_chat_page() -> None:
 
 
 def render_documents_page() -> None:
-    """Render the documents management page."""
-    st.header("Document Management")
+    st.markdown("### Documents")
+    st.caption("Upload research papers. They are chunked, embedded, and ready for questions.")
 
-    # Upload section
-    st.subheader("Upload New Document")
+    st.markdown("#### Upload")
     uploaded_file = st.file_uploader(
-        "Choose a PDF file",
+        "Drop a PDF",
         type=["pdf"],
-        help="Upload a research paper in PDF format",
+        help="Research paper or any PDF with selectable text",
+        label_visibility="collapsed",
     )
 
-    if uploaded_file is not None and st.button("Process Document"):
-        with st.spinner("Processing document..."):
-            result = upload_document(uploaded_file)
-        if result:
-            st.success(
-                f"Uploaded '{result['filename']}' with {result['num_chunks']} chunks"
-            )
-            st.rerun()
+    if uploaded_file is not None:
+        if st.button("Process document", type="primary", use_container_width=True):
+            with st.spinner("Extracting, chunking, embedding…"):
+                result = upload_document(uploaded_file)
+            if result:
+                st.success(
+                    f"**{result['filename']}** — {result['num_chunks']} chunks indexed"
+                )
+                st.rerun()
 
-    # Documents list
-    st.subheader("Uploaded Documents")
+    st.markdown("#### Library")
     documents = get_documents()
 
     if not documents:
-        st.info("No documents uploaded yet. Upload a PDF to get started.")
-    else:
-        for doc in documents:
-            with st.container():
-                col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
-                with col1:
-                    st.text(doc["filename"])
-                with col2:
-                    st.text(f"{doc['num_chunks']} chunks")
-                with col3:
-                    status_color = "green" if doc["status"] == "completed" else "orange"
-                    st.markdown(f":{status_color}[{doc['status']}]")
-                with col4:
-                    if st.button(
-                        "🗑️ Delete",
-                        key=f"delete_{doc['id']}",
-                        type="secondary",
-                    ):
-                        result = delete_document(doc["id"])
-                        if result:
-                            st.success(f"Deleted '{doc['filename']}'")
-                            st.rerun()
-                st.divider()
+        st.info("No papers yet. Upload one above to get started.")
+        return
+
+    for doc in documents:
+        with st.container():
+            c1, c2, c3, c4 = st.columns([4, 1.2, 1.2, 1])
+            with c1:
+                st.markdown(f"**{doc['filename']}**")
+            with c2:
+                st.caption(f"{doc['num_chunks']} chunks")
+            with c3:
+                status = doc["status"]
+                color = "#22c55e" if status == "completed" else "#f59e0b"
+                st.markdown(
+                    f"<span style='color:{color}; font-weight:500;'>{status}</span>",
+                    unsafe_allow_html=True,
+                )
+            with c4:
+                if st.button("Delete", key=f"del_{doc['id']}", type="secondary"):
+                    if delete_document(doc["id"]):
+                        st.success(f"Deleted {doc['filename']}")
+                        st.rerun()
+            st.divider()
 
 
 def main() -> None:
-    """Main application entry point."""
     st.set_page_config(
         page_title="RAGBase",
         page_icon="📚",
         layout="wide",
+        initial_sidebar_state="expanded",
     )
 
-    st.title("RAGBase - Research Paper Q&A")
+    st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+
+    # Header
+    st.markdown(
+        """
+        <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:0.5rem;">
+            <h1 style="margin:0;">RAGBase</h1>
+            <span style="color:#8b90a0; font-size:1rem;">Research paper Q&A</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     init_session_state()
 
-    # Navigation
-    page = st.sidebar.radio(
-        "Navigation",
-        options=["Chat", "Documents"],
-        index=0,
-    )
+    # Sidebar
+    with st.sidebar:
+        st.markdown("### Navigation")
+        page = st.radio(
+            "Go to",
+            options=["Chat", "Documents"],
+            index=0,
+            label_visibility="collapsed",
+        )
 
-    # Stats in sidebar
-    st.sidebar.divider()
-    st.sidebar.subheader("Statistics")
-    try:
-        response = requests.get(f"{BACKEND_URL}/stats", timeout=5)
-        if response.ok:
-            stats = response.json()
-            st.sidebar.metric("Total Queries", stats["total_queries"])
-            st.sidebar.metric("Avg Latency", f"{stats['avg_latency_ms']:.0f}ms")
-            st.sidebar.metric("Documents", stats["total_documents"])
-            st.sidebar.metric("Chunks", stats["total_chunks"])
-    except requests.RequestException:
-        st.sidebar.warning("Could not load stats")
+        st.divider()
+        st.markdown("### Stats")
+        try:
+            response = requests.get(f"{BACKEND_URL}/stats", timeout=5)
+            if response.ok:
+                stats = response.json()
+                st.metric("Queries", stats["total_queries"])
+                st.metric("Avg latency", f"{stats['avg_latency_ms']:.0f} ms")
+                st.metric("Documents", stats["total_documents"])
+                st.metric("Chunks", stats["total_chunks"])
+            else:
+                st.caption("Stats unavailable")
+        except requests.RequestException:
+            st.caption("Could not load stats")
 
-    # Render selected page
+        st.divider()
+        st.caption("Powered by FastAPI · pgvector · Groq")
+
     if page == "Chat":
         render_chat_page()
     else:
