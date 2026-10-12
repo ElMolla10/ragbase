@@ -17,7 +17,6 @@
             surface: '#0c0c0e',
             card: '#141416',
             border: '#27272a',
-            accent: '#818cf8',
           }
         }
       }
@@ -32,7 +31,6 @@
 </head>
 <body class="bg-surface text-zinc-100 min-h-screen">
   <div class="flex h-screen">
-    <!-- Sidebar -->
     <aside class="w-64 border-r border-border bg-card flex flex-col p-5">
       <div class="mb-8">
         <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">RAGBase</h1>
@@ -60,9 +58,7 @@
       </div>
     </aside>
 
-    <!-- Main -->
     <main class="flex-1 flex flex-col">
-      <!-- Chat view -->
       <div id="view-chat" class="flex-1 flex flex-col">
         <div class="border-b border-border px-6 py-4 flex items-center justify-between">
           <div>
@@ -89,7 +85,6 @@
         </div>
       </div>
 
-      <!-- Documents view -->
       <div id="view-docs" class="flex-1 hidden flex-col">
         <div class="border-b border-border px-6 py-4">
           <h2 class="font-semibold">Library</h2>
@@ -110,10 +105,8 @@
   </div>
 
   <script>
-    // Backend URL — set via Railway env or fallback
-    const BACKEND = window.BACKEND_URL || 'https://backend-production-xxxx.up.railway.app';
+    const BACKEND = "__BACKEND_URL__";
 
-    // Navigation
     const navChat = document.getElementById('nav-chat');
     const navDocs = document.getElementById('nav-docs');
     const viewChat = document.getElementById('view-chat');
@@ -134,7 +127,6 @@
     navChat.onclick = () => show('chat');
     navDocs.onclick = () => { show('docs'); loadDocs(); };
 
-    // Stats
     async function loadStats() {
       try {
         const r = await fetch(BACKEND + '/stats');
@@ -147,7 +139,6 @@
     loadStats();
     setInterval(loadStats, 15000);
 
-    // Documents
     async function loadDocs() {
       const sel = document.getElementById('doc-select');
       const list = document.getElementById('doc-list');
@@ -198,7 +189,6 @@
       e.target.value = '';
     };
 
-    // Chat
     const messagesEl = document.getElementById('messages');
     const form = document.getElementById('chat-form');
     const input = document.getElementById('chat-input');
@@ -235,7 +225,7 @@
       if (docId) payload.document_id = parseInt(docId);
 
       const thinking = document.createElement('div');
-      thinking.className = 'text-sm text-zinc-500 italic';
+      thinking.className = 'text-sm text-zinc-500 italic px-2';
       thinking.textContent = 'Thinking…';
       messagesEl.appendChild(thinking);
       messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -260,7 +250,6 @@
       }
     };
 
-    // Initial load
     loadDocs();
   </script>
 </body>

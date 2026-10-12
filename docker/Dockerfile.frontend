@@ -8,4 +8,4 @@ COPY frontend/ ./frontend/
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "cd frontend && python -m http.server ${PORT:-8080}"]
+CMD ["sh", "-c", "cd frontend && python serve.py"]
