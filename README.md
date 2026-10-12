@@ -10,7 +10,7 @@
 
 A production RAG (Retrieval-Augmented Generation) platform that lets you upload research papers and chat with them. Ask questions in **any language** — Arabic, English, or mixed — and get cited answers pulled from the actual document content, with full ML observability built in.
 
-**Live demo:** Deploy on Railway and share the frontend's generated HTTPS URL.
+**Live demo:** [RAGBase on Railway](https://frontend-production-8c14.up.railway.app)
 
 ---
 
@@ -154,6 +154,12 @@ docker compose up -d --build
    from Railway's template marketplace. Name it `Postgres`.
    Railway's standard Postgres image does **not** include pgvector; running SQL
    alone cannot install a missing extension. Keep the database's persistent volume.
+   Alternatively, use the official `pgvector/pgvector:pg16` image, mount a volume
+   at `/var/lib/postgresql/data`, and set `PGDATA=/var/lib/postgresql/data/pgdata`
+   so initialization does not conflict with the volume's `lost+found` directory.
+   Set `POSTGRES_USER=ragbase`, `POSTGRES_DB=ragbase`, a strong
+   `POSTGRES_PASSWORD`, and the service's private `DATABASE_URL` using those
+   credentials and `${{Postgres.RAILWAY_PRIVATE_DOMAIN}}:5432`.
 3. Connect to that database with a SQL client or `railway connect Postgres`
    (requires the Railway CLI and `psql`), then run:
 
