@@ -15,7 +15,6 @@ from backend.pdf import page_text
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-# Load embedding model once at module level
 _embedding_model: SentenceTransformer | None = None
 
 
@@ -41,32 +40,19 @@ def embedding_input(text: str, *, is_query: bool = False) -> str:
 
 @dataclass
 class PageText:
-    """Extracted text from a single PDF page."""
-
     page_number: int
     text: str
 
 
 @dataclass
 class TextChunk:
-    """A chunk of text with metadata."""
-
     content: str
     page_number: int
     chunk_index: int
 
 
 def extract_text_from_pdf(pdf_bytes: bytes) -> list[PageText]:
-    """Extract text from each page of a PDF.
-
-    Args:
-        pdf_bytes: Raw PDF file bytes.
-
-    Returns:
-        List of PageText objects, one per page.
-    """
     pages: list[PageText] = []
-
     with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
         for page_num, page in enumerate(doc):
             text = (
@@ -76,7 +62,6 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> list[PageText]:
             )
             if text.strip():
                 pages.append(PageText(page_number=page_num + 1, text=text))
-
     logger.info(f"Extracted text from {len(pages)} pages")
     return pages
 
@@ -86,16 +71,6 @@ def chunk_text(
     chunk_size: int = settings.chunk_size,
     overlap: int = settings.chunk_overlap,
 ) -> list[TextChunk]:
-    """Split each page at sentence/paragraph boundaries where possible.
-
-    Args:
-        pages: List of PageText objects from PDF extraction.
-        chunk_size: Approximate token budget (four characters per token).
-        overlap: Maximum overlap budget in the same approximate token units.
-
-    Returns:
-        List of TextChunk objects.
-    """
     if chunk_size <= 0 or not 0 <= overlap < chunk_size:
         raise ValueError("chunk_size must be positive and 0 <= overlap < chunk_size")
 
@@ -104,8 +79,6 @@ def chunk_text(
 
     for page in pages:
         text = page.text
-        # Keep legacy size units, prefer sentence/paragraph endings, and fall
-        # back to words or hard cuts for oversized sentences/unbroken text.
         char_chunk_size = chunk_size * 4
         char_overlap = overlap * 4
 
@@ -145,18 +118,9 @@ def chunk_text(
 
 
 def embed_chunks(chunks: list[TextChunk]) -> list[list[float]]:
-    """Generate embeddings for text chunks.
-
-    Args:
-        chunks: List of TextChunk objects.
-
-    Returns:
-        List of embedding vectors (384 dimensions).
-    """
     model = get_embedding_model()
     texts = [embedding_input(chunk.content) for chunk in chunks]
     embeddings = model.encode(texts, show_progress_bar=False, normalize_embeddings=True)
-
     logger.info(f"Generated {len(embeddings)} embeddings")
     return [emb.tolist() for emb in embeddings]
 
@@ -167,63 +131,43 @@ async def ingest_pdf(
     filename: str,
     file_path: str | None = None,
 ) -> Document:
-    """Full ingestion pipeline: extract, chunk, embed, and store.
-
-    Args:
-        session: Database session.
-        pdf_bytes: Raw PDF file bytes.
-        filename: Original filename.
-        file_path: Optional path where file is stored.
-
-    Returns:
-        Created Document object with all chunks.
-    """
-    # Create document record
     document = Document(
         filename=filename,
         file_path=file_path,
+        pdf_bytes=pdf_bytes,
         status="processing",
     )
     session.add(document)
-    await session.flush()  # Get the document ID
+    await session.flush()
 
     try:
-        # Extract text from PDF
         pages = extract_text_from_pdf(pdf_bytes)
-
         if not pages:
             document.status = "failed"
             document.num_chunks = 0
             await session.commit()
             raise ValueError("No text could be extracted from PDF")
 
-        # Chunk the text
         text_chunks = chunk_text(pages)
-
-        # Generate embeddings
         embeddings = embed_chunks(text_chunks)
 
-        # Create chunk records
         for chunk, embedding in zip(text_chunks, embeddings, strict=True):
-            db_chunk = Chunk(
-                document_id=document.id,
-                content=chunk.content,
-                embedding=embedding,
-                chunk_index=chunk.chunk_index,
-                page_number=chunk.page_number,
+            session.add(
+                Chunk(
+                    document_id=document.id,
+                    content=chunk.content,
+                    embedding=embedding,
+                    chunk_index=chunk.chunk_index,
+                    page_number=chunk.page_number,
+                )
             )
-            session.add(db_chunk)
 
-        # Update document status
         document.num_chunks = len(text_chunks)
         document.status = "completed"
-
         await session.commit()
         await session.refresh(document)
-
         logger.info(f"Ingested document '{filename}' with {document.num_chunks} chunks")
         return document
-
     except Exception as e:
         document.status = "failed"
         await session.commit()
