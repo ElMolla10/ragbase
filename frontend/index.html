@@ -60,6 +60,9 @@
           <div class="text-zinc-500 uppercase tracking-wider text-[10px]">Documents</div>
           <div id="stat-docs" class="text-lg font-semibold text-indigo-300">—</div>
         </div>
+        <button id="reset-stats" class="w-full text-left text-[11px] text-zinc-500 hover:text-zinc-300 px-1">
+          Reset query stats
+        </button>
       </div>
     </aside>
 
@@ -105,7 +108,7 @@
             <button id="upload-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium">
               Upload PDF
             </button>
-            <p class="text-xs text-zinc-500 mt-3">Any PDF with selectable text</p>
+            <p id="upload-hint" class="text-xs text-zinc-500 mt-3">Any PDF with selectable text</p>
           </div>
           <div id="doc-list" class="space-y-2"></div>
         </div>
@@ -115,6 +118,7 @@
 
   <script>
     const BACKEND = "__BACKEND_URL__";
+    const history = [];
 
     const sidebar = document.getElementById('sidebar');
     const openBtn = document.getElementById('open-sidebar');
@@ -159,6 +163,12 @@
     loadStats();
     setInterval(loadStats, 15000);
 
+    document.getElementById('reset-stats').onclick = async () => {
+      if (!confirm('Clear query count and average latency?')) return;
+      await fetch(BACKEND + '/stats', { method: 'DELETE' });
+      loadStats();
+    };
+
     async function loadDocs() {
       const sel = document.getElementById('doc-select');
       const list = document.getElementById('doc-list');
@@ -195,14 +205,26 @@
       const fd = new FormData();
       fd.append('file', file);
       const btn = document.getElementById('upload-btn');
+      const hint = document.getElementById('upload-hint');
       btn.textContent = 'Indexing…';
       btn.disabled = true;
+      hint.className = 'text-xs text-zinc-500 mt-3';
+      hint.textContent = 'Any PDF with selectable text';
       try {
-        await fetch(BACKEND + '/ingest', { method: 'POST', body: fd });
-        loadDocs();
-        loadStats();
+        const r = await fetch(BACKEND + '/ingest', { method: 'POST', body: fd });
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({}));
+          hint.className = 'text-xs text-red-400 mt-3';
+          hint.textContent = err.detail || 'Upload failed';
+        } else {
+          hint.className = 'text-xs text-emerald-400 mt-3';
+          hint.textContent = 'Uploaded and indexed';
+          loadDocs();
+          loadStats();
+        }
       } catch (err) {
-        alert('Upload failed');
+        hint.className = 'text-xs text-red-400 mt-3';
+        hint.textContent = 'Upload failed. Check the connection and try again.';
       }
       btn.textContent = 'Upload PDF';
       btn.disabled = false;
@@ -238,6 +260,24 @@
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
+    }
+
+    function prioritizeSources(sources, answer) {
+      const pages = [];
+      const re = /page\s+(\d+)/gi;
+      let match;
+      while ((match = re.exec(answer || '')) !== null) {
+        const page = Number(match[1]);
+        if (!pages.includes(page)) pages.push(page);
+      }
+      if (!pages.length) return sources;
+      const cited = [];
+      const rest = [];
+      sources.forEach(s => {
+        (pages.includes(Number(s.page_number)) ? cited : rest).push(s);
+      });
+      cited.sort((a, b) => pages.indexOf(Number(a.page_number)) - pages.indexOf(Number(b.page_number)));
+      return [...cited, ...rest];
     }
 
     function sourcesHtml(sources) {
@@ -279,9 +319,11 @@
       if (!q) return;
       input.value = '';
       pinnedToBottom = true;
+      const prior = history.slice(-6);
+      history.push({ role: 'user', content: q });
       addMessage('user', q);
       const docId = document.getElementById('doc-select').value;
-      const payload = { query: q };
+      const payload = { query: q, history: prior };
       if (docId) payload.document_id = parseInt(docId);
 
       const thinking = document.createElement('div');
@@ -305,7 +347,9 @@
         if (!r.ok) {
           const err = await r.json().catch(() => ({}));
           thinking.remove();
-          addMessage('assistant', err.detail || 'Query failed');
+          const detail = err.detail || 'Query failed';
+          addMessage('assistant', detail);
+          history.push({ role: 'assistant', content: detail });
           return;
         }
 
@@ -343,18 +387,22 @@
                 thinking.remove();
                 assistantDiv = addMessage('assistant', fullText);
               }
+              const ordered = prioritizeSources(sources, fullText);
               const meta = document.createElement('div');
               meta.className = 'text-[11px] text-zinc-500 mt-2';
               meta.textContent = `${evt.latency_ms} ms · ${evt.token_count} tokens`;
               assistantDiv.appendChild(meta);
-              if (sources.length) {
-                assistantDiv.insertAdjacentHTML('beforeend', sourcesHtml(sources));
+              if (ordered.length) {
+                assistantDiv.insertAdjacentHTML('beforeend', sourcesHtml(ordered));
               }
+              history.push({ role: 'assistant', content: fullText });
               stickToBottom(false);
               loadStats();
             } else if (evt.type === 'error') {
               thinking.remove();
-              addMessage('assistant', evt.detail || 'Stream error');
+              const detail = evt.detail || 'Stream error';
+              addMessage('assistant', detail);
+              history.push({ role: 'assistant', content: detail });
             }
           }
         }
@@ -363,6 +411,7 @@
       } catch (err) {
         if (thinking.parentNode) thinking.remove();
         addMessage('assistant', 'Network error');
+        history.push({ role: 'assistant', content: 'Network error' });
       }
     };
 
