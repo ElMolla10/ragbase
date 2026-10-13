@@ -144,19 +144,19 @@ async def stream_answer(
         url = settings.llm_base_url.rstrip("/") + "/chat/completions"
         payload = _payload(query, chunks, history, stream=True)
         try:
-            async with httpx.AsyncClient(timeout=180) as client:
-                async with client.stream("POST", url, json=payload) as response:
-                    response.raise_for_status()
-                    async for line in response.aiter_lines():
-                        if not line.startswith("data: "):
-                            continue
-                        raw = line[6:].strip()
-                        if raw == "[DONE]":
-                            break
-                        chunk = json.loads(raw)
-                        delta = chunk["choices"][0].get("delta", {}).get("content") or ""
-                        if delta:
-                            yield delta
+            client = httpx.AsyncClient(timeout=180)
+            async with client, client.stream("POST", url, json=payload) as response:
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    if not line.startswith("data: "):
+                        continue
+                    raw = line[6:].strip()
+                    if raw == "[DONE]":
+                        break
+                    chunk = json.loads(raw)
+                    delta = chunk["choices"][0].get("delta", {}).get("content") or ""
+                    if delta:
+                        yield delta
         except httpx.HTTPError as exc:
             raise ValueError(
                 "Local model is not reachable. Start Ollama and pull the model."
