@@ -140,7 +140,9 @@ async def ingest_document(
     try:
         pdf_bytes = await file.read(settings.max_upload_bytes + 1)
         if len(pdf_bytes) > settings.max_upload_bytes:
-            raise HTTPException(status_code=413, detail="PDF exceeds upload size limit")
+            raise HTTPException(
+                status_code=413, detail="PDF exceeds upload size limit"
+            )
         document = await ingest_pdf(session, pdf_bytes, file.filename)
         return IngestResponse(
             document_id=document.id,
@@ -252,7 +254,13 @@ async def query_stream(
                 model_used=settings.llm_model,
             )
 
-            yield f"data: {json.dumps({'type': 'done', 'latency_ms': latency_ms, 'token_count': token_count, 'model_used': settings.llm_model})}\n\n"
+            done = {
+                "type": "done",
+                "latency_ms": latency_ms,
+                "token_count": token_count,
+                "model_used": settings.llm_model,
+            }
+            yield f"data: {json.dumps(done)}\n\n"
         except Exception as e:
             logger.error(f"Stream failed: {e}")
             yield f"data: {json.dumps({'type': 'error', 'detail': str(e)})}\n\n"
@@ -295,7 +303,10 @@ async def get_document_file(
     result = await session.execute(select(Document).where(Document.id == document_id))
     document = result.scalar_one_or_none()
     if not document or not document.pdf_bytes:
-        raise HTTPException(status_code=404, detail="PDF not available. Re-upload the document.")
+        raise HTTPException(
+            status_code=404,
+            detail="PDF not available. Re-upload the document.",
+        )
 
     filename = quote(document.filename or "document.pdf")
     return Response(
