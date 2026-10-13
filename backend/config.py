@@ -48,12 +48,12 @@ class Settings(BaseSettings):
     write_api_key: str = ""
 
     # Retrieval settings
-    top_k: int = 3
+    top_k: int = 5
     use_hybrid_search: bool = True
 
     # LLM settings
-    # gpt-oss-20b is ~2x faster on Groq than 120b; quality stays solid for RAG.
-    llm_model: str = "openai/gpt-oss-20b"
+    # llama-3.3-70b-versatile was retired for free/dev tiers on 2026-08-16.
+    llm_model: str = "openai/gpt-oss-120b"
     llm_max_tokens: int = 512
 
 
