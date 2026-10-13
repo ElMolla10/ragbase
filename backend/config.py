@@ -51,7 +51,9 @@ class Settings(BaseSettings):
     top_k: int = 5
     use_hybrid_search: bool = True
 
-    # LLM settings
+    # LLM settings. groq is the online default; ollama is fully local.
+    llm_provider: Literal["groq", "ollama"] = "groq"
+    llm_base_url: str = "http://localhost:11434/v1"
     # llama-3.3-70b-versatile was retired for free/dev tiers on 2026-08-16.
     llm_model: str = "openai/gpt-oss-120b"
     llm_max_tokens: int = 512
