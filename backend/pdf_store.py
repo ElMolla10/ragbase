@@ -24,7 +24,9 @@ def load_pdf(stored: bytes) -> bytes:
 async def save_pdf_bytes(document_id: int, pdf_bytes: bytes) -> None:
     compressed = compress_pdf(pdf_bytes)
     async with get_session_context() as session:
-        result = await session.execute(select(Document).where(Document.id == document_id))
+        result = await session.execute(
+            select(Document).where(Document.id == document_id)
+        )
         document = result.scalar_one_or_none()
         if not document:
             return
