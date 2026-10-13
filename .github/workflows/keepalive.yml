@@ -12,10 +12,10 @@ jobs:
     steps:
       - name: Ping backend health
         env:
-          # Override in repo secrets if the domain changes.
-          BACKEND_HEALTH_URL: ${{ secrets.BACKEND_HEALTH_URL || 'https://backend-production-4747.up.railway.app/health' }}
+          BACKEND_HEALTH_URL: ${{ secrets.BACKEND_HEALTH_URL }}
         run: |
-          echo "Pinging $BACKEND_HEALTH_URL"
-          curl -fsS --retry 3 --retry-delay 2 --max-time 30 "$BACKEND_HEALTH_URL"
+          URL="${BACKEND_HEALTH_URL:-https://backend-production-4747.up.railway.app/health}"
+          echo "Pinging $URL"
+          curl -fsS --retry 3 --retry-delay 2 --max-time 30 "$URL"
           echo
           echo "OK"
