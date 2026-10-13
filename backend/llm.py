@@ -1,5 +1,6 @@
 """LLM integration for Groq or a local Ollama server."""
 
+import json
 import logging
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
@@ -152,7 +153,7 @@ async def stream_answer(
                         raw = line[6:].strip()
                         if raw == "[DONE]":
                             break
-                        chunk = httpx.Response(200, content=raw).json()
+                        chunk = json.loads(raw)
                         delta = chunk["choices"][0].get("delta", {}).get("content") or ""
                         if delta:
                             yield delta
