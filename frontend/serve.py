@@ -21,7 +21,7 @@ class Handler(SimpleHTTPRequestHandler):
 
         if self.path in ("/", "/index.html"):
             try:
-                with open("index.html", "r", encoding="utf-8") as f:
+                with open("index.html", encoding="utf-8") as f:
                     html = f.read()
                 html = html.replace("__BACKEND_URL__", BACKEND_URL)
                 data = html.encode("utf-8")
