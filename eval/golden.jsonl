@@ -1,0 +1,100 @@
+{"query": "What does this guide cover?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["day-to-day operation", "cluster administrators"], "type": "summary", "lang": "en"}
+{"query": "What are the setup prerequisites?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["supported browser", "network access", "administrator account"], "type": "lookup", "lang": "en"}
+{"query": "Can registration be done without internet?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["with or without an internet connection"], "type": "lookup", "lang": "en"}
+{"query": "Which Single Sign-On providers are supported?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["Active Directory", "Okta", "custom SSL certificates"], "type": "lookup", "lang": "en"}
+{"query": "What panels are in the web interface?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["nodes", "virtual machines", "storage"], "type": "lookup", "lang": "en"}
+{"query": "How is access controlled?", "doc": "english_hypercore_ops.pdf", "expected_pages": [2], "expected_facts": ["user accounts", "role-based permissions"], "type": "lookup", "lang": "en"}
+{"query": "What can administrators do with users?", "doc": "english_hypercore_ops.pdf", "expected_pages": [2], "expected_facts": ["create", "edit", "delete", "reset passwords"], "type": "lookup", "lang": "en"}
+{"query": "What do roles define?", "doc": "english_hypercore_ops.pdf", "expected_pages": [2], "expected_facts": ["panels", "actions"], "type": "lookup", "lang": "en"}
+{"query": "How do you create a virtual machine?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["CPU", "memory", "disks", "ISO"], "type": "lookup", "lang": "en"}
+{"query": "What operations can be done on a virtual machine?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["edited", "cloned", "imported", "exported"], "type": "lookup", "lang": "en"}
+{"query": "What do snapshots do?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["capture", "restored"], "type": "lookup", "lang": "en"}
+{"query": "What is vTPM for?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["virtual trusted platform module"], "type": "lookup", "lang": "en"}
+{"query": "What should you do before opening a support case?", "doc": "english_hypercore_ops.pdf", "expected_pages": [4], "expected_facts": ["replace the hardware"], "type": "lookup", "lang": "en"}
+{"query": "What should a support case include?", "doc": "english_hypercore_ops.pdf", "expected_pages": [4], "expected_facts": ["cluster logs", "node serial number", "time of the failure"], "type": "lookup", "lang": "en"}
+{"query": "Where are system limits listed?", "doc": "english_hypercore_ops.pdf", "expected_pages": [4], "expected_facts": ["appendix"], "type": "lookup", "lang": "en"}
+{"query": "Does setup need an administrator account?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["administrator account"], "type": "lookup", "lang": "en"}
+{"query": "Is Okta supported for SSO?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["Okta"], "type": "lookup", "lang": "en"}
+{"query": "Can a virtual machine be cloned?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["cloned"], "type": "lookup", "lang": "en"}
+{"query": "Can snapshots be restored?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["restored"], "type": "lookup", "lang": "en"}
+{"query": "Who is this guide for?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["cluster administrators"], "type": "summary", "lang": "en"}
+{"query": "What browser requirement is mentioned?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["supported browser"], "type": "lookup", "lang": "en"}
+{"query": "Does the interface monitor storage?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["storage"], "type": "lookup", "lang": "en"}
+{"query": "Can administrators reset passwords?", "doc": "english_hypercore_ops.pdf", "expected_pages": [2], "expected_facts": ["reset passwords"], "type": "lookup", "lang": "en"}
+{"query": "Can users be deleted?", "doc": "english_hypercore_ops.pdf", "expected_pages": [2], "expected_facts": ["delete"], "type": "lookup", "lang": "en"}
+{"query": "Is an ISO optional when creating a VM?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["optional ISO"], "type": "lookup", "lang": "en"}
+{"query": "Can a VM be exported?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["exported"], "type": "lookup", "lang": "en"}
+{"query": "What hardware step comes before a support case?", "doc": "english_hypercore_ops.pdf", "expected_pages": [4], "expected_facts": ["replace the hardware"], "type": "lookup", "lang": "en"}
+{"query": "What serial number is needed in a support case?", "doc": "english_hypercore_ops.pdf", "expected_pages": [4], "expected_facts": ["node serial number"], "type": "lookup", "lang": "en"}
+{"query": "Are there per-VM maximums?", "doc": "english_hypercore_ops.pdf", "expected_pages": [4], "expected_facts": ["per-VM maximums"], "type": "lookup", "lang": "en"}
+{"query": "What does Chapter 1 cover?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["Setup"], "type": "summary", "lang": "en"}
+{"query": "What does Chapter 2 cover?", "doc": "english_hypercore_ops.pdf", "expected_pages": [2], "expected_facts": ["Users"], "type": "summary", "lang": "en"}
+{"query": "What does Chapter 3 cover?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["Virtual Machines"], "type": "summary", "lang": "en"}
+{"query": "What does Chapter 4 cover?", "doc": "english_hypercore_ops.pdf", "expected_pages": [4], "expected_facts": ["Support"], "type": "summary", "lang": "en"}
+{"query": "Does SSO support custom certificates?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["custom SSL certificates"], "type": "lookup", "lang": "en"}
+{"query": "Is Active Directory a supported SSO option?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["Active Directory"], "type": "lookup", "lang": "en"}
+{"query": "Do roles limit which panels a user can reach?", "doc": "english_hypercore_ops.pdf", "expected_pages": [2], "expected_facts": ["panels"], "type": "lookup", "lang": "en"}
+{"query": "Can a virtual machine be imported?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["imported"], "type": "lookup", "lang": "en"}
+{"query": "Do snapshots capture machine state?", "doc": "english_hypercore_ops.pdf", "expected_pages": [3], "expected_facts": ["capture"], "type": "lookup", "lang": "en"}
+{"query": "Should failure time be included in a support case?", "doc": "english_hypercore_ops.pdf", "expected_pages": [4], "expected_facts": ["time of the failure"], "type": "lookup", "lang": "en"}
+{"query": "Does the guide mention cluster logs?", "doc": "english_hypercore_ops.pdf", "expected_pages": [4], "expected_facts": ["cluster logs"], "type": "lookup", "lang": "en"}
+{"query": "ماذا تغطي هذه الوثيقة؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["تشغيل", "العربية", "الإنجليزية"], "type": "summary", "lang": "ar"}
+{"query": "ماذا يفعل المسؤول بعد تسجيل الدخول؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["حالة العقد", "التخزين"], "type": "lookup", "lang": "ar"}
+{"query": "هل يمكن إنشاء مستخدم وتعيين دور؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["إنشاء مستخدم", "دور"], "type": "lookup", "lang": "ar"}
+{"query": "ماذا تحدد الأدوار؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["صلاحيات", "الآلات الافتراضية", "اللقطات"], "type": "lookup", "lang": "ar"}
+{"query": "كيف يتم إنشاء آلة افتراضية؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [2], "expected_facts": ["المعالج", "الذاكرة", "القرص"], "type": "lookup", "lang": "ar"}
+{"query": "متى يمكن تركيب ملف ISO؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [2], "expected_facts": ["عند الإنشاء", "إعدادات الجهاز"], "type": "lookup", "lang": "ar"}
+{"query": "ماذا تفعل اللقطة؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [2], "expected_facts": ["تحفظ حالة الآلة", "استعادتها"], "type": "lookup", "lang": "ar"}
+{"query": "ماذا يجب فعله عند تعطل قرص أو عقدة؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [3], "expected_facts": ["اجمع السجلات", "تذكرة دعم"], "type": "lookup", "lang": "ar"}
+{"query": "ما المعلومات المطلوبة في تذكرة الدعم؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [3], "expected_facts": ["رقم العقدة", "وقت العطل", "إصدار البرنامج"], "type": "lookup", "lang": "ar"}
+{"query": "هل تذكر الوثيقة HyperCore؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["HyperCore"], "type": "lookup", "lang": "ar"}
+{"query": "من يراجع حالة العقد؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["المسؤول"], "type": "lookup", "lang": "ar"}
+{"query": "هل يمكن حذف اللقطات حسب الصلاحيات؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["حذف اللقطات"], "type": "lookup", "lang": "ar"}
+{"query": "ما الذي يختاره المسؤول عند إنشاء آلة؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [2], "expected_facts": ["المعالج", "الذاكرة", "القرص"], "type": "lookup", "lang": "ar"}
+{"query": "هل يمكن استعادة اللقطة لاحقا؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [2], "expected_facts": ["استعادتها"], "type": "lookup", "lang": "ar"}
+{"query": "هل يجب جمع السجلات قبل فتح التذكرة؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [3], "expected_facts": ["قبل فتح تذكرة دعم"], "type": "lookup", "lang": "ar"}
+{"query": "هل يذكر إصدار البرنامج في الدعم؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [3], "expected_facts": ["إصدار البرنامج"], "type": "lookup", "lang": "ar"}
+{"query": "ما عنوان قسم المستخدمين؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["إدارة المستخدمين"], "type": "lookup", "lang": "ar"}
+{"query": "ما عنوان قسم الآلات؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [2], "expected_facts": ["الآلات الافتراضية"], "type": "lookup", "lang": "ar"}
+{"query": "ما عنوان قسم الدعم؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [3], "expected_facts": ["الدعم"], "type": "lookup", "lang": "ar"}
+{"query": "هل الوثيقة بالعربية والإنجليزية؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["العربية", "الإنجليزية"], "type": "summary", "lang": "ar"}
+{"query": "هل يمكن تعيين دور للمستخدم؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["تعيين دور"], "type": "lookup", "lang": "ar"}
+{"query": "هل اللقطة تحفظ حالة الآلة؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [2], "expected_facts": ["حالة الآلة"], "type": "lookup", "lang": "ar"}
+{"query": "ماذا يذكر الدعم عن وقت العطل؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [3], "expected_facts": ["وقت العطل"], "type": "lookup", "lang": "ar"}
+{"query": "هل يمكن تركيب ISO لاحقا؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [2], "expected_facts": ["لاحقا"], "type": "lookup", "lang": "ar"}
+{"query": "من ينشئ المستخدم؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["المسؤول"], "type": "lookup", "lang": "ar"}
+{"query": "هل تذكر الوثيقة التخزين؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["التخزين"], "type": "lookup", "lang": "ar"}
+{"query": "هل تذكر الوثيقة العقد؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["العقد"], "type": "lookup", "lang": "ar"}
+{"query": "ماذا يجمع المسؤول قبل الدعم؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [3], "expected_facts": ["السجلات"], "type": "lookup", "lang": "ar"}
+{"query": "هل يذكر رقم العقدة؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [3], "expected_facts": ["رقم العقدة"], "type": "lookup", "lang": "ar"}
+{"query": "هل يمكن إنشاء آلات افتراضية حسب الدور؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["إنشاء الآلات الافتراضية"], "type": "lookup", "lang": "ar"}
+{"query": "What is HyperCore in the Arabic notes?", "doc": "arabic_mixed_notes.pdf", "expected_pages": [1], "expected_facts": ["HyperCore"], "type": "lookup", "lang": "mixed"}
+{"query": "How do I create a VM according to the Arabic notes?", "doc": "arabic_mixed_notes.pdf", "expected_pages": [2], "expected_facts": ["المعالج", "الذاكرة", "القرص"], "type": "lookup", "lang": "mixed"}
+{"query": "Does the Arabic doc mention ISO mounting?", "doc": "arabic_mixed_notes.pdf", "expected_pages": [2], "expected_facts": ["ISO"], "type": "lookup", "lang": "mixed"}
+{"query": "What support details are in the Arabic notes?", "doc": "arabic_mixed_notes.pdf", "expected_pages": [3], "expected_facts": ["رقم العقدة", "وقت العطل", "إصدار البرنامج"], "type": "lookup", "lang": "mixed"}
+{"query": "Compare user roles in the English guide and Arabic notes", "doc": "english_hypercore_ops.pdf", "expected_pages": [2], "expected_facts": ["role-based permissions"], "type": "multi-hop", "lang": "mixed"}
+{"query": "Where are snapshot limits and what do snapshots do?", "doc": "limits_table.pdf", "expected_pages": [1], "expected_facts": ["32"], "type": "multi-hop", "lang": "mixed"}
+{"query": "How many nodes per cluster, and what is a node failure step?", "doc": "limits_table.pdf", "expected_pages": [1], "expected_facts": ["8"], "type": "multi-hop", "lang": "mixed"}
+{"query": "What is the VM memory limit?", "doc": "limits_table.pdf", "expected_pages": [2], "expected_facts": ["512 GB"], "type": "lookup", "lang": "mixed"}
+{"query": "What is the vCPU limit?", "doc": "limits_table.pdf", "expected_pages": [2], "expected_facts": ["32 vCPUs"], "type": "lookup", "lang": "mixed"}
+{"query": "How many virtual disks can a VM have?", "doc": "limits_table.pdf", "expected_pages": [2], "expected_facts": ["16"], "type": "lookup", "lang": "mixed"}
+{"query": "How many concurrent import or export jobs per node?", "doc": "limits_table.pdf", "expected_pages": [2], "expected_facts": ["2"], "type": "lookup", "lang": "mixed"}
+{"query": "How many VMs per cluster?", "doc": "limits_table.pdf", "expected_pages": [1], "expected_facts": ["200"], "type": "lookup", "lang": "mixed"}
+{"query": "How many snapshots per VM?", "doc": "limits_table.pdf", "expected_pages": [1], "expected_facts": ["32"], "type": "lookup", "lang": "mixed"}
+{"query": "How many concurrent replications?", "doc": "limits_table.pdf", "expected_pages": [1], "expected_facts": ["4"], "type": "lookup", "lang": "mixed"}
+{"query": "What must match for replication?", "doc": "limits_table.pdf", "expected_pages": [3], "expected_facts": ["matching HyperCore versions"], "type": "lookup", "lang": "mixed"}
+{"query": "How many replication targets can one VM have?", "doc": "limits_table.pdf", "expected_pages": [3], "expected_facts": ["one active replication target"], "type": "lookup", "lang": "mixed"}
+{"query": "Do replication snapshots count toward the snapshot limit?", "doc": "limits_table.pdf", "expected_pages": [3], "expected_facts": ["32 snapshot limit"], "type": "lookup", "lang": "mixed"}
+{"query": "What do cluster limits apply to?", "doc": "limits_table.pdf", "expected_pages": [1], "expected_facts": ["cluster", "virtual machine", "replication"], "type": "summary", "lang": "mixed"}
+{"query": "Is Okta in the English guide?", "doc": "english_hypercore_ops.pdf", "expected_pages": [1], "expected_facts": ["Okta"], "type": "lookup", "lang": "mixed"}
+{"query": "What Arabic section covers الدعم?", "doc": "arabic_mixed_notes.pdf", "expected_pages": [3], "expected_facts": ["السجلات"], "type": "lookup", "lang": "mixed"}
+{"query": "What is the default admin password?", "doc": "english_hypercore_ops.pdf", "expected_pages": [], "expected_facts": [], "type": "negative", "lang": "en"}
+{"query": "How do I enable Kubernetes on HyperCore?", "doc": "english_hypercore_ops.pdf", "expected_pages": [], "expected_facts": [], "type": "negative", "lang": "en"}
+{"query": "What is the price of a HyperCore license?", "doc": "limits_table.pdf", "expected_pages": [], "expected_facts": [], "type": "negative", "lang": "en"}
+{"query": "Does the guide explain GPU passthrough?", "doc": "english_hypercore_ops.pdf", "expected_pages": [], "expected_facts": [], "type": "negative", "lang": "en"}
+{"query": "ما هي كلمة مرور المسؤول الافتراضية؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [], "expected_facts": [], "type": "negative", "lang": "ar"}
+{"query": "هل تدعم الوثيقة النسخ الاحتياطي إلى S3؟", "doc": "arabic_mixed_notes.pdf", "expected_pages": [], "expected_facts": [], "type": "negative", "lang": "ar"}
+{"query": "How many GPUs per VM?", "doc": "limits_table.pdf", "expected_pages": [], "expected_facts": [], "type": "negative", "lang": "en"}
+{"query": "What is the maximum network throughput?", "doc": "limits_table.pdf", "expected_pages": [], "expected_facts": [], "type": "negative", "lang": "en"}
+{"query": "Does SSO support Google Workspace?", "doc": "english_hypercore_ops.pdf", "expected_pages": [], "expected_facts": [], "type": "negative", "lang": "en"}
+{"query": "Can I live-migrate a VM to VMware in this guide?", "doc": "english_hypercore_ops.pdf", "expected_pages": [], "expected_facts": [], "type": "negative", "lang": "en"}
