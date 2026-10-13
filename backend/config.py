@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     # LLM settings
     # llama-3.3-70b-versatile was retired for free/dev tiers on 2026-08-16.
     llm_model: str = "openai/gpt-oss-120b"
-    llm_max_tokens: int = 1024
+    llm_max_tokens: int = 512
 
 
 @lru_cache

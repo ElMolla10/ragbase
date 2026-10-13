@@ -13,7 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.database import get_session, init_db
-from backend.ingest import ingest_pdf
+from backend.ingest import get_embedding_model, ingest_pdf
 from backend.llm import generate_answer, stream_answer
 from backend.logger import log_query
 from backend.models import Chunk, Document, QueryLog
@@ -32,6 +32,10 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing database...")
     await init_db()
     logger.info("Database initialized")
+    # Warm the embedding model so the first query is not cold.
+    logger.info("Warming embedding model...")
+    get_embedding_model()
+    logger.info("Embedding model ready")
     yield
 
 
@@ -225,7 +229,6 @@ async def query_stream(
     sources = _sources(chunks)
 
     async def event_stream():
-        # Send sources first so the UI can show them immediately
         yield f"data: {json.dumps({'type': 'sources', 'sources': sources})}\n\n"
 
         answer_parts: list[str] = []
@@ -236,7 +239,6 @@ async def query_stream(
 
             answer = "".join(answer_parts)
             latency_ms = int((time.time() - start_time) * 1000)
-            # Approximate token count (4 chars ≈ 1 token)
             token_count = max(1, len(answer) // 4)
 
             await log_query(
