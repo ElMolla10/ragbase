@@ -64,7 +64,6 @@
     </aside>
 
     <main class="flex-1 flex flex-col min-w-0">
-      <!-- Open sidebar button (shown when collapsed) -->
       <button id="open-sidebar" class="hidden absolute top-3 left-3 z-10 bg-zinc-800 border border-border text-zinc-300 hover:text-white px-2.5 py-1.5 rounded-lg text-sm">
         ☰
       </button>
@@ -117,7 +116,6 @@
   <script>
     const BACKEND = "__BACKEND_URL__";
 
-    // Sidebar toggle
     const sidebar = document.getElementById('sidebar');
     const openBtn = document.getElementById('open-sidebar');
     const closeBtn = document.getElementById('close-sidebar');
@@ -129,7 +127,6 @@
     closeBtn.onclick = () => setSidebar(false);
     openBtn.onclick = () => setSidebar(true);
 
-    // Navigation
     const navChat = document.getElementById('nav-chat');
     const navDocs = document.getElementById('nav-docs');
     const viewChat = document.getElementById('view-chat');
@@ -221,13 +218,13 @@
       div.className = role === 'user'
         ? 'msg-user border border-indigo-900/50 rounded-2xl px-4 py-3 max-w-2xl ml-auto'
         : 'bg-card border border-border rounded-2xl px-4 py-3 max-w-2xl';
-      let html = `<div class="text-sm whitespace-pre-wrap">${content}</div>`;
+      let html = `<div class="text-sm whitespace-pre-wrap msg-content">${escapeHtml(content)}</div>`;
       if (meta) {
-        html += `<div class="text-[11px] text-zinc-500 mt-2">${meta.latency_ms} ms · ${meta.token_count} tokens</div>`;
+        html += `<div class="text-[11px] text-zinc-500 mt-2 meta">${meta.latency_ms} ms · ${meta.token_count} tokens</div>`;
         if (meta.sources?.length) {
           html += `<details class="mt-2 text-xs"><summary class="cursor-pointer text-zinc-400">Sources (${meta.sources.length})</summary><div class="mt-2 space-y-2">`;
           meta.sources.forEach(s => {
-            html += `<div class="bg-zinc-900/50 rounded-lg p-2"><span class="text-indigo-300">Page ${s.page_number}</span> · ${s.similarity_score.toFixed(3)}<div class="text-zinc-400 mt-1">${s.content.slice(0,220)}…</div></div>`;
+            html += `<div class="bg-zinc-900/50 rounded-lg p-2"><span class="text-indigo-300">Page ${s.page_number}</span> · ${Number(s.similarity_score).toFixed(3)}<div class="text-zinc-400 mt-1">${escapeHtml(s.content.slice(0,220))}…</div></div>`;
           });
           html += '</div></details>';
         }
@@ -235,6 +232,14 @@
       div.innerHTML = html;
       messagesEl.appendChild(div);
       messagesEl.scrollTop = messagesEl.scrollHeight;
+      return div;
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
     }
 
     form.onsubmit = async (e) => {
@@ -253,22 +258,71 @@
       messagesEl.appendChild(thinking);
       messagesEl.scrollTop = messagesEl.scrollHeight;
 
+      let assistantDiv = null;
+      let contentEl = null;
+      let fullText = '';
+
       try {
-        const r = await fetch(BACKEND + '/query', {
+        const r = await fetch(BACKEND + '/query/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        const data = await r.json();
-        thinking.remove();
+
         if (!r.ok) {
-          addMessage('assistant', data.detail || 'Query failed');
+          const err = await r.json().catch(() => ({}));
+          thinking.remove();
+          addMessage('assistant', err.detail || 'Query failed');
           return;
         }
-        addMessage('assistant', data.answer, data);
-        loadStats();
+
+        const reader = r.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop() || '';
+
+          for (const part of parts) {
+            const line = part.trim();
+            if (!line.startsWith('data: ')) continue;
+            let evt;
+            try { evt = JSON.parse(line.slice(6)); } catch { continue; }
+
+            if (evt.type === 'token') {
+              if (!assistantDiv) {
+                thinking.remove();
+                assistantDiv = addMessage('assistant', '');
+                contentEl = assistantDiv.querySelector('.msg-content');
+              }
+              fullText += evt.content;
+              contentEl.textContent = fullText;
+              messagesEl.scrollTop = messagesEl.scrollHeight;
+            } else if (evt.type === 'done') {
+              if (!assistantDiv) {
+                thinking.remove();
+                assistantDiv = addMessage('assistant', fullText);
+              }
+              const meta = document.createElement('div');
+              meta.className = 'text-[11px] text-zinc-500 mt-2';
+              meta.textContent = `${evt.latency_ms} ms · ${evt.token_count} tokens`;
+              assistantDiv.appendChild(meta);
+              loadStats();
+            } else if (evt.type === 'error') {
+              thinking.remove();
+              addMessage('assistant', evt.detail || 'Stream error');
+            }
+          }
+        }
+
+        if (thinking.parentNode) thinking.remove();
       } catch (err) {
-        thinking.remove();
+        if (thinking.parentNode) thinking.remove();
         addMessage('assistant', 'Network error');
       }
     };
