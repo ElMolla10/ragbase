@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.config import get_settings
 from backend.models import Chunk, Document
 from backend.pdf import page_text
+from backend.pdf_store import compress_pdf
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -168,6 +169,7 @@ async def ingest_pdf(
 
         document.num_chunks = len(text_chunks)
         document.status = "completed"
+        document.pdf_bytes = compress_pdf(pdf_bytes)
         await session.commit()
         await session.refresh(document)
         logger.info(f"Ingested document '{filename}' with {document.num_chunks} chunks")
