@@ -285,6 +285,12 @@ GitHub Actions runs on every push to master:
   (four characters per unit); overlap is bounded and may be smaller to avoid
   starting inside a word. This is not semantic chunking or PDF layout analysis.
   Existing chunks stay unchanged; re-ingest documents to use the new splitter.
+- **PDF layout:** PyMuPDF block coordinates improve common two-column reading
+  order and preserve full-width headings. Detected ruled tables keep cells on
+  each row separated by ` | `. Table detection errors fall back to text.
+  Set `PDF_LAYOUT_EXTRACTION=false` for sorted plain-text extraction.
+  Scanned PDFs still need OCR; complex layouts and merged/borderless tables may
+  remain imperfect. Re-ingest existing PDFs to use improved extraction.
 - **No reranking yet:** a cross-encoder reranker remains a possible next step.
 - **Hybrid search is enabled by default:** set `USE_HYBRID_SEARCH=false` for
   pure cosine search. Hybrid mode combines

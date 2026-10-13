@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.config import get_settings
 from backend.models import Chunk, Document
+from backend.pdf import page_text
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -68,7 +69,11 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> list[PageText]:
 
     with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
         for page_num, page in enumerate(doc):
-            text = page.get_text("text")
+            text = (
+                page_text(page)
+                if settings.pdf_layout_extraction
+                else page.get_text("text", sort=True)
+            )
             if text.strip():
                 pages.append(PageText(page_number=page_num + 1, text=text))
 
