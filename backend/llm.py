@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 SYSTEM_PROMPT = """You are a research assistant. Answer using only the provided context from research papers.
-Cite sources as (Page N), matching the page labels in the context. Never cite as Source 1 or Source 2.
+Write in clear prose or a short numbered list. Use simple markdown only when a list helps.
+Cite inline as (Page N). Never cite as Source 1 or Source 2. Do not dump a list of pages at the end.
 Keep answers concise. If the user asks a follow-up, use the conversation and the context."""
 
 
