@@ -9,13 +9,17 @@ from backend import ingest, retrieval
 
 
 def test_e5_prefixes_and_normalization(monkeypatch):
-    monkeypatch.setattr(ingest.settings, "embedding_model", "intfloat/multilingual-e5-small")
+    monkeypatch.setattr(
+        ingest.settings, "embedding_model", "intfloat/multilingual-e5-small"
+    )
     model = Mock()
     model.encode.return_value = np.zeros((1, 384))
     monkeypatch.setattr(ingest, "get_embedding_model", lambda: model)
     ingest.embed_chunks([ingest.TextChunk("Arabic or English", 1, 0)])
     model.encode.assert_called_once_with(
-        ["passage: Arabic or English"], show_progress_bar=False, normalize_embeddings=True
+        ["passage: Arabic or English"],
+        show_progress_bar=False,
+        normalize_embeddings=True,
     )
     model.encode.reset_mock()
     model.encode.return_value = np.zeros(384)

@@ -1,8 +1,9 @@
 """Configuration management using Pydantic settings."""
 
 from functools import lru_cache
+from typing import Literal
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -32,11 +33,19 @@ class Settings(BaseSettings):
 
     # Embedding model
     embedding_model: str = "intfloat/multilingual-e5-small"
-    embedding_dimension: int = 384
+    embedding_dimension: Literal[384] = 384  # Must match Chunk.embedding's schema.
 
     # Chunking settings
     chunk_size: int = 512
     chunk_overlap: int = 50
+    pdf_layout_extraction: bool = True
+
+    # Demo protection; write API key is opt-in, queries stay public.
+    max_upload_bytes: int = Field(default=20 * 1024 * 1024, gt=0)
+    query_rate_limit: int = Field(default=30, ge=0)
+    ingest_rate_limit: int = Field(default=5, ge=0)
+    rate_limit_window_seconds: int = Field(default=60, gt=0)
+    write_api_key: str = ""
 
     # Retrieval settings
     top_k: int = 5

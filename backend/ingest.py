@@ -155,9 +155,7 @@ def embed_chunks(chunks: list[TextChunk]) -> list[list[float]]:
     """
     model = get_embedding_model()
     texts = [embedding_input(chunk.content) for chunk in chunks]
-    embeddings = model.encode(
-        texts, show_progress_bar=False, normalize_embeddings=True
-    )
+    embeddings = model.encode(texts, show_progress_bar=False, normalize_embeddings=True)
 
     logger.info(f"Generated {len(embeddings)} embeddings")
     return [emb.tolist() for emb in embeddings]

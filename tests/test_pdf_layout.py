@@ -22,7 +22,11 @@ def test_ruled_table_preserves_rows():
             page.draw_line((x, 100), (x, 190))
         for y in (100, 130, 160, 190):
             page.draw_line((50, y), (350, y))
-        for y, cells in zip((120, 150, 180), (("Model", "Accuracy"), ("E5", "92%"), ("MiniLM", "81%")), strict=True):
+        for y, cells in zip(
+            (120, 150, 180),
+            (("Model", "Accuracy"), ("E5", "92%"), ("MiniLM", "81%")),
+            strict=True,
+        ):
             for x, cell in zip((60, 210), cells, strict=True):
                 page.insert_text((x, y), cell)
         text = extract_text_from_pdf(doc.tobytes())[0].text

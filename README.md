@@ -271,7 +271,7 @@ GitHub Actions runs on every push to master:
   `EMBEDDING_MODEL` remains configurable; non-E5 models receive unprefixed text.
   Model loading rejects dimensions that do not match `EMBEDDING_DIMENSION`.
   Changing dimensions requires migrating the existing pgvector column and indexes;
-  changing the environment alone does not alter an existing database.
+  and updating the schema guard in config.py; other dimensions are rejected.
   **After upgrading from MiniLM, delete and re-ingest all existing documents**
   from your original PDFs before querying. Equal dimensions do not mean compatible
   embeddings. PDFs are not retained, so keep your source copies. Query logs can stay.
@@ -283,7 +283,7 @@ GitHub Actions runs on every push to master:
   whitespace or hard cuts for long sentences, and keeps every chunk on its source
   page. `CHUNK_SIZE` and `CHUNK_OVERLAP` retain the legacy approximate token units
   (four characters per unit); overlap is bounded and may be smaller to avoid
-  starting inside a word. This is not semantic chunking or PDF layout analysis.
+  starting inside a word. This is not semantic chunking.
   Existing chunks stay unchanged; re-ingest documents to use the new splitter.
 - **PDF layout:** PyMuPDF block coordinates improve common two-column reading
   order and preserve full-width headings. Detected ruled tables keep cells on
@@ -300,6 +300,37 @@ GitHub Actions runs on every push to master:
   without Arabic stemming or language-specific normalization; it does not
   translate queries. Full-text vectors are computed at query time; a GIN index
   is a future optimization for larger collections. No schema migration is needed.
+
+## Demo protection and evaluation
+
+Uploads default to a 20 MiB file limit (`MAX_UPLOAD_BYTES`). Oversized files
+return HTTP 413; multipart Content-Length is also checked before parsing with
+64 KiB allowed for form overhead. Requests without Content-Length still receive
+the file check after multipart parsing; use an ingress body limit for strict
+stream-level protection against arbitrary bodies.
+
+`QUERY_RATE_LIMIT=30` and `INGEST_RATE_LIMIT=5` allow that many requests per client
+in `RATE_LIMIT_WINDOW_SECONDS=60`. HTTP 429 includes `Retry-After`; set a limit to
+0 to disable it. Limits are in memory per worker, reset on restart, and are not
+shared across replicas. Client identity uses the ASGI client address; behind a
+proxy, configure Uvicorn's trusted proxy addresses (`FORWARDED_ALLOW_IPS`) for
+accurate per-client limits. Only trust known ingress proxies. Otherwise visitors
+behind the same proxy may share one allowance.
+
+The public demo needs no new variables. Optional `WRITE_API_KEY` protects uploads
+and document deletion via `X-API-Key`, while queries and health remain public.
+Leave it empty to keep browser uploads usable. When enabled, use an API client
+with the header for writes; the frontend does not contain or inject this secret.
+
+After changing these settings, redeploy the backend (or rebuild Compose).
+No re-ingestion is needed for protection changes.
+
+Run `ruff check .`, `ruff format --check .`, and `pytest tests/` against a
+**disposable** pgvector database: test fixtures create and drop application tables.
+The tiny harness `pytest tests/test_eval.py -q` loads two sample texts and checks
+expected keywords in top-1 retrieved chunks for English and Arabic questions,
+using both vector-only and hybrid search. It uses the real embedding model and
+Postgres, without Groq calls. This is a regression smoke test, not a benchmark.
 
 ## Observability
 

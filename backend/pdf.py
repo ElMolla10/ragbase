@@ -40,8 +40,12 @@ def page_text(page: fitz.Page) -> str:
     left = [b for b in blocks if b[0].x1 <= midpoint]
     right = [b for b in blocks if b[0].x0 >= midpoint]
     # Only infer columns when both sides have vertically overlapping content.
-    two_columns = left and right and any(
-        l[0].y0 < r[0].y1 and r[0].y0 < l[0].y1 for l in left for r in right
+    two_columns = (
+        left
+        and right
+        and any(
+            lb[0].y0 < rb[0].y1 and rb[0].y0 < lb[0].y1 for lb in left for rb in right
+        )
     )
     if not two_columns:
         ordered = sorted(blocks, key=lambda b: (b[0].y0, b[0].x0))

@@ -12,12 +12,21 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from backend.database import get_session
 from backend.main import app
 from backend.models import Base
+from backend.protection import limiter
 
 # Use DATABASE_URL from environment (set by CI) or default to local test database
 TEST_DATABASE_URL = os.environ.get(
     "DATABASE_URL",
     "postgresql+asyncpg://ragbase:ragbase@localhost:5432/ragbase_test",
 )
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limiter():
+    """Keep independent HTTP tests from sharing demo request allowances."""
+    limiter.events.clear()
+    yield
+    limiter.events.clear()
 
 
 @pytest_asyncio.fixture(scope="function")
