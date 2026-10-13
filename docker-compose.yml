@@ -21,11 +21,20 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+      args:
+        EMBEDDING_MODEL: ${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
     container_name: ragbase-backend
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-ragbase}:${POSTGRES_PASSWORD:-ragbase}@postgres:5432/${POSTGRES_DB:-ragbase}
       GROQ_API_KEY: ${GROQ_API_KEY}
-      USE_HYBRID_SEARCH: ${USE_HYBRID_SEARCH:-false}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
+      USE_HYBRID_SEARCH: ${USE_HYBRID_SEARCH:-true}
+      MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-20971520}
+      QUERY_RATE_LIMIT: ${QUERY_RATE_LIMIT:-30}
+      INGEST_RATE_LIMIT: ${INGEST_RATE_LIMIT:-5}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
+      WRITE_API_KEY: ${WRITE_API_KEY:-}
+      PDF_LAYOUT_EXTRACTION: ${PDF_LAYOUT_EXTRACTION:-true}
       CHUNK_SIZE: ${CHUNK_SIZE:-512}
       CHUNK_OVERLAP: ${CHUNK_OVERLAP:-50}
     ports:
@@ -42,9 +51,9 @@ services:
       dockerfile: docker/Dockerfile.frontend
     container_name: ragbase-frontend
     environment:
-      BACKEND_URL: http://backend:8000
+      BACKEND_URL: ${BACKEND_URL:-http://localhost:8000}
     ports:
-      - "8501:8501"
+      - "8501:8080"
     depends_on:
       - backend
 

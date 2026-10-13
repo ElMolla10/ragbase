@@ -15,6 +15,7 @@ from backend.ingest import ingest_pdf
 from backend.llm import generate_answer
 from backend.logger import log_query
 from backend.models import Chunk, Document, QueryLog
+from backend.protection import protect_request, settings
 from backend.retrieval import search_chunks
 
 logging.basicConfig(
@@ -38,6 +39,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.middleware("http")(protect_request)
 
 app.add_middleware(
     CORSMiddleware,
@@ -115,7 +118,9 @@ async def ingest_document(
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
 
     try:
-        pdf_bytes = await file.read()
+        pdf_bytes = await file.read(settings.max_upload_bytes + 1)
+        if len(pdf_bytes) > settings.max_upload_bytes:
+            raise HTTPException(status_code=413, detail="PDF exceeds upload size limit")
         document = await ingest_pdf(session, pdf_bytes, file.filename)
         return IngestResponse(
             document_id=document.id,
@@ -123,6 +128,8 @@ async def ingest_document(
             num_chunks=document.num_chunks,
             status=document.status,
         )
+    except HTTPException:
+        raise
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:

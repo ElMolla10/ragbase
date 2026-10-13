@@ -10,7 +10,7 @@
 
 A production RAG (Retrieval-Augmented Generation) platform that lets you upload research papers and chat with them. Ask questions in **any language** — Arabic, English, or mixed — and get cited answers pulled from the actual document content, with full ML observability built in.
 
-**Live demo:** [RAGBase on Railway](https://frontend-production-8c14.up.railway.app)
+**Live demo:** [RAGBase on Railway](https://ragbase.up.railway.app)
 
 ---
 
@@ -34,9 +34,9 @@ Metabase at http://localhost:3000. The first build downloads the embedding model
 
 ## Features
 
-- **Multilingual questions** — ask in Arabic, English, or mixed language and get cited answers. Arabic retrieval quality is limited by the current embedding model; see the limitations below.
+- **Multilingual questions** — ask in Arabic, English, or mixed language and get cited answers. Retrieval uses multilingual E5-small; quality varies by language and corpus.
 - **PDF ingestion** — upload any PDF, chunks are embedded and stored in pgvector
-- **Semantic search** — queries use cosine similarity to retrieve the most relevant chunks
+- **Hybrid search (on by default)** — combines pgvector cosine similarity and PostgreSQL full-text search using reciprocal rank fusion
 - **Cited answers** — every answer references the exact source pages it used
 - **ML observability** — every query is logged: latency, token count, timestamp, sources
 - **Live stats** — total queries, avg latency, documents, and chunks shown in real time
@@ -47,7 +47,7 @@ Metabase at http://localhost:3000. The first build downloads the embedding model
 ## Architecture
 
 ```text
-Browser → Streamlit (Railway public HTTPS URL)
+Browser → HTML/Tailwind frontend (Railway public HTTPS URL)
                 ↓ BACKEND_URL
           FastAPI (Railway) → Groq API (server-side key)
                 ↓
@@ -69,10 +69,10 @@ External PDF storage is optional and is not part of this deployment.
 | Layer | Technology |
 |-------|-----------|
 | Backend | Python, FastAPI, async SQLAlchemy |
-| Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
+| Embeddings | sentence-transformers (intfloat/multilingual-e5-small) |
 | Vector DB | pgvector on Railway Postgres |
 | LLM | Groq API — llama-3.3-70b-versatile |
-| Frontend | Streamlit |
+| Frontend | HTML/Tailwind + Python static server |
 | Observability | Metabase + query_logs table |
 | Infrastructure | Railway backend + frontend + Postgres |
 | Containers | Docker Compose |
@@ -159,7 +159,7 @@ docker compose up -d --build
 
 # Services:
 # localhost:8000  → FastAPI (API + docs at /docs)
-# localhost:8501  → Streamlit UI
+# localhost:8501  → HTML/Tailwind UI
 # localhost:3000  → Metabase dashboard
 ```
 
@@ -216,16 +216,18 @@ docker compose up -d --build
    | `BACKEND_URL` | `https://<backend-domain>` (no trailing slash) |
 
    Leave the start command unset. Both Dockerfiles bind to `0.0.0.0` and use
-   Railway's `PORT` at runtime; local defaults remain 8000 and 8501.
-   Set the frontend healthcheck path to `/_stcore/health`.
+   Railway's `PORT` at runtime. Compose exposes the API on 8000 and the UI on
+   8501 (the frontend container defaults to 8080).
+   Set the frontend healthcheck path to `/health`.
    Generate a public domain for the frontend.
 6. Open the frontend HTTPS URL, upload a PDF, ask a question, and check that
    citations and query statistics appear. Share that URL with your friend.
    **Visitors do not need a Groq API key**: only the backend has the deployer's key;
-   Streamlit sends queries to it on the server. Groq usage uses that key's quota.
+   The browser sends queries to the backend via the injected `BACKEND_URL`.
+   Groq usage uses the backend key's quota.
 
 The backend runs sentence-transformers and CPU PyTorch locally, using
-`all-MiniLM-L6-v2`; allocate enough backend memory for model loading and ingestion.
+`intfloat/multilingual-e5-small`; allocate enough backend memory for model loading and ingestion.
 The model is downloaded during the Docker build. No GPU or embedding API key is
 required. Metabase is optional: deploy it separately and connect it to the same
 Postgres database if you want dashboards.
@@ -258,37 +260,78 @@ GitHub Actions runs on every push to master:
 
 ```
 ✅ lint  (ruff check + format)
-✅ test  (9 unit tests + 22 integration tests)
+✅ test  (unit tests + Postgres/pgvector integration tests)
 ```
 
 ---
 
 ## Known Limitations & Next Steps
 
-- **Arabic embeddings:** `all-MiniLM-L6-v2` is primarily an English model, so
-  Arabic and cross-language retrieval can miss relevant passages. A stronger
-  multilingual model such as
-  [`intfloat/multilingual-e5-small`](https://huggingface.co/intfloat/multilingual-e5-small)
-  can be selected later via `settings.embedding_model` / `EMBEDDING_MODEL`.
-  Re-embed all existing documents after changing models. E5 also requires
-  `query: ` / `passage: ` input prefixes; add that preprocessing when adopting it.
-  Its 384-dimensional output fits the current schema; other dimensions require
-  a schema change. Docker Compose must explicitly pass `EMBEDDING_MODEL` if used.
+- **Embeddings:** the default is `intfloat/multilingual-e5-small` (384 dimensions),
+  with normalized vectors and automatic `query: ` / `passage: ` prefixes for E5.
+  `EMBEDDING_MODEL` remains configurable; non-E5 models receive unprefixed text.
+  Model loading rejects dimensions that do not match `EMBEDDING_DIMENSION`.
+  Changing dimensions requires migrating the existing pgvector column and indexes
+  and updating the schema guard in config.py; other dimensions are rejected.
+  **After upgrading from MiniLM, delete and re-ingest all existing documents**
+  from your original PDFs before querying. Equal dimensions do not mean compatible
+  embeddings. PDFs are not retained, so keep your source copies. Query logs can stay.
+  For Railway, remove an old `EMBEDDING_MODEL` override or set the new model name,
+  then rebuild the backend. Compose passes the setting at build and runtime.
+  Custom Railway models may download on first use unless the build argument matches.
+  Multilingual support improves coverage, but quality varies by language and corpus.
 - **Chunking:** splitting now prefers paragraph/sentence endings, falls back to
   whitespace or hard cuts for long sentences, and keeps every chunk on its source
   page. `CHUNK_SIZE` and `CHUNK_OVERLAP` retain the legacy approximate token units
   (four characters per unit); overlap is bounded and may be smaller to avoid
-  starting inside a word. This is not semantic chunking or PDF layout analysis.
+  starting inside a word. This is not semantic chunking.
   Existing chunks stay unchanged; re-ingest documents to use the new splitter.
+- **PDF layout:** PyMuPDF block coordinates improve common two-column reading
+  order and preserve full-width headings. Detected ruled tables keep cells on
+  each row separated by ` | `. Table detection errors fall back to text.
+  Set `PDF_LAYOUT_EXTRACTION=false` for sorted plain-text extraction.
+  Scanned PDFs still need OCR; complex layouts and merged/borderless tables may
+  remain imperfect. Re-ingest existing PDFs to use improved extraction.
 - **No reranking yet:** a cross-encoder reranker remains a possible next step.
-- **Optional hybrid search:** set `USE_HYBRID_SEARCH=true` in `.env` and rerun
-  `./start.sh`. The default is `false` (pure cosine search). Hybrid mode combines
+- **Hybrid search is enabled by default:** set `USE_HYBRID_SEARCH=false` for
+  pure cosine search. Hybrid mode combines
   pgvector and PostgreSQL full-text search using reciprocal rank fusion, with
   document filters applied to both. Returned scores are fusion scores rather
   than cosine similarities. It uses the `simple` text-search configuration,
   without Arabic stemming or language-specific normalization; it does not
   translate queries. Full-text vectors are computed at query time; a GIN index
   is a future optimization for larger collections. No schema migration is needed.
+
+## Demo protection and evaluation
+
+Uploads default to a 20 MiB file limit (`MAX_UPLOAD_BYTES`). Oversized files
+return HTTP 413; multipart Content-Length is also checked before parsing with
+64 KiB allowed for form overhead. Requests without Content-Length still receive
+the file check after multipart parsing; use an ingress body limit for strict
+stream-level protection against arbitrary bodies.
+
+`QUERY_RATE_LIMIT=30` and `INGEST_RATE_LIMIT=5` allow that many requests per client
+in `RATE_LIMIT_WINDOW_SECONDS=60`. HTTP 429 includes `Retry-After`; set a limit to
+0 to disable it. Limits are in memory per worker, reset on restart, and are not
+shared across replicas. Client identity uses the ASGI client address; behind a
+proxy, configure Uvicorn's trusted proxy addresses (`FORWARDED_ALLOW_IPS`) for
+accurate per-client limits. Only trust known ingress proxies. Otherwise visitors
+behind the same proxy may share one allowance.
+
+The public demo needs no new variables. Optional `WRITE_API_KEY` protects uploads
+and document deletion via `X-API-Key`, while queries and health remain public.
+Leave it empty to keep browser uploads usable. When enabled, use an API client
+with the header for writes; the frontend does not contain or inject this secret.
+
+After changing these settings, redeploy the backend (or rebuild Compose).
+No re-ingestion is needed for protection changes.
+
+Run `ruff check .`, `ruff format --check .`, and `pytest tests/` against a
+**disposable** pgvector database: test fixtures create and drop application tables.
+The tiny harness `pytest tests/test_eval.py -q` loads two sample texts and checks
+expected keywords in top-1 retrieved chunks for English and Arabic questions,
+using both vector-only and hybrid search. It uses the real embedding model and
+Postgres, without Groq calls. This is a regression smoke test, not a benchmark.
 
 ## Observability
 
@@ -318,7 +361,8 @@ ragbase/
 │   ├── database.py    # Async Postgres + pgvector setup
 │   └── config.py      # Environment variable config
 ├── frontend/
-│   └── app.py         # Streamlit UI (Chat + Documents pages)
+│   ├── index.html     # HTML/Tailwind UI
+│   └── serve.py       # Static server + BACKEND_URL injection
 ├── docker/
 │   ├── Dockerfile.backend
 │   ├── Dockerfile.frontend

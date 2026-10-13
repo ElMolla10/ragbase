@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.config import get_settings
 from backend.models import Chunk, Document
+from backend.pdf import page_text
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -23,8 +24,19 @@ def get_embedding_model() -> SentenceTransformer:
     global _embedding_model
     if _embedding_model is None:
         logger.info(f"Loading embedding model: {settings.embedding_model}")
-        _embedding_model = SentenceTransformer(settings.embedding_model)
+        model = SentenceTransformer(settings.embedding_model)
+        if model.get_sentence_embedding_dimension() != settings.embedding_dimension:
+            raise ValueError("Embedding model dimension must match the database schema")
+        _embedding_model = model
     return _embedding_model
+
+
+def embedding_input(text: str, *, is_query: bool = False) -> str:
+    """Apply E5's retrieval prefixes, including for non-English inputs."""
+    model_name = settings.embedding_model.lower().rsplit("/", 1)[-1]
+    if model_name.startswith(("e5-", "multilingual-e5-")):
+        return ("query: " if is_query else "passage: ") + text
+    return text
 
 
 @dataclass
@@ -57,7 +69,11 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> list[PageText]:
 
     with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
         for page_num, page in enumerate(doc):
-            text = page.get_text("text")
+            text = (
+                page_text(page)
+                if settings.pdf_layout_extraction
+                else page.get_text("text", sort=True)
+            )
             if text.strip():
                 pages.append(PageText(page_number=page_num + 1, text=text))
 
@@ -138,8 +154,8 @@ def embed_chunks(chunks: list[TextChunk]) -> list[list[float]]:
         List of embedding vectors (384 dimensions).
     """
     model = get_embedding_model()
-    texts = [chunk.content for chunk in chunks]
-    embeddings = model.encode(texts, show_progress_bar=False)
+    texts = [embedding_input(chunk.content) for chunk in chunks]
+    embeddings = model.encode(texts, show_progress_bar=False, normalize_embeddings=True)
 
     logger.info(f"Generated {len(embeddings)} embeddings")
     return [emb.tolist() for emb in embeddings]

@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.config import get_settings
-from backend.ingest import get_embedding_model
+from backend.ingest import embedding_input, get_embedding_model
 from backend.models import Chunk
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,11 @@ def embed_query(query: str) -> list[float]:
         Embedding vector (384 dimensions).
     """
     model = get_embedding_model()
-    embedding = model.encode(query, show_progress_bar=False)
+    embedding = model.encode(
+        embedding_input(query, is_query=True),
+        show_progress_bar=False,
+        normalize_embeddings=True,
+    )
     return embedding.tolist()
 
 
