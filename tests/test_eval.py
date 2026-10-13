@@ -1,14 +1,13 @@
-"""Tiny retrieval regression harness: real embeddings, pgvector, and RRF.
-
-Run against a disposable test database: pytest tests/test_eval.py -q
-No Groq key or external PDF downloads are needed.
-"""
+"""Retrieval regression harness and golden-set floor."""
 
 import pytest
 
+from backend.evalset import load_golden, run_eval
 from backend.ingest import PageText, chunk_text, embed_chunks
 from backend.models import Chunk, Document
 from backend.retrieval import search_chunks, settings
+
+RECALL_FLOOR = 0.35
 
 
 @pytest.mark.asyncio
@@ -18,11 +17,13 @@ async def test_retrieval_keyword_regressions(db_session, monkeypatch, hybrid):
     pages = [
         PageText(
             1,
-            "Solar panels convert sunlight into electricity. Photovoltaic cells use silicon semiconductors.",
+            "Solar panels convert sunlight into electricity. "
+            "Photovoltaic cells use silicon semiconductors.",
         ),
         PageText(
             2,
-            "Vaccines train the immune system to recognize pathogens. Immunization helps prevent infectious disease.",
+            "Vaccines train the immune system to recognize pathogens. "
+            "Immunization helps prevent infectious disease.",
         ),
     ]
     chunks = chunk_text(pages)
@@ -56,3 +57,13 @@ async def test_retrieval_keyword_regressions(db_session, monkeypatch, hybrid):
             query,
             results,
         )
+
+
+@pytest.mark.asyncio
+async def test_golden_recall_floor(db_session):
+    report = await run_eval(db_session, generate=False)
+    metrics = report["metrics"]
+    assert metrics["n_retrieval"] == 90
+    assert metrics["recall_at_5"] is not None
+    assert metrics["recall_at_5"] >= RECALL_FLOOR, metrics
+    assert len(load_golden()) == 100
