@@ -3,7 +3,16 @@
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import ARRAY, DateTime, ForeignKey, Integer, LargeBinary, String, Text, func
+from sqlalchemy import (
+    ARRAY,
+    DateTime,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    String,
+    Text,
+    func,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -53,7 +62,10 @@ class Chunk(Base):
     document: Mapped["Document"] = relationship("Document", back_populates="chunks")
 
     def __repr__(self) -> str:
-        return f"<Chunk(id={self.id}, document_id={self.document_id}, index={self.chunk_index})>"
+        return (
+            f"<Chunk(id={self.id}, document_id={self.document_id}, "
+            f"index={self.chunk_index})>"
+        )
 
 
 class QueryLog(Base):
