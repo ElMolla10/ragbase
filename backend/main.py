@@ -6,7 +6,7 @@ import time
 from contextlib import asynccontextmanager
 from urllib.parse import quote
 
-from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
@@ -18,7 +18,7 @@ from backend.ingest import get_embedding_model, ingest_pdf
 from backend.llm import generate_answer, stream_answer
 from backend.logger import log_query
 from backend.models import Chunk, Document, QueryLog
-from backend.pdf_store import load_pdf, save_pdf_bytes
+from backend.pdf_store import load_pdf
 from backend.protection import protect_request, settings
 from backend.retrieval import search_chunks
 
@@ -142,7 +142,6 @@ async def health_check() -> HealthResponse:
 
 @app.post("/ingest", response_model=IngestResponse)
 async def ingest_document(
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     session: AsyncSession = Depends(get_session),
 ) -> IngestResponse:
@@ -154,7 +153,6 @@ async def ingest_document(
         if len(pdf_bytes) > settings.max_upload_bytes:
             raise HTTPException(status_code=413, detail="PDF exceeds upload size limit")
         document = await ingest_pdf(session, pdf_bytes, file.filename)
-        background_tasks.add_task(save_pdf_bytes, document.id, pdf_bytes)
         return IngestResponse(
             document_id=document.id,
             filename=document.filename,
