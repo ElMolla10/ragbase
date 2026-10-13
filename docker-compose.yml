@@ -21,10 +21,13 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+      args:
+        EMBEDDING_MODEL: ${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
     container_name: ragbase-backend
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-ragbase}:${POSTGRES_PASSWORD:-ragbase}@postgres:5432/${POSTGRES_DB:-ragbase}
       GROQ_API_KEY: ${GROQ_API_KEY}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
       USE_HYBRID_SEARCH: ${USE_HYBRID_SEARCH:-true}
       CHUNK_SIZE: ${CHUNK_SIZE:-512}
       CHUNK_OVERLAP: ${CHUNK_OVERLAP:-50}

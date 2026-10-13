@@ -34,7 +34,7 @@ Metabase at http://localhost:3000. The first build downloads the embedding model
 
 ## Features
 
-- **Multilingual questions** — ask in Arabic, English, or mixed language and get cited answers. Arabic retrieval quality is limited by the current embedding model; see the limitations below.
+- **Multilingual questions** — ask in Arabic, English, or mixed language and get cited answers. Retrieval uses multilingual E5-small; quality varies by language and corpus.
 - **PDF ingestion** — upload any PDF, chunks are embedded and stored in pgvector
 - **Hybrid search (on by default)** — combines pgvector cosine similarity and PostgreSQL full-text search using reciprocal rank fusion
 - **Cited answers** — every answer references the exact source pages it used
@@ -69,7 +69,7 @@ External PDF storage is optional and is not part of this deployment.
 | Layer | Technology |
 |-------|-----------|
 | Backend | Python, FastAPI, async SQLAlchemy |
-| Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
+| Embeddings | sentence-transformers (intfloat/multilingual-e5-small) |
 | Vector DB | pgvector on Railway Postgres |
 | LLM | Groq API — llama-3.3-70b-versatile |
 | Frontend | HTML/Tailwind + Python static server |
@@ -226,7 +226,7 @@ docker compose up -d --build
    Groq usage uses the backend key's quota.
 
 The backend runs sentence-transformers and CPU PyTorch locally, using
-`all-MiniLM-L6-v2`; allocate enough backend memory for model loading and ingestion.
+`intfloat/multilingual-e5-small`; allocate enough backend memory for model loading and ingestion.
 The model is downloaded during the Docker build. No GPU or embedding API key is
 required. Metabase is optional: deploy it separately and connect it to the same
 Postgres database if you want dashboards.
@@ -266,15 +266,19 @@ GitHub Actions runs on every push to master:
 
 ## Known Limitations & Next Steps
 
-- **Arabic embeddings:** `all-MiniLM-L6-v2` is primarily an English model, so
-  Arabic and cross-language retrieval can miss relevant passages. A stronger
-  multilingual model such as
-  [`intfloat/multilingual-e5-small`](https://huggingface.co/intfloat/multilingual-e5-small)
-  can be selected later via `settings.embedding_model` / `EMBEDDING_MODEL`.
-  Re-embed all existing documents after changing models. E5 also requires
-  `query: ` / `passage: ` input prefixes; add that preprocessing when adopting it.
-  Its 384-dimensional output fits the current schema; other dimensions require
-  a schema change. Docker Compose must explicitly pass `EMBEDDING_MODEL` if used.
+- **Embeddings:** the default is `intfloat/multilingual-e5-small` (384 dimensions),
+  with normalized vectors and automatic `query: ` / `passage: ` prefixes for E5.
+  `EMBEDDING_MODEL` remains configurable; non-E5 models receive unprefixed text.
+  Model loading rejects dimensions that do not match `EMBEDDING_DIMENSION`.
+  Changing dimensions requires migrating the existing pgvector column and indexes;
+  changing the environment alone does not alter an existing database.
+  **After upgrading from MiniLM, delete and re-ingest all existing documents**
+  from your original PDFs before querying. Equal dimensions do not mean compatible
+  embeddings. PDFs are not retained, so keep your source copies. Query logs can stay.
+  For Railway, remove an old `EMBEDDING_MODEL` override or set the new model name,
+  then rebuild the backend. Compose passes the setting at build and runtime.
+  Custom Railway models may download on first use unless the build argument matches.
+  Multilingual support improves coverage, but quality varies by language and corpus.
 - **Chunking:** splitting now prefers paragraph/sentence endings, falls back to
   whitespace or hard cuts for long sentences, and keeps every chunk on its source
   page. `CHUNK_SIZE` and `CHUNK_OVERLAP` retain the legacy approximate token units

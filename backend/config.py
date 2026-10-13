@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
 
     # Embedding model
-    embedding_model: str = "all-MiniLM-L6-v2"
+    embedding_model: str = "intfloat/multilingual-e5-small"
     embedding_dimension: int = 384
 
     # Chunking settings
