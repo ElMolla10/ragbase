@@ -9,8 +9,8 @@ from urllib.parse import quote
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, StreamingResponse
-from pydantic import BaseModel
-from sqlalchemy import func, select
+from pydantic import BaseModel, Field
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.database import get_session, init_db
@@ -57,9 +57,15 @@ app.add_middleware(
 )
 
 
+class ChatTurn(BaseModel):
+    role: str
+    content: str
+
+
 class QueryRequest(BaseModel):
     query: str
     document_id: int | None = None
+    history: list[ChatTurn] = Field(default_factory=list)
 
 
 class SourceChunk(BaseModel):
@@ -111,6 +117,10 @@ class DeleteResponse(BaseModel):
     filename: str
 
 
+def _history(request: QueryRequest) -> list[dict]:
+    return [turn.model_dump() for turn in request.history]
+
+
 def _sources(chunks) -> list[dict]:
     return [
         {
@@ -151,7 +161,13 @@ async def ingest_document(
     except HTTPException:
         raise
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        message = str(e)
+        if "No text" in message:
+            message = (
+                "No selectable text in this PDF. "
+                "Scanned or image-only files are not supported."
+            )
+        raise HTTPException(status_code=400, detail=message) from e
     except Exception as e:
         logger.error(f"Ingest failed: {e}")
         raise HTTPException(status_code=500, detail="Failed to process document") from e
@@ -175,7 +191,7 @@ async def query_documents(
                 detail="No relevant content found. Please upload documents first.",
             )
 
-        llm_response = await generate_answer(request.query, chunks)
+        llm_response = await generate_answer(request.query, chunks, _history(request))
         latency_ms = int((time.time() - start_time) * 1000)
 
         await log_query(
@@ -210,6 +226,7 @@ async def query_stream(
     session: AsyncSession = Depends(get_session),
 ):
     start_time = time.time()
+    history = _history(request)
     try:
         chunks = await search_chunks(
             session,
@@ -234,7 +251,7 @@ async def query_stream(
 
         answer_parts: list[str] = []
         try:
-            async for token in stream_answer(request.query, chunks):
+            async for token in stream_answer(request.query, chunks, history):
                 answer_parts.append(token)
                 yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
 
@@ -341,6 +358,15 @@ async def get_stats(
         total_documents=total_docs,
         total_chunks=total_chunks,
     )
+
+
+@app.delete("/stats")
+async def reset_stats(
+    session: AsyncSession = Depends(get_session),
+):
+    await session.execute(delete(QueryLog))
+    await session.commit()
+    return {"message": "Query stats cleared"}
 
 
 @app.delete("/documents/{document_id}", response_model=DeleteResponse)

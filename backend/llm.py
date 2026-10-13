@@ -12,13 +12,13 @@ from backend.retrieval import RetrievedChunk
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-SYSTEM_PROMPT = """You are a research assistant. Answer the question based only on the provided context from research papers. Always cite which part of the context you used. Keep answers concise."""
+SYSTEM_PROMPT = """You are a research assistant. Answer using only the provided context from research papers.
+Cite sources as (Page N), matching the page labels in the context. Never cite as Source 1 or Source 2.
+Keep answers concise. If the user asks a follow-up, use the conversation and the context."""
 
 
 @dataclass
 class LLMResponse:
-    """Response from the LLM."""
-
     answer: str
     prompt_tokens: int
     completion_tokens: int
@@ -27,17 +27,13 @@ class LLMResponse:
 
 
 def build_context(chunks: list[RetrievedChunk]) -> str:
-    """Build context string from retrieved chunks."""
     context_parts = []
-    for i, chunk in enumerate(chunks, 1):
-        context_parts.append(
-            f"[Source {i} - Page {chunk.page_number}]\n{chunk.content}"
-        )
+    for chunk in chunks:
+        context_parts.append(f"[Page {chunk.page_number}]\n{chunk.content}")
     return "\n\n".join(context_parts)
 
 
 def build_prompt(query: str, chunks: list[RetrievedChunk]) -> str:
-    """Build the full prompt with context."""
     context = build_context(chunks)
     return f"""Context:
 {context}
@@ -53,24 +49,32 @@ def _client() -> AsyncGroq:
     return AsyncGroq(api_key=settings.groq_api_key)
 
 
-def _messages(query: str, chunks: list[RetrievedChunk]) -> list[dict]:
-    return [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": build_prompt(query, chunks)},
-    ]
+def _messages(
+    query: str,
+    chunks: list[RetrievedChunk],
+    history: list[dict] | None = None,
+) -> list[dict]:
+    messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for turn in (history or [])[-6:]:
+        role = turn.get("role")
+        content = (turn.get("content") or "").strip()
+        if role in ("user", "assistant") and content:
+            messages.append({"role": role, "content": content[:2000]})
+    messages.append({"role": "user", "content": build_prompt(query, chunks)})
+    return messages
 
 
 async def generate_answer(
     query: str,
     chunks: list[RetrievedChunk],
+    history: list[dict] | None = None,
 ) -> LLMResponse:
-    """Generate a full answer using the Groq API."""
     client = _client()
     logger.info(f"Generating answer for query: '{query[:50]}...'")
 
     response = await client.chat.completions.create(
         model=settings.llm_model,
-        messages=_messages(query, chunks),
+        messages=_messages(query, chunks, history),
         max_tokens=settings.llm_max_tokens,
         temperature=0.1,
     )
@@ -91,14 +95,14 @@ async def generate_answer(
 async def stream_answer(
     query: str,
     chunks: list[RetrievedChunk],
+    history: list[dict] | None = None,
 ) -> AsyncIterator[str]:
-    """Stream answer tokens from Groq."""
     client = _client()
     logger.info(f"Streaming answer for query: '{query[:50]}...'")
 
     stream = await client.chat.completions.create(
         model=settings.llm_model,
-        messages=_messages(query, chunks),
+        messages=_messages(query, chunks, history),
         max_tokens=settings.llm_max_tokens,
         temperature=0.1,
         stream=True,
