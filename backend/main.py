@@ -1,18 +1,20 @@
 """FastAPI application for RAGBase."""
 
+import json
 import logging
 import time
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.database import get_session, init_db
 from backend.ingest import ingest_pdf
-from backend.llm import generate_answer
+from backend.llm import generate_answer, stream_answer
 from backend.logger import log_query
 from backend.models import Chunk, Document, QueryLog
 from backend.protection import protect_request, settings
@@ -104,6 +106,18 @@ class DeleteResponse(BaseModel):
     filename: str
 
 
+def _sources(chunks) -> list[dict]:
+    return [
+        {
+            "id": chunk.id,
+            "content": chunk.content[:500],
+            "page_number": chunk.page_number,
+            "similarity_score": round(chunk.similarity_score, 4),
+        }
+        for chunk in chunks
+    ]
+
+
 @app.get("/health", response_model=HealthResponse)
 async def health_check() -> HealthResponse:
     return HealthResponse(status="healthy", message="RAGBase is running")
@@ -168,19 +182,9 @@ async def query_documents(
             model_used=llm_response.model,
         )
 
-        sources = [
-            SourceChunk(
-                id=chunk.id,
-                content=chunk.content[:500],
-                page_number=chunk.page_number,
-                similarity_score=round(chunk.similarity_score, 4),
-            )
-            for chunk in chunks
-        ]
-
         return QueryResponse(
             answer=llm_response.answer,
-            sources=sources,
+            sources=_sources(chunks),
             latency_ms=latency_ms,
             token_count=llm_response.total_tokens,
             model_used=llm_response.model,
@@ -192,6 +196,72 @@ async def query_documents(
     except Exception as e:
         logger.error(f"Query failed: {e}")
         raise HTTPException(status_code=500, detail="Failed to process query") from e
+
+
+@app.post("/query/stream")
+async def query_stream(
+    request: QueryRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Stream an answer as Server-Sent Events."""
+    start_time = time.time()
+    try:
+        chunks = await search_chunks(
+            session,
+            request.query,
+            document_id=request.document_id,
+        )
+        if not chunks:
+            raise HTTPException(
+                status_code=404,
+                detail="No relevant content found. Please upload documents first.",
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Retrieval failed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve context") from e
+
+    sources = _sources(chunks)
+
+    async def event_stream():
+        # Send sources first so the UI can show them immediately
+        yield f"data: {json.dumps({'type': 'sources', 'sources': sources})}\n\n"
+
+        answer_parts: list[str] = []
+        try:
+            async for token in stream_answer(request.query, chunks):
+                answer_parts.append(token)
+                yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
+
+            answer = "".join(answer_parts)
+            latency_ms = int((time.time() - start_time) * 1000)
+            # Approximate token count (4 chars ≈ 1 token)
+            token_count = max(1, len(answer) // 4)
+
+            await log_query(
+                session,
+                query=request.query,
+                answer=answer,
+                chunks=chunks,
+                latency_ms=latency_ms,
+                token_count=token_count,
+                model_used=settings.llm_model,
+            )
+
+            yield f"data: {json.dumps({'type': 'done', 'latency_ms': latency_ms, 'token_count': token_count, 'model_used': settings.llm_model})}\n\n"
+        except Exception as e:
+            logger.error(f"Stream failed: {e}")
+            yield f"data: {json.dumps({'type': 'error', 'detail': str(e)})}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.get("/documents", response_model=list[DocumentResponse])
