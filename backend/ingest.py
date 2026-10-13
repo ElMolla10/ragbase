@@ -125,7 +125,6 @@ def embed_chunks(chunks: list[TextChunk]) -> list[list[float]]:
         texts,
         show_progress_bar=False,
         normalize_embeddings=True,
-        batch_size=32,
     )
     logger.info(f"Generated {len(embeddings)} embeddings")
     return [emb.tolist() for emb in embeddings]
