@@ -29,7 +29,6 @@
     .msg-user { background: linear-gradient(180deg, #1e1b4b 0%, #141416 100%); }
     #sidebar { transition: width 0.2s ease, transform 0.2s ease; }
     #sidebar.collapsed { width: 0; padding: 0; border: none; overflow: hidden; }
-    #messages { scroll-behavior: smooth; }
   </style>
 </head>
 <body class="bg-surface text-zinc-100 min-h-screen">
@@ -80,8 +79,8 @@
           </select>
         </div>
 
-        <div id="messages" class="flex-1 min-h-0 overflow-y-auto px-6 py-4 scrollbar-thin flex flex-col justify-end gap-4">
-          <div id="empty-state" class="text-center text-zinc-500 text-sm">
+        <div id="messages" class="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4 scrollbar-thin">
+          <div id="empty-state" class="text-center text-zinc-500 text-sm mt-20">
             Upload a paper, then ask anything.<br/>Answers include page citations.
           </div>
         </div>
@@ -214,8 +213,20 @@
     const form = document.getElementById('chat-form');
     const input = document.getElementById('chat-input');
 
-    function stickToBottom() {
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+    // Only auto-scroll if the user is already near the bottom.
+    let pinnedToBottom = true;
+    function isNearBottom() {
+      return messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < 80;
+    }
+    messagesEl.addEventListener('scroll', () => {
+      pinnedToBottom = isNearBottom();
+    });
+
+    function stickToBottom(force) {
+      if (force || pinnedToBottom) {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        pinnedToBottom = true;
+      }
     }
 
     function hideEmpty() {
@@ -227,8 +238,8 @@
       hideEmpty();
       const div = document.createElement('div');
       div.className = role === 'user'
-        ? 'msg-user border border-indigo-900/50 rounded-2xl px-4 py-3 max-w-2xl ml-auto shrink-0'
-        : 'bg-card border border-border rounded-2xl px-4 py-3 max-w-2xl shrink-0';
+        ? 'msg-user border border-indigo-900/50 rounded-2xl px-4 py-3 max-w-2xl ml-auto'
+        : 'bg-card border border-border rounded-2xl px-4 py-3 max-w-2xl';
       let html = `<div class="text-sm whitespace-pre-wrap msg-content">${escapeHtml(content)}</div>`;
       if (meta) {
         html += `<div class="text-[11px] text-zinc-500 mt-2 meta">${meta.latency_ms} ms · ${meta.token_count} tokens</div>`;
@@ -242,7 +253,7 @@
       }
       div.innerHTML = html;
       messagesEl.appendChild(div);
-      stickToBottom();
+      stickToBottom(true);
       return div;
     }
 
@@ -258,16 +269,17 @@
       const q = input.value.trim();
       if (!q) return;
       input.value = '';
+      pinnedToBottom = true;
       addMessage('user', q);
       const docId = document.getElementById('doc-select').value;
       const payload = { query: q };
       if (docId) payload.document_id = parseInt(docId);
 
       const thinking = document.createElement('div');
-      thinking.className = 'text-sm text-zinc-500 italic px-2 shrink-0';
+      thinking.className = 'text-sm text-zinc-500 italic px-2';
       thinking.textContent = 'Thinking…';
       messagesEl.appendChild(thinking);
-      stickToBottom();
+      stickToBottom(true);
 
       let assistantDiv = null;
       let contentEl = null;
@@ -313,7 +325,7 @@
               }
               fullText += evt.content;
               contentEl.textContent = fullText;
-              stickToBottom();
+              stickToBottom(false);
             } else if (evt.type === 'done') {
               if (!assistantDiv) {
                 thinking.remove();
@@ -323,7 +335,7 @@
               meta.className = 'text-[11px] text-zinc-500 mt-2';
               meta.textContent = `${evt.latency_ms} ms · ${evt.token_count} tokens`;
               assistantDiv.appendChild(meta);
-              stickToBottom();
+              stickToBottom(false);
               loadStats();
             } else if (evt.type === 'error') {
               thinking.remove();
