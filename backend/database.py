@@ -31,12 +31,14 @@ async_session_maker = async_sessionmaker(
 async def init_db() -> None:
     """Initialize database with pgvector extension and create all tables."""
     async with engine.begin() as conn:
-        # Enable pgvector extension
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         logger.info("pgvector extension enabled")
 
-        # Create all tables
         await conn.run_sync(Base.metadata.create_all)
+        # Additive for existing deployments that predate PDF storage.
+        await conn.execute(
+            text("ALTER TABLE documents ADD COLUMN IF NOT EXISTS pdf_bytes BYTEA")
+        )
         logger.info("Database tables created")
 
 
