@@ -216,7 +216,8 @@ docker compose up -d --build
    | `BACKEND_URL` | `https://<backend-domain>` (no trailing slash) |
 
    Leave the start command unset. Both Dockerfiles bind to `0.0.0.0` and use
-   Railway's `PORT` at runtime; local defaults remain 8000 and 8501.
+   Railway's `PORT` at runtime. Compose exposes the API on 8000 and the UI on
+   8501 (the frontend container defaults to 8080).
    Set the frontend healthcheck path to `/health`.
    Generate a public domain for the frontend.
 6. Open the frontend HTTPS URL, upload a PDF, ask a question, and check that
@@ -259,7 +260,7 @@ GitHub Actions runs on every push to master:
 
 ```
 ✅ lint  (ruff check + format)
-✅ test  (9 unit tests + 22 integration tests)
+✅ test  (unit tests + Postgres/pgvector integration tests)
 ```
 
 ---
@@ -270,7 +271,7 @@ GitHub Actions runs on every push to master:
   with normalized vectors and automatic `query: ` / `passage: ` prefixes for E5.
   `EMBEDDING_MODEL` remains configurable; non-E5 models receive unprefixed text.
   Model loading rejects dimensions that do not match `EMBEDDING_DIMENSION`.
-  Changing dimensions requires migrating the existing pgvector column and indexes;
+  Changing dimensions requires migrating the existing pgvector column and indexes
   and updating the schema guard in config.py; other dimensions are rejected.
   **After upgrading from MiniLM, delete and re-ingest all existing documents**
   from your original PDFs before querying. Equal dimensions do not mean compatible

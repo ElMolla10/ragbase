@@ -43,3 +43,14 @@ def test_table_failure_keeps_text(monkeypatch):
     with fitz.open() as doc:
         doc.new_page().insert_text((72, 72), "Text must survive")
         assert "Text must survive" in extract_text_from_pdf(doc.tobytes())[0].text
+
+
+def test_full_width_heading_stays_before_columns():
+    with fitz.open() as doc:
+        page = doc.new_page(width=600, height=800)
+        page.insert_text((330, 100), "RIGHT column")
+        page.insert_text((40, 100), "LEFT column")
+        heading = "Research findings across multilingual retrieval systems"
+        page.insert_text((40, 50), heading, fontsize=16)
+        text = extract_text_from_pdf(doc.tobytes())[0].text
+    assert text.index(heading) < text.index("LEFT column") < text.index("RIGHT column")

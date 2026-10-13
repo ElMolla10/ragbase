@@ -13,11 +13,33 @@ def page_text(page: fitz.Page) -> str:
     Table detection is best effort: a failure falls back to ordinary text.
     Blocks that straddle table boundaries are retained to avoid losing prose.
     """
-    blocks = [
-        (fitz.Rect(b[:4]), b[4].strip())
-        for b in page.get_text("blocks")
-        if b[6] == 0 and b[4].strip()
-    ]
+    midpoint = page.rect.width / 2
+    blocks = []
+    for block in page.get_text("dict", flags=fitz.TEXTFLAGS_TEXT)["blocks"]:
+        if block["type"] != 0:
+            continue
+        # MuPDF can put both columns in one block. Partition its lines before
+        # ordering, while keeping paragraph lines together on each side.
+        groups = {}
+        for line in block["lines"]:
+            rect = fitz.Rect(line["bbox"])
+            text = "".join(span["text"] for span in line["spans"]).strip()
+            if not text:
+                continue
+            side = (
+                "left"
+                if rect.x1 <= midpoint
+                else "right"
+                if rect.x0 >= midpoint
+                else "wide"
+            )
+            if side not in groups:
+                groups[side] = (rect, [text])
+            else:
+                group_rect, lines = groups[side]
+                group_rect.include_rect(rect)
+                lines.append(text)
+        blocks.extend((rect, "\n".join(lines)) for rect, lines in groups.values())
     tables = []
     try:
         for table in page.find_tables().tables:
@@ -36,7 +58,6 @@ def page_text(page: fitz.Page) -> str:
         for rect, text in blocks
         if not any(table_rect.contains(rect) for table_rect, _ in tables)
     ] + tables
-    midpoint = page.rect.width / 2
     left = [b for b in blocks if b[0].x1 <= midpoint]
     right = [b for b in blocks if b[0].x0 >= midpoint]
     # Only infer columns when both sides have vertically overlapping content.
