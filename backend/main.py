@@ -4,10 +4,11 @@ import json
 import logging
 import time
 from contextlib import asynccontextmanager
+from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,7 +33,6 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing database...")
     await init_db()
     logger.info("Database initialized")
-    # Warm the embedding model so the first query is not cold.
     logger.info("Warming embedding model...")
     get_embedding_model()
     logger.info("Embedding model ready")
@@ -64,6 +64,7 @@ class QueryRequest(BaseModel):
 
 class SourceChunk(BaseModel):
     id: int
+    document_id: int
     content: str
     page_number: int
     similarity_score: float
@@ -114,6 +115,7 @@ def _sources(chunks) -> list[dict]:
     return [
         {
             "id": chunk.id,
+            "document_id": chunk.document_id,
             "content": chunk.content[:500],
             "page_number": chunk.page_number,
             "similarity_score": round(chunk.similarity_score, 4),
@@ -207,7 +209,6 @@ async def query_stream(
     request: QueryRequest,
     session: AsyncSession = Depends(get_session),
 ):
-    """Stream an answer as Server-Sent Events."""
     start_time = time.time()
     try:
         chunks = await search_chunks(
@@ -284,6 +285,27 @@ async def list_documents(
         )
         for doc in documents
     ]
+
+
+@app.get("/documents/{document_id}/file")
+async def get_document_file(
+    document_id: int,
+    session: AsyncSession = Depends(get_session),
+) -> Response:
+    result = await session.execute(select(Document).where(Document.id == document_id))
+    document = result.scalar_one_or_none()
+    if not document or not document.pdf_bytes:
+        raise HTTPException(status_code=404, detail="PDF not available. Re-upload the document.")
+
+    filename = quote(document.filename or "document.pdf")
+    return Response(
+        content=document.pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"inline; filename*=UTF-8''{filename}",
+            "Cache-Control": "private, max-age=3600",
+        },
+    )
 
 
 @app.get("/stats", response_model=StatsResponse)
