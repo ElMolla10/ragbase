@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RAGBase</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script>
@@ -29,6 +30,11 @@
     .msg-user { background: linear-gradient(180deg, #1e1b4b 0%, #141416 100%); }
     #sidebar { transition: width 0.2s ease, transform 0.2s ease; }
     #sidebar.collapsed { width: 0; padding: 0; border: none; overflow: hidden; }
+    .msg-content p { margin: 0 0 0.6rem; }
+    .msg-content p:last-child { margin-bottom: 0; }
+    .msg-content ul, .msg-content ol { margin: 0.4rem 0 0.6rem 1.1rem; }
+    .msg-content li { margin: 0.25rem 0; }
+    .msg-content strong { color: #e4e4e7; font-weight: 600; }
   </style>
 </head>
 <body class="bg-surface text-zinc-100 min-h-screen">
@@ -262,6 +268,14 @@
         .replace(/>/g, '&gt;');
     }
 
+    function renderMarkdown(text) {
+      if (!text) return '';
+      if (window.marked) {
+        return marked.parse(text, { breaks: true, gfm: true });
+      }
+      return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+
     function prioritizeSources(sources, answer) {
       const pages = [];
       const re = /page\s+(\d+)/gi;
@@ -302,7 +316,8 @@
       div.className = role === 'user'
         ? 'msg-user border border-indigo-900/50 rounded-2xl px-4 py-3 max-w-2xl ml-auto'
         : 'bg-card border border-border rounded-2xl px-4 py-3 max-w-2xl';
-      let html = `<div class="text-sm whitespace-pre-wrap msg-content">${escapeHtml(content)}</div>`;
+      const body = role === 'assistant' ? renderMarkdown(content) : escapeHtml(content);
+      let html = `<div class="text-sm msg-content">${body}</div>`;
       if (meta) {
         html += `<div class="text-[11px] text-zinc-500 mt-2 meta">${meta.latency_ms} ms · ${meta.token_count} tokens</div>`;
         html += sourcesHtml(meta.sources);
@@ -380,7 +395,7 @@
                 contentEl = assistantDiv.querySelector('.msg-content');
               }
               fullText += evt.content;
-              contentEl.textContent = fullText;
+              contentEl.innerHTML = renderMarkdown(fullText);
               stickToBottom(false);
             } else if (evt.type === 'done') {
               if (!assistantDiv) {
