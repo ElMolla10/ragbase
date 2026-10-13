@@ -213,7 +213,6 @@
     const form = document.getElementById('chat-form');
     const input = document.getElementById('chat-input');
 
-    // Only auto-scroll if the user is already near the bottom.
     let pinnedToBottom = true;
     function isNearBottom() {
       return messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < 80;
@@ -234,6 +233,23 @@
       if (empty) empty.remove();
     }
 
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function sourcesHtml(sources) {
+      if (!sources?.length) return '';
+      let html = `<details class="mt-2 text-xs sources"><summary class="cursor-pointer text-zinc-400">Sources (${sources.length})</summary><div class="mt-2 space-y-2">`;
+      sources.forEach(s => {
+        html += `<div class="bg-zinc-900/50 rounded-lg p-2"><span class="text-indigo-300">Page ${s.page_number}</span> · ${Number(s.similarity_score).toFixed(3)}<div class="text-zinc-400 mt-1">${escapeHtml((s.content || '').slice(0,220))}…</div></div>`;
+      });
+      html += '</div></details>';
+      return html;
+    }
+
     function addMessage(role, content, meta) {
       hideEmpty();
       const div = document.createElement('div');
@@ -243,25 +259,12 @@
       let html = `<div class="text-sm whitespace-pre-wrap msg-content">${escapeHtml(content)}</div>`;
       if (meta) {
         html += `<div class="text-[11px] text-zinc-500 mt-2 meta">${meta.latency_ms} ms · ${meta.token_count} tokens</div>`;
-        if (meta.sources?.length) {
-          html += `<details class="mt-2 text-xs"><summary class="cursor-pointer text-zinc-400">Sources (${meta.sources.length})</summary><div class="mt-2 space-y-2">`;
-          meta.sources.forEach(s => {
-            html += `<div class="bg-zinc-900/50 rounded-lg p-2"><span class="text-indigo-300">Page ${s.page_number}</span> · ${Number(s.similarity_score).toFixed(3)}<div class="text-zinc-400 mt-1">${escapeHtml(s.content.slice(0,220))}…</div></div>`;
-          });
-          html += '</div></details>';
-        }
+        html += sourcesHtml(meta.sources);
       }
       div.innerHTML = html;
       messagesEl.appendChild(div);
       stickToBottom(true);
       return div;
-    }
-
-    function escapeHtml(s) {
-      return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
     }
 
     form.onsubmit = async (e) => {
@@ -284,6 +287,7 @@
       let assistantDiv = null;
       let contentEl = null;
       let fullText = '';
+      let sources = [];
 
       try {
         const r = await fetch(BACKEND + '/query/stream', {
@@ -317,7 +321,9 @@
             let evt;
             try { evt = JSON.parse(line.slice(6)); } catch { continue; }
 
-            if (evt.type === 'token') {
+            if (evt.type === 'sources') {
+              sources = evt.sources || [];
+            } else if (evt.type === 'token') {
               if (!assistantDiv) {
                 thinking.remove();
                 assistantDiv = addMessage('assistant', '');
@@ -335,6 +341,9 @@
               meta.className = 'text-[11px] text-zinc-500 mt-2';
               meta.textContent = `${evt.latency_ms} ms · ${evt.token_count} tokens`;
               assistantDiv.appendChild(meta);
+              if (sources.length) {
+                assistantDiv.insertAdjacentHTML('beforeend', sourcesHtml(sources));
+              }
               stickToBottom(false);
               loadStats();
             } else if (evt.type === 'error') {
