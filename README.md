@@ -10,7 +10,7 @@
 
 A production RAG (Retrieval-Augmented Generation) platform that lets you upload research papers and chat with them. Ask questions in **any language** — Arabic, English, or mixed — and get cited answers pulled from the actual document content, with full ML observability built in.
 
-**Live demo:** [RAGBase on Railway](https://frontend-production-8c14.up.railway.app)
+**Live demo:** [RAGBase on Railway](https://ragbase.up.railway.app)
 
 ---
 
@@ -36,7 +36,7 @@ Metabase at http://localhost:3000. The first build downloads the embedding model
 
 - **Multilingual questions** — ask in Arabic, English, or mixed language and get cited answers. Arabic retrieval quality is limited by the current embedding model; see the limitations below.
 - **PDF ingestion** — upload any PDF, chunks are embedded and stored in pgvector
-- **Semantic search** — queries use cosine similarity to retrieve the most relevant chunks
+- **Hybrid search (on by default)** — combines pgvector cosine similarity and PostgreSQL full-text search using reciprocal rank fusion
 - **Cited answers** — every answer references the exact source pages it used
 - **ML observability** — every query is logged: latency, token count, timestamp, sources
 - **Live stats** — total queries, avg latency, documents, and chunks shown in real time
@@ -47,7 +47,7 @@ Metabase at http://localhost:3000. The first build downloads the embedding model
 ## Architecture
 
 ```text
-Browser → Streamlit (Railway public HTTPS URL)
+Browser → HTML/Tailwind frontend (Railway public HTTPS URL)
                 ↓ BACKEND_URL
           FastAPI (Railway) → Groq API (server-side key)
                 ↓
@@ -72,7 +72,7 @@ External PDF storage is optional and is not part of this deployment.
 | Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
 | Vector DB | pgvector on Railway Postgres |
 | LLM | Groq API — llama-3.3-70b-versatile |
-| Frontend | Streamlit |
+| Frontend | HTML/Tailwind + Python static server |
 | Observability | Metabase + query_logs table |
 | Infrastructure | Railway backend + frontend + Postgres |
 | Containers | Docker Compose |
@@ -159,7 +159,7 @@ docker compose up -d --build
 
 # Services:
 # localhost:8000  → FastAPI (API + docs at /docs)
-# localhost:8501  → Streamlit UI
+# localhost:8501  → HTML/Tailwind UI
 # localhost:3000  → Metabase dashboard
 ```
 
@@ -217,12 +217,13 @@ docker compose up -d --build
 
    Leave the start command unset. Both Dockerfiles bind to `0.0.0.0` and use
    Railway's `PORT` at runtime; local defaults remain 8000 and 8501.
-   Set the frontend healthcheck path to `/_stcore/health`.
+   Set the frontend healthcheck path to `/health`.
    Generate a public domain for the frontend.
 6. Open the frontend HTTPS URL, upload a PDF, ask a question, and check that
    citations and query statistics appear. Share that URL with your friend.
    **Visitors do not need a Groq API key**: only the backend has the deployer's key;
-   Streamlit sends queries to it on the server. Groq usage uses that key's quota.
+   The browser sends queries to the backend via the injected `BACKEND_URL`.
+   Groq usage uses the backend key's quota.
 
 The backend runs sentence-transformers and CPU PyTorch locally, using
 `all-MiniLM-L6-v2`; allocate enough backend memory for model loading and ingestion.
@@ -281,8 +282,8 @@ GitHub Actions runs on every push to master:
   starting inside a word. This is not semantic chunking or PDF layout analysis.
   Existing chunks stay unchanged; re-ingest documents to use the new splitter.
 - **No reranking yet:** a cross-encoder reranker remains a possible next step.
-- **Optional hybrid search:** set `USE_HYBRID_SEARCH=true` in `.env` and rerun
-  `./start.sh`. The default is `false` (pure cosine search). Hybrid mode combines
+- **Hybrid search is enabled by default:** set `USE_HYBRID_SEARCH=false` for
+  pure cosine search. Hybrid mode combines
   pgvector and PostgreSQL full-text search using reciprocal rank fusion, with
   document filters applied to both. Returned scores are fusion scores rather
   than cosine similarities. It uses the `simple` text-search configuration,
@@ -318,7 +319,8 @@ ragbase/
 │   ├── database.py    # Async Postgres + pgvector setup
 │   └── config.py      # Environment variable config
 ├── frontend/
-│   └── app.py         # Streamlit UI (Chat + Documents pages)
+│   ├── index.html     # HTML/Tailwind UI
+│   └── serve.py       # Static server + BACKEND_URL injection
 ├── docker/
 │   ├── Dockerfile.backend
 │   ├── Dockerfile.frontend
