@@ -52,7 +52,8 @@ class Settings(BaseSettings):
     use_hybrid_search: bool = True
 
     # LLM settings
-    llm_model: str = "llama-3.3-70b-versatile"
+    # llama-3.3-70b-versatile was retired for free/dev tiers on 2026-08-16.
+    llm_model: str = "openai/gpt-oss-120b"
     llm_max_tokens: int = 1024
 
 
