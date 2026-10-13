@@ -140,9 +140,7 @@ async def ingest_document(
     try:
         pdf_bytes = await file.read(settings.max_upload_bytes + 1)
         if len(pdf_bytes) > settings.max_upload_bytes:
-            raise HTTPException(
-                status_code=413, detail="PDF exceeds upload size limit"
-            )
+            raise HTTPException(status_code=413, detail="PDF exceeds upload size limit")
         document = await ingest_pdf(session, pdf_bytes, file.filename)
         return IngestResponse(
             document_id=document.id,
