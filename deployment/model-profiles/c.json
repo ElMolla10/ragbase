@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "id": "c",
+  "checkpoint": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+  "immutable_revision": null,
+  "quantization": "pending-artifact-selection",
+  "artifact_sha256": null,
+  "engine_image_digest": null,
+  "serving_alias": "company-assistant",
+  "published_context_limit": 131072,
+  "validated_context_limit": null,
+  "tokenizer_revision": null,
+  "status": "pending_real_compute",
+  "production_enabled": false,
+  "validated_capabilities": [],
+  "benchmark_results": null,
+  "target_contexts": [
+    16384,
+    32768,
+    65536,
+    131072
+  ]
+}

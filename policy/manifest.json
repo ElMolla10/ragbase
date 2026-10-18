@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "constitution_version": "1.0.0",
+  "constitution_sha256": "288fedd95fdd15438fad40f95333f9871aa6c57b1cfd2eff3b2d99b12accaae8",
+  "sections": {
+    "core": {
+      "rule_ids": [
+        "LOC-001",
+        "LOC-002",
+        "SEC-002",
+        "SEC-005",
+        "SEC-007",
+        "EVD-002",
+        "EVD-003",
+        "ANA-001",
+        "MOD-003",
+        "MOD-004",
+        "UX-001"
+      ],
+      "sha256": "80fc59c73f50968637042ce242320c8a45032ceb2162e6d293ccde1b8d67d264"
+    },
+    "retrieval": {
+      "rule_ids": [
+        "EVD-001",
+        "EVD-002",
+        "EVD-003"
+      ],
+      "sha256": "6db890847410e35f3ecb67f69dea9c41dcc5b54278b88ef6b1fe219a750c317a"
+    },
+    "coverage": {
+      "rule_ids": [
+        "EVD-002",
+        "EVD-004"
+      ],
+      "sha256": "b1e1ad9c591e7c904a29520099f40b7411ad0cb442a58aead676d3a8365f612c"
+    },
+    "analysis": {
+      "rule_ids": [
+        "ANA-001",
+        "ANA-002",
+        "ANA-003",
+        "ANA-004",
+        "ANA-007"
+      ],
+      "sha256": "70fb54fc3f822398f8c72194c00d3d0ba426aabdef3b42714f42f01f592a49cf"
+    },
+    "vision": {
+      "rule_ids": [
+        "EVD-005",
+        "MOD-003",
+        "LOC-002"
+      ],
+      "sha256": "eae75f7d09d7c9a007cff0f7c6f8d26292ab7ffea20b64526251a6831a9c64c1"
+    }
+  }
+}

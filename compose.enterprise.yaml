@@ -1,0 +1,38 @@
+name: ragbase-enterprise-dev
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enterprise
+      target: runtime
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    cpus: 1
+    pids_limit: 64
+    tmpfs:
+      - /tmp:size=16m
+    networks: [enterprise]
+  proxy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enterprise
+      target: runtime
+    command: [uvicorn, "backend.dev_proxy:app", --host, "0.0.0.0", --port, "8080"]
+    ports:
+      - "127.0.0.1:8800:8080"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 96m
+    cpus: 0.25
+    pids_limit: 32
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    depends_on: [api]
+    networks: [edge, enterprise]
+networks:
+  edge: {}
+  enterprise:
+    internal: true

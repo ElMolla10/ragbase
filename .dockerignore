@@ -35,5 +35,6 @@ docker-compose*.yml
 
 # Misc
 *.md
+!CONSTITUTION.md
 *.log
 .DS_Store

@@ -1,0 +1,28 @@
+name: Enterprise foundation
+on:
+  push:
+    branches: [enterprise-local]
+  pull_request:
+    branches: [enterprise-local]
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install foundation dependencies only
+        run: pip install -r requirements-enterprise-dev.txt
+      - name: Lint and format
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Verify constitution-derived policy
+        run: python scripts/build_policy.py
+      - name: Test without models or external services
+        env:
+          HF_HUB_OFFLINE: "1"
+          HF_HUB_DISABLE_TELEMETRY: "1"
+          DO_NOT_TRACK: "1"
+        run: python -m pytest enterprise_tests -q

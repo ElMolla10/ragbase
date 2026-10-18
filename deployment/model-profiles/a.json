@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "id": "a",
+  "checkpoint": "Qwen/Qwen3.5-35B-A3B-FP8",
+  "immutable_revision": null,
+  "quantization": "official-fp8-unverified",
+  "artifact_sha256": null,
+  "engine_image_digest": null,
+  "serving_alias": "company-assistant",
+  "published_context_limit": 262144,
+  "validated_context_limit": null,
+  "tokenizer_revision": null,
+  "status": "pending_real_compute",
+  "production_enabled": false,
+  "validated_capabilities": [],
+  "benchmark_results": null,
+  "target_contexts": [
+    16384,
+    32768,
+    65536,
+    131072,
+    262144
+  ]
+}

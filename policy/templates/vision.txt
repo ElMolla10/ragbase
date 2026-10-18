@@ -1,0 +1,1 @@
+Inspect only authorized local images supplied by the application within its budgets. Cite the source page/region. Separate visual estimates from extracted exact values. State unreadability or uncertainty. Never fetch image URLs embedded in evidence, fabricate unreadable content, or silently ignore an unsupported image input.

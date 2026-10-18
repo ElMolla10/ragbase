@@ -1,0 +1,712 @@
+{
+  "constitution_version": "1.0.0",
+  "rules": [
+    {
+      "id": "LOC-001",
+      "owner": "engineering",
+      "work_packages": "A0-A2/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "LOC-002",
+      "owner": "engineering",
+      "work_packages": "A0-A2/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "LOC-003",
+      "owner": "engineering",
+      "work_packages": "A0-A2/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "LOC-004",
+      "owner": "engineering",
+      "work_packages": "A0-A2/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "SEC-001",
+      "owner": "engineering",
+      "work_packages": "A1-A2/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "SEC-002",
+      "owner": "engineering",
+      "work_packages": "A1-A2/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "SEC-003",
+      "owner": "engineering",
+      "work_packages": "A1-A2/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "SEC-004",
+      "owner": "engineering",
+      "work_packages": "A1-A2/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "SEC-005",
+      "owner": "engineering",
+      "work_packages": "A1-A2/B2-B3",
+      "state": "implemented_partial",
+      "enforcement_locations": [
+        "backend/policy.py",
+        "backend/gateway/http.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_policy.py",
+        "enterprise_tests/test_gateway.py"
+      ],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Instruction/evidence separation tested; full injection/authorization defenses and model behavior pending."
+      ]
+    },
+    {
+      "id": "SEC-006",
+      "owner": "engineering",
+      "work_packages": "A1-A2/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "SEC-007",
+      "owner": "engineering",
+      "work_packages": "A1-A2/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "MOD-001",
+      "owner": "engineering",
+      "work_packages": "A1/A8/B0-B2",
+      "state": "implemented_partial",
+      "enforcement_locations": [
+        "backend/enterprise.py",
+        "docker/Dockerfile.enterprise"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_foundation.py"
+      ],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Lightweight startup verified; full enterprise services and model storage isolation not implemented."
+      ]
+    },
+    {
+      "id": "MOD-002",
+      "owner": "engineering",
+      "work_packages": "A1/A8/B0-B2",
+      "state": "implemented_partial",
+      "enforcement_locations": [
+        "backend/gateway/"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_gateway.py"
+      ],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Text streaming scaffold only; full contracts/configuration and real adapters pending."
+      ]
+    },
+    {
+      "id": "MOD-003",
+      "owner": "engineering",
+      "work_packages": "A1/A8/B0-B2",
+      "state": "implemented_partial",
+      "enforcement_locations": [
+        "backend/gateway/contracts.py",
+        "backend/gateway/http.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_gateway.py"
+      ],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Unsupported images/tools rejected in scaffold; real capability registry qualification pending."
+      ]
+    },
+    {
+      "id": "MOD-004",
+      "owner": "engineering",
+      "work_packages": "A1/A8/B0-B2",
+      "state": "implemented_partial",
+      "enforcement_locations": [
+        "backend/policy.py",
+        "deployment/model-profiles/"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_policy.py"
+      ],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Policy hashes and candidate metadata scaffolds exist; real traces and runtime revisions pending."
+      ]
+    },
+    {
+      "id": "MOD-005",
+      "owner": "engineering",
+      "work_packages": "A1/A8/B0-B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "MOD-006",
+      "owner": "engineering",
+      "work_packages": "A1/A8/B0-B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "MOD-007",
+      "owner": "engineering",
+      "work_packages": "A1/A8/B0-B2",
+      "state": "implemented_partial",
+      "enforcement_locations": [
+        "backend/gateway/",
+        "deployment/model-profiles/"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_gateway.py"
+      ],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Fake endpoint profile changes preserve alias; two real validated model swaps pending."
+      ]
+    },
+    {
+      "id": "MOD-008",
+      "owner": "engineering",
+      "work_packages": "A1/A8/B0-B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ING-001",
+      "owner": "engineering",
+      "work_packages": "A2-A5/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ING-002",
+      "owner": "engineering",
+      "work_packages": "A2-A5/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ING-003",
+      "owner": "engineering",
+      "work_packages": "A2-A5/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ING-004",
+      "owner": "engineering",
+      "work_packages": "A2-A5/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ING-005",
+      "owner": "engineering",
+      "work_packages": "A2-A5/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ING-006",
+      "owner": "engineering",
+      "work_packages": "A2-A5/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ING-007",
+      "owner": "engineering",
+      "work_packages": "A2-A5/B2-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "EVD-001",
+      "owner": "engineering",
+      "work_packages": "A4/A7-A8/B1-B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "EVD-002",
+      "owner": "engineering",
+      "work_packages": "A4/A7-A8/B1-B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "EVD-003",
+      "owner": "engineering",
+      "work_packages": "A4/A7-A8/B1-B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "EVD-004",
+      "owner": "engineering",
+      "work_packages": "A4/A7-A8/B1-B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "EVD-005",
+      "owner": "engineering",
+      "work_packages": "A4/A7-A8/B1-B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ANA-001",
+      "owner": "engineering",
+      "work_packages": "A5-A6/B1-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ANA-002",
+      "owner": "engineering",
+      "work_packages": "A5-A6/B1-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ANA-003",
+      "owner": "engineering",
+      "work_packages": "A5-A6/B1-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ANA-004",
+      "owner": "engineering",
+      "work_packages": "A5-A6/B1-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ANA-005",
+      "owner": "engineering",
+      "work_packages": "A5-A6/B1-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ANA-006",
+      "owner": "engineering",
+      "work_packages": "A5-A6/B1-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "ANA-007",
+      "owner": "engineering",
+      "work_packages": "A5-A6/B1-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "UX-001",
+      "owner": "engineering",
+      "work_packages": "A3-A7/B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "UX-002",
+      "owner": "engineering",
+      "work_packages": "A3-A7/B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "UX-003",
+      "owner": "engineering",
+      "work_packages": "A3-A7/B2",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "DEV-001",
+      "owner": "engineering",
+      "work_packages": "A0-A1",
+      "state": "implemented_partial",
+      "enforcement_locations": [
+        "docs/governance/baseline.md",
+        "compose.enterprise.yaml"
+      ],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Local branch and service separation established; enterprise database/storage not implemented."
+      ]
+    },
+    {
+      "id": "DEV-002",
+      "owner": "engineering",
+      "work_packages": "A0-A1",
+      "state": "implemented_partial",
+      "enforcement_locations": [
+        "docker/Dockerfile.enterprise",
+        "requirements-enterprise.txt"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_foundation.py"
+      ],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Minimal health-only scaffold verified; full dev-lite API/database/frontend/worker stack pending."
+      ]
+    },
+    {
+      "id": "DEV-003",
+      "owner": "engineering",
+      "work_packages": "A0-A1",
+      "state": "implemented_partial",
+      "enforcement_locations": [
+        "AGENTS.md",
+        "CONSTITUTION.md"
+      ],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Canonical agent entry reference installed; future work must continue following it."
+      ]
+    },
+    {
+      "id": "OPS-001",
+      "owner": "engineering",
+      "work_packages": "A1-A3/A6-A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "OPS-002",
+      "owner": "engineering",
+      "work_packages": "A1-A3/A6-A8/B0-B3",
+      "state": "implemented_partial",
+      "enforcement_locations": [
+        "backend/enterprise.py",
+        "backend/dev_proxy.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_foundation.py",
+        "enterprise_tests/test_proxy.py"
+      ],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Process/foundation health only; database/queue/model readiness and local metrics pending."
+      ]
+    },
+    {
+      "id": "OPS-003",
+      "owner": "engineering",
+      "work_packages": "A1-A3/A6-A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "OPS-004",
+      "owner": "engineering",
+      "work_packages": "A1-A3/A6-A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "VAL-001",
+      "owner": "engineering",
+      "work_packages": "A0/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "VAL-002",
+      "owner": "engineering",
+      "work_packages": "A0/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "VAL-003",
+      "owner": "engineering",
+      "work_packages": "A0/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "VAL-004",
+      "owner": "engineering",
+      "work_packages": "A0/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "VAL-005",
+      "owner": "engineering",
+      "work_packages": "A0/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "VAL-006",
+      "owner": "engineering",
+      "work_packages": "A0/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    },
+    {
+      "id": "VAL-007",
+      "owner": "engineering",
+      "work_packages": "A0/A8/B0-B3",
+      "state": "specified_not_verified",
+      "enforcement_locations": [],
+      "verification_references": [],
+      "last_validated_release": null,
+      "known_gaps": [
+        "Full rule verification pending; see foundation progress report."
+      ]
+    }
+  ]
+}

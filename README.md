@@ -1,5 +1,10 @@
 # RAGBase
 
+> Enterprise work starts at [the execution plan](docs/execution-plan.md) and
+> [development instructions](docs/operations/development.md). The enterprise
+> foundation is separate from the legacy demo described below. It currently
+> exposes development health/status only; company-data features are not ready.
+
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green?style=flat-square&logo=fastapi)
 ![Railway](https://img.shields.io/badge/Deployment-Railway-black?style=flat-square)

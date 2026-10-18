@@ -1,0 +1,24 @@
+FROM python:3.11.17-slim AS runtime
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
+    HF_HUB_OFFLINE=1 HF_HUB_DISABLE_TELEMETRY=1 \
+    VLLM_NO_USAGE_STATS=1 DO_NOT_TRACK=1 RAGBASE_PROFILE=dev-lite
+COPY requirements-enterprise.txt .
+RUN pip install --no-cache-dir -r requirements-enterprise.txt
+COPY backend/ ./backend/
+COPY policy/ ./policy/
+COPY CONSTITUTION.md .
+USER 10001:10001
+EXPOSE 8000
+CMD ["uvicorn", "backend.enterprise:app", "--host", "0.0.0.0", "--port", "8000"]
+
+FROM runtime AS tests
+USER root
+COPY requirements-enterprise-dev.txt .
+RUN pip install --no-cache-dir -r requirements-enterprise-dev.txt
+COPY enterprise_tests/ ./enterprise_tests/
+COPY docs/governance/ ./docs/governance/
+COPY deployment/model-profiles/ ./deployment/model-profiles/
+COPY pyproject.toml .
+USER 10001:10001
+CMD ["python", "-m", "pytest", "enterprise_tests", "-p", "no:cacheprovider", "-q"]
