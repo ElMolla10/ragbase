@@ -1,10 +1,10 @@
 {
-  "constitution_version": "1.0.0",
+  "constitution_version": "2.0.0",
   "rules": [
     {
       "id": "LOC-001",
       "owner": "engineering",
-      "work_packages": "A0-A2/A8/B0-B3",
+      "work_packages": "P0/P1/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -16,7 +16,7 @@
     {
       "id": "LOC-002",
       "owner": "engineering",
-      "work_packages": "A0-A2/A8/B0-B3",
+      "work_packages": "P0/P1/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -28,7 +28,7 @@
     {
       "id": "LOC-003",
       "owner": "engineering",
-      "work_packages": "A0-A2/A8/B0-B3",
+      "work_packages": "P0/P1/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -40,7 +40,7 @@
     {
       "id": "LOC-004",
       "owner": "engineering",
-      "work_packages": "A0-A2/A8/B0-B3",
+      "work_packages": "P0/P1/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -52,55 +52,91 @@
     {
       "id": "SEC-001",
       "owner": "engineering",
-      "work_packages": "A1-A2/B2-B3",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "work_packages": "P1/P2/P4/P5/P6",
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/auth/development.py",
+        "backend/enterprise_db.py",
+        "backend/library.py",
+        "backend/migrations/versions/0001_workspace_storage.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "SEC-002",
       "owner": "engineering",
-      "work_packages": "A1-A2/B2-B3",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "work_packages": "P1/P2/P4/P5/P6",
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/auth/development.py",
+        "backend/enterprise_db.py",
+        "backend/library.py",
+        "backend/migrations/versions/0001_workspace_storage.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "SEC-003",
       "owner": "engineering",
-      "work_packages": "A1-A2/B2-B3",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "work_packages": "P1/P2/P4/P5/P6",
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/auth/development.py",
+        "backend/enterprise_db.py",
+        "backend/library.py",
+        "backend/migrations/versions/0001_workspace_storage.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "SEC-004",
       "owner": "engineering",
-      "work_packages": "A1-A2/B2-B3",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "work_packages": "P1/P2/P4/P5/P6",
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/auth/development.py",
+        "backend/enterprise_db.py",
+        "backend/library.py",
+        "backend/migrations/versions/0001_workspace_storage.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "SEC-005",
       "owner": "engineering",
-      "work_packages": "A1-A2/B2-B3",
+      "work_packages": "P1/P2/P4/P5/P6",
       "state": "implemented_partial",
       "enforcement_locations": [
         "backend/policy.py",
@@ -118,19 +154,28 @@
     {
       "id": "SEC-006",
       "owner": "engineering",
-      "work_packages": "A1-A2/B2-B3",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "work_packages": "P1/P2/P4/P5/P6",
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/auth/development.py",
+        "backend/enterprise_db.py",
+        "backend/library.py",
+        "backend/migrations/versions/0001_workspace_storage.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "SEC-007",
       "owner": "engineering",
-      "work_packages": "A1-A2/B2-B3",
+      "work_packages": "P1/P2/P4/P5/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -142,7 +187,7 @@
     {
       "id": "MOD-001",
       "owner": "engineering",
-      "work_packages": "A1/A8/B0-B2",
+      "work_packages": "P0/P2/P5",
       "state": "implemented_partial",
       "enforcement_locations": [
         "backend/enterprise.py",
@@ -159,23 +204,25 @@
     {
       "id": "MOD-002",
       "owner": "engineering",
-      "work_packages": "A1/A8/B0-B2",
-      "state": "implemented_partial",
+      "work_packages": "P0/P2/P5",
+      "state": "partially_implemented_development_checks_passed",
       "enforcement_locations": [
         "backend/gateway/"
       ],
       "verification_references": [
-        "enterprise_tests/test_gateway.py"
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Text streaming scaffold only; full contracts/configuration and real adapters pending."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "MOD-003",
       "owner": "engineering",
-      "work_packages": "A1/A8/B0-B2",
+      "work_packages": "P0/P2/P5",
       "state": "implemented_partial",
       "enforcement_locations": [
         "backend/gateway/contracts.py",
@@ -192,7 +239,7 @@
     {
       "id": "MOD-004",
       "owner": "engineering",
-      "work_packages": "A1/A8/B0-B2",
+      "work_packages": "P0/P2/P5",
       "state": "implemented_partial",
       "enforcement_locations": [
         "backend/policy.py",
@@ -209,7 +256,7 @@
     {
       "id": "MOD-005",
       "owner": "engineering",
-      "work_packages": "A1/A8/B0-B2",
+      "work_packages": "P0/P2/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -221,19 +268,19 @@
     {
       "id": "MOD-006",
       "owner": "engineering",
-      "work_packages": "A1/A8/B0-B2",
+      "work_packages": "P0/P2/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Revised CPU-only obligation; hardware discovery, implementation alignment and real benchmarks pending."
       ]
     },
     {
       "id": "MOD-007",
       "owner": "engineering",
-      "work_packages": "A1/A8/B0-B2",
+      "work_packages": "P0/P2/P5",
       "state": "implemented_partial",
       "enforcement_locations": [
         "backend/gateway/",
@@ -250,31 +297,43 @@
     {
       "id": "MOD-008",
       "owner": "engineering",
-      "work_packages": "A1/A8/B0-B2",
-      "state": "specified_not_verified",
+      "work_packages": "P0/P2/P5",
+      "state": "partially_implemented_development_checks_passed",
       "enforcement_locations": [],
-      "verification_references": [],
+      "verification_references": [
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "ING-001",
       "owner": "engineering",
-      "work_packages": "A2-A5/B2-B3",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "work_packages": "P1/P2/P3",
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/storage/local.py",
+        "backend/storage/reconcile.py",
+        "backend/library.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "ING-002",
       "owner": "engineering",
-      "work_packages": "A2-A5/B2-B3",
+      "work_packages": "P1/P2/P3",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -286,7 +345,7 @@
     {
       "id": "ING-003",
       "owner": "engineering",
-      "work_packages": "A2-A5/B2-B3",
+      "work_packages": "P1/P2/P3",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -298,7 +357,7 @@
     {
       "id": "ING-004",
       "owner": "engineering",
-      "work_packages": "A2-A5/B2-B3",
+      "work_packages": "P1/P2/P3",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -310,7 +369,7 @@
     {
       "id": "ING-005",
       "owner": "engineering",
-      "work_packages": "A2-A5/B2-B3",
+      "work_packages": "P1/P2/P3",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -322,7 +381,7 @@
     {
       "id": "ING-006",
       "owner": "engineering",
-      "work_packages": "A2-A5/B2-B3",
+      "work_packages": "P1/P2/P3",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -334,19 +393,27 @@
     {
       "id": "ING-007",
       "owner": "engineering",
-      "work_packages": "A2-A5/B2-B3",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "work_packages": "P1/P2/P3",
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/storage/local.py",
+        "backend/storage/reconcile.py",
+        "backend/library.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "EVD-001",
       "owner": "engineering",
-      "work_packages": "A4/A7-A8/B1-B2",
+      "work_packages": "P2/P3/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -358,7 +425,7 @@
     {
       "id": "EVD-002",
       "owner": "engineering",
-      "work_packages": "A4/A7-A8/B1-B2",
+      "work_packages": "P2/P3/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -370,7 +437,7 @@
     {
       "id": "EVD-003",
       "owner": "engineering",
-      "work_packages": "A4/A7-A8/B1-B2",
+      "work_packages": "P2/P3/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -382,7 +449,7 @@
     {
       "id": "EVD-004",
       "owner": "engineering",
-      "work_packages": "A4/A7-A8/B1-B2",
+      "work_packages": "P2/P3/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -394,7 +461,7 @@
     {
       "id": "EVD-005",
       "owner": "engineering",
-      "work_packages": "A4/A7-A8/B1-B2",
+      "work_packages": "P2/P3/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -406,7 +473,7 @@
     {
       "id": "ANA-001",
       "owner": "engineering",
-      "work_packages": "A5-A6/B1-B3",
+      "work_packages": "P3/P4/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -418,7 +485,7 @@
     {
       "id": "ANA-002",
       "owner": "engineering",
-      "work_packages": "A5-A6/B1-B3",
+      "work_packages": "P3/P4/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -430,7 +497,7 @@
     {
       "id": "ANA-003",
       "owner": "engineering",
-      "work_packages": "A5-A6/B1-B3",
+      "work_packages": "P3/P4/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -442,7 +509,7 @@
     {
       "id": "ANA-004",
       "owner": "engineering",
-      "work_packages": "A5-A6/B1-B3",
+      "work_packages": "P3/P4/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -454,7 +521,7 @@
     {
       "id": "ANA-005",
       "owner": "engineering",
-      "work_packages": "A5-A6/B1-B3",
+      "work_packages": "P3/P4/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -466,7 +533,7 @@
     {
       "id": "ANA-006",
       "owner": "engineering",
-      "work_packages": "A5-A6/B1-B3",
+      "work_packages": "P3/P4/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -478,7 +545,7 @@
     {
       "id": "ANA-007",
       "owner": "engineering",
-      "work_packages": "A5-A6/B1-B3",
+      "work_packages": "P3/P4/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -490,7 +557,7 @@
     {
       "id": "UX-001",
       "owner": "engineering",
-      "work_packages": "A3-A7/B2",
+      "work_packages": "P2/P3/P4/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -502,7 +569,7 @@
     {
       "id": "UX-002",
       "owner": "engineering",
-      "work_packages": "A3-A7/B2",
+      "work_packages": "P2/P3/P4/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -514,7 +581,7 @@
     {
       "id": "UX-003",
       "owner": "engineering",
-      "work_packages": "A3-A7/B2",
+      "work_packages": "P2/P3/P4/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -526,7 +593,7 @@
     {
       "id": "DEV-001",
       "owner": "engineering",
-      "work_packages": "A0-A1",
+      "work_packages": "P0/P1",
       "state": "implemented_partial",
       "enforcement_locations": [
         "docs/governance/baseline.md",
@@ -541,24 +608,26 @@
     {
       "id": "DEV-002",
       "owner": "engineering",
-      "work_packages": "A0-A1",
-      "state": "implemented_partial",
+      "work_packages": "P0/P1",
+      "state": "partially_implemented_development_checks_passed",
       "enforcement_locations": [
         "docker/Dockerfile.enterprise",
         "requirements-enterprise.txt"
       ],
       "verification_references": [
-        "enterprise_tests/test_foundation.py"
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Minimal health-only scaffold verified; full dev-lite API/database/frontend/worker stack pending."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "DEV-003",
       "owner": "engineering",
-      "work_packages": "A0-A1",
+      "work_packages": "P0/P1",
       "state": "implemented_partial",
       "enforcement_locations": [
         "AGENTS.md",
@@ -573,19 +642,19 @@
     {
       "id": "OPS-001",
       "owner": "engineering",
-      "work_packages": "A1-A3/A6-A8/B0-B3",
+      "work_packages": "P0/P1/P2/P4/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Revised CPU-only obligation; hardware discovery, implementation alignment and real benchmarks pending."
       ]
     },
     {
       "id": "OPS-002",
       "owner": "engineering",
-      "work_packages": "A1-A3/A6-A8/B0-B3",
+      "work_packages": "P0/P1/P2/P4/P6",
       "state": "implemented_partial",
       "enforcement_locations": [
         "backend/enterprise.py",
@@ -603,7 +672,7 @@
     {
       "id": "OPS-003",
       "owner": "engineering",
-      "work_packages": "A1-A3/A6-A8/B0-B3",
+      "work_packages": "P0/P1/P2/P4/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -615,7 +684,7 @@
     {
       "id": "OPS-004",
       "owner": "engineering",
-      "work_packages": "A1-A3/A6-A8/B0-B3",
+      "work_packages": "P0/P1/P2/P4/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -627,7 +696,7 @@
     {
       "id": "VAL-001",
       "owner": "engineering",
-      "work_packages": "A0/A8/B0-B3",
+      "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -639,7 +708,7 @@
     {
       "id": "VAL-002",
       "owner": "engineering",
-      "work_packages": "A0/A8/B0-B3",
+      "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -651,19 +720,19 @@
     {
       "id": "VAL-003",
       "owner": "engineering",
-      "work_packages": "A0/A8/B0-B3",
+      "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Revised CPU-only obligation; hardware discovery, implementation alignment and real benchmarks pending."
       ]
     },
     {
       "id": "VAL-004",
       "owner": "engineering",
-      "work_packages": "A0/A8/B0-B3",
+      "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -675,19 +744,23 @@
     {
       "id": "VAL-005",
       "owner": "engineering",
-      "work_packages": "A0/A8/B0-B3",
-      "state": "specified_not_verified",
+      "work_packages": "P0/P2/P3/P4/P5/P6",
+      "state": "partially_implemented_development_checks_passed",
       "enforcement_locations": [],
-      "verification_references": [],
+      "verification_references": [
+        "docs/governance/cpu-storage-progress.md",
+        "enterprise_tests/",
+        "enterprise_integration_tests/test_access_storage.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
       ]
     },
     {
       "id": "VAL-006",
       "owner": "engineering",
-      "work_packages": "A0/A8/B0-B3",
+      "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -699,7 +772,7 @@
     {
       "id": "VAL-007",
       "owner": "engineering",
-      "work_packages": "A0/A8/B0-B3",
+      "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [],
       "verification_references": [],
@@ -708,5 +781,6 @@
         "Full rule verification pending; see foundation progress report."
       ]
     }
-  ]
+  ],
+  "planning_revision": "CPU-only plan 2.0; no implementation verification performed by this revision"
 }

@@ -12,6 +12,8 @@ venv/
 .venv/
 env/
 .env
+.env.enterprise
+.local/
 *.egg-info/
 .eggs/
 dist/

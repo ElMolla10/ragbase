@@ -1,0 +1,2 @@
+-r requirements-enterprise.txt
+alembic==1.20.0

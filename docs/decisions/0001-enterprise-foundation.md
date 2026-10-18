@@ -1,5 +1,7 @@
 # 0001 — Isolated foundation and pending model validation
 
+> Historical foundation record. The CPU-only execution plan v2.0 and constitution v2.0.0 supersede earlier hardware, model, context and startup assumptions. Existing source WIP must be reviewed and tested before these older startup instructions are reused.
+
 Date: 18 October 2026. Status: implemented foundation decision.
 
 The reviewed upstream and implementation base are both

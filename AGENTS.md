@@ -14,6 +14,7 @@ for implementation/verification state.
 - Use one canonical constitution; derive bounded runtime instructions and enforce
   authorization, data scope, execution, and network limits in trusted code.
 
-The current foundation entry point is `backend.enterprise:app`. It exposes only
-development health/status and has no document or analysis API yet. Do not add
-unprotected data routes to this scaffold.
+The current development entry point is `backend.enterprise:app`. With explicit
+enterprise configuration it exposes authenticated TXT/Markdown original storage
+and downloads backed by PostgreSQL RLS. Extraction, generation, SSO and analysis
+are not implemented. Do not add unprotected data routes to this scaffold.

@@ -1,4 +1,6 @@
 .env
+.env.enterprise
+.local/
 .DS_Store
 .venv/
 __pycache__/

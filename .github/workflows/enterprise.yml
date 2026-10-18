@@ -26,3 +26,12 @@ jobs:
           HF_HUB_DISABLE_TELEMETRY: "1"
           DO_NOT_TRACK: "1"
         run: python -m pytest enterprise_tests -q
+  postgres-isolation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test migrations and access as the actual serving role
+        run: docker compose -f compose.enterprise-tests.yaml up --build --abort-on-container-exit --exit-code-from tests
+      - name: Remove disposable synthetic services
+        if: always()
+        run: docker compose -f compose.enterprise-tests.yaml down

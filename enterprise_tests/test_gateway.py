@@ -203,7 +203,15 @@ async def test_cancellation_propagates_and_closes_provider():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("candidate", ["a", "b", "c"])
+@pytest.mark.parametrize(
+    "candidate",
+    [
+        "cpu-qwen35-9b-q4km",
+        "cpu-qwen35-35b-q4km",
+        "cpu-qwen35-27b-q4km",
+        "cpu-qwen35-4b-q4km",
+    ],
+)
 async def test_profile_swap_preserves_application_alias(candidate):
     from backend.policy import ROOT
 
@@ -215,7 +223,7 @@ async def test_profile_swap_preserves_application_alias(candidate):
     )
     _ = [item async for item in adapter.stream(request())]
     assert json.loads(captured[0].content)["model"] == profile["serving_alias"]
-    assert profile["status"] == "pending_real_compute"
+    assert profile["status"] == "planning_only_cpu_benchmark_pending"
     assert captured[0].url.host == f"model-{candidate}.internal"
 
 

@@ -1,5 +1,7 @@
 # Enterprise foundation — implementation checkpoint
 
+> Historical foundation record. The CPU-only execution plan v2.0 and constitution v2.0.0 supersede earlier hardware, model, context and startup assumptions. Existing source WIP must be reviewed and tested before these older startup instructions are reused.
+
 Date: 18 October 2026. Governing constitution: 1.0.0.
 
 ## Delivered

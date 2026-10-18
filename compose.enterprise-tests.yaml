@@ -1,0 +1,41 @@
+name: ragbase-enterprise-checks
+services:
+  database:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: ragbase_enterprise
+      POSTGRES_PASSWORD: integration-admin-only
+      DEV_OWNER_PASSWORD: integration-owner-only
+      DEV_APP_PASSWORD: integration-app-only
+    volumes:
+      - ./deployment/postgres/init-dev.sh:/docker-entrypoint-initdb.d/10-enterprise.sh:ro
+    tmpfs:
+      - /var/lib/postgresql/data:size=256m
+    mem_limit: 512m
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d ragbase_enterprise"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    networks: [checks]
+  tests:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enterprise
+      target: tests
+    command: [sh, -c, "python -m alembic upgrade head && python -m pytest enterprise_integration_tests -p no:cacheprovider -q"]
+    environment:
+      ENTERPRISE_MIGRATION_DATABASE_URL: postgresql+asyncpg://ragbase_owner:integration-owner-only@database:5432/ragbase_enterprise
+      ENTERPRISE_TEST_APP_URL: postgresql+asyncpg://ragbase_app:integration-app-only@database:5432/ragbase_enterprise
+    depends_on:
+      database:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    mem_limit: 384m
+    networks: [checks]
+networks:
+  checks:
+    internal: true

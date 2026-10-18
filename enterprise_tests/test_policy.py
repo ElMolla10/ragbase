@@ -29,7 +29,7 @@ def test_deterministic_core_and_task_policy(task):
     assert first == assemble(task)
     assert "untrusted data" in first.text
     assert "LOC-001" in first.rule_ids
-    assert first.constitution_version == "1.0.0"
+    assert first.constitution_version == "2.0.0"
     assert len(first.sha256) == 64
 
 
@@ -105,9 +105,19 @@ def test_invalid_sections_fail_closed(policy_root, sections):
 
 def test_candidates_are_explicitly_unvalidated():
     profiles = list((ROOT / "deployment/model-profiles").glob("*.json"))
-    assert len(profiles) == 3
+    candidates = {}
     for path in profiles:
         profile = json.loads(path.read_text("utf-8"))
         assert profile["benchmark_results"] is None
         assert profile["production_enabled"] is False
         assert profile["validated_capabilities"] == []
+        candidates[path.stem] = profile
+    assert {name for name in candidates if name.startswith("cpu-")} == {
+        "cpu-qwen35-9b-q4km",
+        "cpu-qwen35-35b-q4km",
+        "cpu-qwen35-27b-q4km",
+        "cpu-qwen35-4b-q4km",
+        "cpu-gemma4-12b-existing",
+    }
+    for name in ("a", "b", "c"):
+        assert candidates[name]["status"] == "superseded_by_cpu_plan_2.0_do_not_deploy"

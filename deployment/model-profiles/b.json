@@ -10,7 +10,7 @@
   "published_context_limit": 262144,
   "validated_context_limit": null,
   "tokenizer_revision": null,
-  "status": "pending_real_compute",
+  "status": "superseded_by_cpu_plan_2.0_do_not_deploy",
   "production_enabled": false,
   "validated_capabilities": [],
   "benchmark_results": null,
@@ -20,5 +20,6 @@
     65536,
     131072,
     262144
-  ]
+  ],
+  "superseded_reason": "Old shortlist/hardware assumptions; use inactive cpu-* planning records after qualification"
 }

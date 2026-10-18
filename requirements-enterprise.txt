@@ -1,5 +1,7 @@
 # Foundation only. Full transitive release locking is a later packaging gate.
-# No Torch, model weights, hosted inference SDK, database, or parser dependencies.
+# No Torch, model weights, hosted inference SDK, or parser dependencies.
 fastapi==0.143.0
 uvicorn==0.54.0
 httpx==0.28.1
+sqlalchemy[asyncio]==2.1.4
+asyncpg==0.32.0

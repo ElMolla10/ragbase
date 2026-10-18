@@ -1,22 +1,41 @@
-FROM python:3.11.17-slim AS runtime
+FROM python:3.11.17-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce AS runtime-deps
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     HF_HUB_OFFLINE=1 HF_HUB_DISABLE_TELEMETRY=1 \
-    VLLM_NO_USAGE_STATS=1 DO_NOT_TRACK=1 RAGBASE_PROFILE=dev-lite
+    VLLM_NO_USAGE_STATS=1 DO_NOT_TRACK=1 RAGBASE_PROFILE=dev-lite \
+    PIP_DEFAULT_TIMEOUT=90 PIP_DISABLE_PIP_VERSION_CHECK=1
 COPY requirements-enterprise.txt .
 RUN pip install --no-cache-dir -r requirements-enterprise.txt
+FROM runtime-deps AS migration-deps
+COPY requirements-enterprise-migrations.txt .
+RUN pip install --no-cache-dir -r requirements-enterprise-migrations.txt
+FROM migration-deps AS test-deps
+COPY requirements-enterprise-dev.txt .
+RUN pip install --no-cache-dir -r requirements-enterprise-dev.txt
+
+FROM runtime-deps AS runtime
 COPY backend/ ./backend/
 COPY policy/ ./policy/
 COPY CONSTITUTION.md .
+RUN mkdir /data && chown 10001:10001 /data
 USER 10001:10001
 EXPOSE 8000
-CMD ["uvicorn", "backend.enterprise:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.enterprise:app", "--host", "0.0.0.0", "--port", "8000", "--limit-concurrency", "32"]
 
-FROM runtime AS tests
-USER root
-COPY requirements-enterprise-dev.txt .
-RUN pip install --no-cache-dir -r requirements-enterprise-dev.txt
+FROM migration-deps AS migrations
+COPY backend/ ./backend/
+COPY alembic.ini .
+COPY scripts/seed_enterprise_dev.py ./scripts/
+COPY scripts/reconcile_enterprise_storage.py ./scripts/
+USER 10001:10001
+CMD ["python", "-m", "alembic", "upgrade", "head"]
+
+FROM test-deps AS tests
+COPY backend/ ./backend/
+COPY policy/ ./policy/
+COPY CONSTITUTION.md alembic.ini ./
 COPY enterprise_tests/ ./enterprise_tests/
+COPY enterprise_integration_tests/ ./enterprise_integration_tests/
 COPY docs/governance/ ./docs/governance/
 COPY deployment/model-profiles/ ./deployment/model-profiles/
 COPY pyproject.toml .

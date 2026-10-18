@@ -1,30 +1,17 @@
-# Execution backlog
+# Execution backlog â€” CPU-only revision
 
-Updated: 18 October 2026. Work package definitions live in `docs/execution-plan.md`.
+Updated: 18 October 2026. Canonical package definitions: `docs/execution-plan.md`, version 2.0. Constitution: 2.0.0. The previous A/B package sequence is superseded by P0â€“P6.
 
-| Package | State | Next evidence needed |
+| Phase | State | Next evidence needed |
 |---|---|---|
-| A0 baseline/governance | Implemented for initial local checkout | Continue updating ledger and baseline decisions |
-| A1 foundation | In progress | Storage/embedding/OCR injection, migrations, full gateway/capability/token-budget contracts, larger dev-lite stack |
-| A2 identity/access/storage | Not started | Scoped identity, SSO path, durable storage, RLS, revocation and serving-role tests |
-| A3 durable ingestion | Not started | Jobs/outbox/retries, originals, text PDF adapters and source previews |
-| A4 retrieval/chat | Not started | ACL-aware search, cited streaming, real-versus-mocked metrics |
-| A5 formats | Not started | Office/workbook adapters, format gold fixtures and source mappings |
-| A6 analysis | Not started | Typed trusted calculations, sandbox, numerical gold cases and exports |
-| A7 coverage/UX | Not started | Coverage workflows, bounded vision, history, cancellation and RTL UX |
-| A8 evaluations/packaging | Not started | Real benchmark runners, scorecards, offline bundles, backup/restore |
-| B0 inventory | Pending company access | Hardware inventory, representative internal corpus and IT decisions |
-| B1 candidate benchmarks | Pending suitable compute | A/B/C Arabic, context, vision, memory, latency and concurrency |
-| B2 real integration/swap | Pending preceding gates | Validated local components and two real model swaps |
-| B3 hardening/pilot | Pending preceding gates | Offline cold start, load, restoration and acceptance report |
+| P0 hardware/policy reconciliation | Laptop inventory complete; actual server discovery pending | Actual server CPU/ISA/OS/visible RAM, utilization, storage and internal requirements |
+| P1 lightweight foundation/scoped storage | Local storage slice running; 103 checks passed; production gates pending | Company SSO/provisioning, broader authorization, backup/restore and production controls; see cpu-storage-progress.md |
+| P2 CPU baseline/PDF slice | Not accepted | Small-context local inference, durable extraction, retrieval, citations, resource and bilingual gold cases |
+| P3 CPU OCR/Office formats | Not implemented | Native-first adapters, bounded Arabic/English OCR, preserved structure/cells/locations |
+| P4 deterministic analysis | Not implemented | Typed tools, data validation, sandbox, process RAM and spill quotas, numerical gold fixtures |
+| P5 coverage/vision/model comparison | Not implemented | Whole-document coverage, 9B/35B/27B/4B plus existing Gemma comparison, qualified images, real swaps |
+| P6 offline hardening/pilot | Pending preceding gates | SSO, offline cold start, scheduler/load envelope, safe assets, backups/restore and acceptance report |
 
-Next implementation sequence:
+Execution resumed on the project owner’s subsequent instruction. See cpu-storage-progress.md for measured implementation evidence. Historical foundation counts remain superseded.
 
-1. Finish A1 migrations and enterprise configuration/injection contracts without
-   broadening the unprotected development API.
-2. Implement A2 workspace identity, storage and actual serving-role RLS tests in
-   a separate enterprise database namespace.
-3. Add A3 durable ingestion only behind those controls.
-
-No current health check constitutes G1 completion for the entire planned
-application. No current contract test establishes G7/G8/G9 model acceptance.
+Next execution continues with P2 durable jobs and the authorized PDF slice while company-server discovery remains pending. The development storage boundary and policy/profile checks now pass. No model weights have been downloaded. The already-installed `gemma4:12b` can be considered for later short laptop tests after resource checks; it has not been benchmarked.

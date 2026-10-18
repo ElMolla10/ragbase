@@ -1,16 +1,94 @@
 name: ragbase-enterprise-dev
 services:
+  database:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: ragbase_enterprise
+      POSTGRES_PASSWORD: ${DEV_POSTGRES_PASSWORD:?Run scripts/init_enterprise_dev.py and use --env-file .env.enterprise}
+      DEV_OWNER_PASSWORD: ${DEV_OWNER_PASSWORD:?Development configuration required}
+      DEV_APP_PASSWORD: ${DEV_APP_PASSWORD:?Development configuration required}
+    volumes:
+      - enterprise_database:/var/lib/postgresql/data
+      - ./deployment/postgres/init-dev.sh:/docker-entrypoint-initdb.d/10-enterprise.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d ragbase_enterprise"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    mem_limit: 512m
+    cpus: 1
+    networks: [enterprise]
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enterprise
+      target: migrations
+    environment:
+      ENTERPRISE_MIGRATION_DATABASE_URL: ${ENTERPRISE_MIGRATION_DATABASE_URL:?Development configuration required}
+    depends_on:
+      database:
+        condition: service_healthy
+    networks: [enterprise]
+    restart: "no"
+    mem_limit: 256m
+  seed:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enterprise
+      target: migrations
+    command: [python, scripts/seed_enterprise_dev.py]
+    environment:
+      RAGBASE_PROFILE: dev-lite
+      ENTERPRISE_MIGRATION_DATABASE_URL: ${ENTERPRISE_MIGRATION_DATABASE_URL:?Development configuration required}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks: [enterprise]
+    restart: "no"
+    mem_limit: 256m
   api:
     build:
       context: .
       dockerfile: docker/Dockerfile.enterprise
       target: runtime
+    environment:
+      ENTERPRISE_DATABASE_URL: ${ENTERPRISE_DATABASE_URL:?Development configuration required}
+      ENTERPRISE_STORAGE_ROOT: /data
+      ENTERPRISE_DEV_TOKENS: ${ENTERPRISE_DEV_TOKENS:?Development configuration required}
+    volumes:
+      - enterprise_artifacts:/data
+    depends_on:
+      seed:
+        condition: service_completed_successfully
     read_only: true
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     mem_limit: 256m
     cpus: 1
     pids_limit: 64
+    tmpfs:
+      - /tmp:size=16m
+    networks: [enterprise]
+  reconcile:
+    profiles: [operations]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enterprise
+      target: migrations
+    command: [python, -m, scripts.reconcile_enterprise_storage]
+    environment:
+      ENTERPRISE_MIGRATION_DATABASE_URL: ${ENTERPRISE_MIGRATION_DATABASE_URL:?Development configuration required}
+      ENTERPRISE_STORAGE_ROOT: /data
+    volumes:
+      - enterprise_artifacts:/data:ro
+    depends_on:
+      database:
+        condition: service_healthy
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
     tmpfs:
       - /tmp:size=16m
     networks: [enterprise]
@@ -36,3 +114,6 @@ networks:
   edge: {}
   enterprise:
     internal: true
+volumes:
+  enterprise_database:
+  enterprise_artifacts:

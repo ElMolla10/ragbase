@@ -1,454 +1,524 @@
 # RAGBase Local Enterprise — Final Execution Plan
 
-Version: 1.0  
-Prepared: 18 October 2026  
-Governing specification: [CONSTITUTION.md](../CONSTITUTION.md), version 1.0.0  
-Project: [ElMolla10/ragbase](https://github.com/ElMolla10/ragbase)  
-Status: execution baseline for implementation; application code, server configuration, and model performance have not been validated by this deliverable.
+Version: 2.0 — CPU-only revision
 
-## 1. What we are building
+Updated: 18 October 2026
 
-We will turn RAGBase into a fully local company document and analysis platform. Users will upload documents, ask questions, summarize complete files, compare versions or files, extract structured information, calculate spreadsheet results, and generate charts and downloadable outputs. Arabic, English, and mixed-language work are first-class requirements.
+Governing specification: [CONSTITUTION.md](../CONSTITUTION.md), version 2.0.0
 
-The system has two evidence paths:
+Project: [ElMolla10/ragbase](https://github.com/ElMolla10/ragbase)
 
-1. **Document path:** extract and preserve source structure, search authorized evidence, inspect relevant pages where necessary, and answer with precise citations.
-2. **Analysis path:** normalize authorized tables, validate their meaning and quality, calculate results with trusted code, and explain those results with source ranges and reproducible operations.
+Status: revised planning baseline. Implementation is paused for this revision. No model weights were downloaded, inference performed, or live deployment changed by this planning task. Earlier implementation work is preserved, including unfinished changes that have not passed integration tests.
 
-The model coordinates bounded workflows and explains evidence. Application code controls permissions, validates tool requests, performs calculations, and enforces resource and network restrictions.
+> Execution resumed on 18 October 2026 by the project owner. The planning-time status descriptions below are historical; see the [current implementation record](governance/cpu-storage-progress.md) for running features, tests and remaining gates.
 
-We will develop the application now without requiring access to the production server. Actual model ranking, Arabic reliability, supported context lengths, GPU capacity, production load, and offline server acceptance remain explicit later gates. A completed mock workflow will never be reported as a validated local-model deployment.
+## 1. The correction and its consequences
 
-## 2. Agreed requirements and decision boundaries
+**Confirmed by the project owner:** the company server has **64 GB of ordinary system RAM, no dedicated GPU, and no dedicated VRAM**. The development laptop has 16 GB system RAM. Server CPU model, physical cores, memory bandwidth, instruction sets, operating system, virtualization limits, and storage are unknown.
 
-| Area | Execution decision |
-|---|---|
-| Local operation | Company-controlled inference, OCR, parsing, storage, search, analysis, identity, logs, and browser assets; no hosted fallback |
-| Development computer | 16 GB RAM laptop with lightweight services, synthetic fixtures, and mocked generation/embeddings by default |
-| Production assumption | One server with one 64 GB GPU; vendor, usable VRAM, system RAM, CPU, OS, storage, and runtime remain unverified |
-| Model candidates | Three candidates prepared behind one gateway; no winner selected before real testing |
-| Context | 16K integration; 64K normal-use target; 128K priority validation; approximately 256K later where supported |
-| Languages | Formal Arabic, Egyptian questions, English, mixed terminology, and cross-language retrieval |
-| Formats | PDF, DOCX, XLSX, PPTX, CSV, TXT, Markdown, delivered incrementally |
-| Identity | Company OIDC/SSO where available; local development identity only in a clearly separate development profile |
-| Data isolation | Workspaces and roles; authorization applies to originals and all derived content |
-| Deployment | Modular services under Docker Compose for the pilot; no Kubernetes requirement |
-| Initial outputs | Cited answers, source previews, result tables, PNG charts, CSV/XLSX and Markdown exports |
-| Deferred scope | Fine-tuning, arbitrary generated Python, unrestricted SQL, GraphRAG, general multi-agent frameworks, HA, legacy Office conversion, password handling, and polished DOCX/PDF exports |
+The old single-64-GB-GPU assumption is invalid everywhere in this plan. We will use CPU-compatible quantized artifacts, reserve RAM for the whole application, serialize expensive work, and measure practical response time before selecting a production model. Fitting weights in memory does not establish useful inference speed.
 
-The constitution owns policy. This plan owns sequence, deliverables, and verification. An implementation ledger will record whether each constitution rule is merely specified, implemented, or verified for a named release. No file or prompt alone guarantees model compliance.
+The product remains fully local: document Q&A, complete-document summaries, comparisons, structured extraction, spreadsheet calculations, charts, and analysis with Arabic, Egyptian questions, mixed-language use, precise citations, and reproducible calculations. No external inference API or hosted fallback is allowed.
 
-## 3. Three model candidates
+**Provisional decisions:** llama.cpp is the primary server-runtime candidate; Qwen3.5-9B Q4_K_M is the first practical baseline. Compare Qwen3.5-35B-A3B as the main larger challenger and dense Qwen3.5-27B as a quality-first challenger. Keep Qwen3.5-4B for lighter development/fallback. Include the already-downloaded Gemma 4 12B as an additional independent-family comparison through the existing local Ollama installation.
 
-These are a practical comparison shortlist, not an exhaustive market ranking. No production suitability or hardware fit is claimed yet. Quantization and serving engine are part of the tested candidate configuration, not interchangeable implementation details.
+Start with **one active generation**, queued users, and small bounded prompts. There is no committed 64K/128K production-context target and no promised tokens-per-second, latency, or concurrent-generation capacity. Hardware discovery is the first execution step when work resumes; unknown CPU specifications do not prevent planning or independent application development.
 
-| ID | Candidate | Role in comparison | Artifact and runtime decision |
+## 2. Evidence labels and current repository state
+
+Use these labels throughout execution:
+
+- **Confirmed:** supplied hardware facts and read-only local/repository observations.
+- **Documented:** capabilities or artifacts described by primary sources; not necessarily tested by us.
+- **Estimate:** a planning allowance or arithmetic calculation, not measured consumption.
+- **Provisional recommendation:** a choice to test, which can change after measurement.
+- **Pending:** no result exists yet; do not substitute mock scores or mark it passed.
+
+On 18 October 2026, remote `master` still points to `2f0a0204a14f6659b97a061168ccb0bdd8c061f7`, the original reviewed snapshot. The local feature branch contains foundation commit `94fe1c2f939fba4904da14eb540136ca05de04ef`. That foundation added governance, policy assembly, fake/HTTP streaming contracts, candidate metadata, and a lightweight entry point. Its recorded 63 baseline tests and 55 foundation tests are historical evidence for that checkpoint only.
+
+There are also uncommitted database, storage, identity, migration, proxy, and test changes from the interrupted implementation batch. Dependency-download failures prevented that batch from reaching integration acceptance. They must be reviewed and tested before reuse. They are not a completed authorization/storage layer. This revision does not discard them or deploy them.
+
+The legacy demo still has hosted-generation defaults, heavy embedding startup coupling, startup schema creation, public browser assets, and missing enterprise controls. Its existing runnable demo is not the revised enterprise product. Inspection covered configuration, LLM integration, ingestion/retrieval, routes, protection, database startup, Compose, dependencies, and tests.
+
+## 3. Architecture retained and simplified for CPU
+
+```text
+Company browser: internally hosted assets, Arabic RTL and source viewers
+       |
+Internal HTTPS reverse proxy — only user-facing component
+       |
+Frontend / FastAPI / identity / workspace authorization / policy assembly
+       |-- PostgreSQL + pgvector: permissions, versions, evidence, jobs, history
+       |-- Durable files: originals, extraction, previews, Parquet, artifacts
+       |-- PostgreSQL durable job queue + CPU/RAM admission coordinator
+       |       |-- one admitted extraction/OCR or analysis workload
+       |       |-- bounded embedding/reranking batches
+       |-- Authorized retrieval / typed analysis / coverage workflows
+       |                           |
+       |                       ModelGateway
+       |                           |
+       |             Separate CPU generation service, one active slot
+       |             GGUF + tokenizer/template + optional image components
+       |
+Restricted local audit, metrics, backups and administration
+```
+
+The model service has no database credentials, original-document mounts, host Docker socket, or general company-filesystem access. Only the application sends authorized evidence and controlled local image inputs. Keep generation, embedding, reranking, OCR, storage, and execution interfaces independently replaceable.
+
+Retain FastAPI, PostgreSQL/pgvector, Alembic, durable storage, and the document-versus-structured-analysis split. Start with a **PostgreSQL-backed durable job queue**, transactional job creation, leases/retries, and reconciliation. A broker is optional later if measured operational needs justify it. This replaces the earlier default Celery/Valkey requirement and reduces idle services; it does not remove durability or job recovery. If an external broker is introduced, use an outbox/reconciler and retain PostgreSQL as job truth.
+
+Use bounded CPU workers and isolated analysis processes. Separate dependency groups/images by API, migration, parsing/OCR, analysis, and inference responsibility; do not keep multiple heavyweight worker copies or inference engines resident merely because images are separate. Start CPU tasks serially and add overlap only after end-to-end measurements.
+
+## 4. Inference runtime decision and compatibility checks
+
+### Provisional primary: llama.cpp CPU server
+
+Reasoning: explicit local GGUF paths, reproducible artifact selection, visible CPU thread/context controls, and a small serving boundary fit this server's constraints. This is an engineering preference, not a benchmark win over Ollama.
+
+Current upstream contains Qwen3.5 dense and MoE implementations, Qwen3.5 tokenizer support, and CPU backend operations for its hybrid architecture. This establishes source-level availability, not successful loading of our precise file on an unknown CPU. Research snapshot: llama.cpp commit `547208dca250ceb3e4c8615598d043f2b602a527`. Select a tested release/build from a recorded revision; do not deploy a moving branch. [Dense architecture](https://github.com/ggml-org/llama.cpp/blob/547208dca250ceb3e4c8615598d043f2b602a527/src/models/qwen35.cpp), [MoE architecture](https://github.com/ggml-org/llama.cpp/blob/547208dca250ceb3e4c8615598d043f2b602a527/src/models/qwen35moe.cpp), [CPU operation support](https://github.com/ggml-org/llama.cpp/blob/master/docs/ops.md), [tokenizer implementation](https://github.com/ggml-org/llama.cpp/blob/master/src/llama-vocab.cpp).
+
+llama.cpp documents CPU builds and an optional CPU BLAS backend. Build for the actual ISA, or produce a portable baseline on approved staging; never copy an aggressively native laptop build to a different CPU without checking compatibility. Benchmark BLAS for prompt processing rather than assuming it improves generation. No accelerator toolchain is a prerequisite. [Build documentation](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
+
+### Ollama: supported alternative and existing laptop path
+
+Ollama's Qwen3.5 catalogue lists the four shortlisted sizes with text/image support, and the explicit `qwen3.5:9b-q4_K_M` tag exists. Its APIs document streaming, tools, structured output and image inputs. These API features still need exact-model/runtime adapter tests. Select the llama.cpp/GGUF variant rather than assuming every catalogue variant uses the same backend. Pin the full manifest/blob digests; a mutable tag alone is insufficient. [Qwen catalogue](https://ollama.com/library/qwen3.5), [specific 9B tag](https://ollama.com/library/qwen3.5:9b-q4_K_M), [OpenAI compatibility](https://docs.ollama.com/api/openai-compatibility), [structured outputs](https://docs.ollama.com/capabilities/structured-outputs), [tools](https://docs.ollama.com/capabilities/tool-calling), [vision](https://docs.ollama.com/capabilities/vision).
+
+Ollama is already installed locally at version **0.40.3**, and `gemma4:12b` is downloaded. Reuse that asset for later development experiments; do not replace or reload it during this planning revision. Production should select one measured runtime, not maintain both without a demonstrated need.
+
+If Ollama wins the operational/quality comparison, keep its engine behavior in an adapter. Configure local-only mode, one loaded generation model, one parallel request, a small explicit context and bounded queue. Its documentation warns that parallelism increases memory. Disable cloud features with `OLLAMA_NO_CLOUD=1`, verify logs, and still enforce egress restrictions. Keep model management and pull endpoints inaccessible to ordinary users. [Ollama FAQ](https://docs.ollama.com/faq).
+
+### vLLM: reconsidered, not the default
+
+vLLM has an official CPU backend; it is incorrect to call it GPU-only. Its ISA, dtype, supported architecture, quantization and memory requirements need separate verification for the actual CPU. It is not selected for this pilot because we have no measured advantage for the intended GGUF/single-request workload and would add another serving stack. Reconsider only after hardware discovery and a concrete benchmark need. Do not carry over the previous GPU commands or FP8 configuration. [vLLM CPU documentation](https://docs.vllm.ai/en/latest/getting_started/installation/cpu/).
+
+### Required compatibility matrix for each pinned configuration
+
+| Component | Documented evidence | Required local verification |
+|---|---|---|
+| Architecture | Qwen3.5 dense/MoE source implementations; Ollama catalogue | Exact artifact loads on the chosen CPU build; all required kernels work |
+| Quantization | Publisher lists exact Q4_K_M GGUF files | File checksum, tensor metadata, memory peak and quality at that quantization |
+| Tokenizer | Runtime Qwen3.5 support and GGUF metadata path | Match base tokenizer on Arabic/English, combining marks, digits, tool delimiters and full chat-template accounting |
+| Images | Matching projector files exist; runtime multimodal APIs are documented | Matching model/projector/template, actual CPU encoding and answer quality; exact build can fail and must be reported |
+| Streaming | Server/API support documented | Fragmented UTF-8/SSE, errors, usage, termination, disconnect and cancellation |
+| Structured output | Runtime schema-constrained output APIs | Our schemas, refusal/truncation, malformed JSON, bounded retries and independent validation |
+| Tool calls | Runtime tool support and Qwen template source | Exact parser/template, correct tool choice/arguments, rejection of unauthorized actions |
+| Reasoning | Models/templates expose differing controls | Bound actual token/time cost and keep internal channels out of answers/history |
+
+Tool-call formatting depends on the model template/parser; general runtime support is not proof for every combination. Keep a tested schema-constrained planning path available where appropriate, with application validation. If neither path passes, disable dependent model-planned analysis with a clear explanation instead of executing free-form instructions. [Function-calling guide](https://github.com/ggml-org/llama.cpp/blob/master/docs/function-calling.md), [Qwen template](https://github.com/ggml-org/llama.cpp/blob/master/models/templates/Qwen3.5-4B.jinja), [grammar/schema documentation](https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md).
+
+## 5. Model comparison and verified proposed artifacts
+
+The four Qwens are the main CPU comparison set. Gemma is an additional already-available comparator. No model is selected for production. Mistral Small 3.2 is removed from the initial comparison budget, not declared incapable of CPU use.
+
+All Qwen paths below are **Unsloth-published conversions of Qwen checkpoints**, not official Qwen GGUF releases. Publisher metadata identifies the base models and Apache-2.0 license; verify license files, conversion provenance, revision and checksums before acquisition. Do not confuse unrelated modified/uncensored variants with these artifacts. Matching `mmproj-F16.gguf` files are proposed for optional vision; they are not needed for ordinary text-only serving.
+
+| Role / model | Exact proposed artifact | Verified disk payload, decimal GB | Estimated text-process RAM at 4K–8K, one slot | Capabilities and unresolved questions |
+|---|---|---|---|---|
+| First practical baseline: Qwen3.5-9B | `unsloth/Qwen3.5-9B-GGUF/Qwen3.5-9B-Q4_K_M.gguf` | 5.681 weights; 0.918 F16 projector | 9–16 GiB | Text; optional images with matching projector; Arabic/tools/CPU speed untested |
+| Main larger challenger: Qwen3.5-35B-A3B | `unsloth/Qwen3.5-35B-A3B-GGUF/Qwen3.5-35B-A3B-Q4_K_M.gguf` | 22.016 weights; 0.899 projector | 28–38 GiB | MoE; full weight footprint matters; fit under our experimental cap and response speed both unproven |
+| Quality-first challenger: Qwen3.5-27B | `unsloth/Qwen3.5-27B-GGUF/Qwen3.5-27B-Q4_K_M.gguf` | 16.741 weights; 0.928 projector | 22–30 GiB | Dense; possible quality benefit is a hypothesis to test, not an established advantage |
+| Lightweight development/fallback: Qwen3.5-4B | `unsloth/Qwen3.5-4B-GGUF/Qwen3.5-4B-Q4_K_M.gguf` | 2.741 weights; 0.672 projector | 6–10 GiB | Smaller Arabic/analysis capability must be evaluated; optional laptop use with other heavy services stopped |
+| Existing independent comparator: Gemma 4 12B | Local Ollama `gemma4:12b`, GGUF/Q4_K_M, digest recorded below | 8.022 local bundle; not a main-weight-only measurement | 12–20 GiB | Local metadata lists text, vision, tools, thinking and audio; no performance/quality run done; audio is outside scope |
+
+**The RAM column is an engineering allowance, not a measurement, guaranteed fit, or loading-peak bound.** It includes weights plus a provisional cache/buffer allowance; tokenizer/template, runtime version, projector/draft settings and context can change consumption. The 35B upper estimate exceeds some safe application profiles and may be inadmissible. Benchmark loading separately and refuse a configuration whose measured peak exceeds its budget.
+
+Qwen file metadata and image components were inspected without downloading weights. [9B files](https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/tree/3885219b6810b007914f3a7950a8d1b469d598a5), [35B files](https://huggingface.co/unsloth/Qwen3.5-35B-A3B-GGUF/tree/bc014a17be43adabd7066b7a86075ff935c6a4e2), [27B files](https://huggingface.co/unsloth/Qwen3.5-27B-GGUF/tree/3221f178a6b842d04f1fb42f1c413534adcc0a6a), [4B files](https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/tree/e87f176479d0855a907a41277aca2f8ee7a09523).
+
+### Pin record for later approved acquisition
+
+Sizes are exact bytes from publisher metadata. SHA-256 values are reported LFS hashes, **not independently verified local file hashes**. Acquisition must compute and compare actual bytes. The F16 projector filename is identical across repositories but the files are model-specific and cannot be interchanged.
+
+| Model | Repository revision | Weights bytes / SHA-256 | `mmproj-F16.gguf` bytes / SHA-256 |
 |---|---|---|---|
-| A | `Qwen/Qwen3.5-35B-A3B-FP8` | Initial leading candidate; mixture-of-experts comparison | Official FP8 checkpoint; verify GPU support and pin a compatible runtime |
-| B | `Qwen/Qwen3.5-27B` | Dense-model comparison within the same family | Select and pin a compatible quantized artifact after license, lineage, kernel, and memory checks; the base model name does not identify a tested quantization |
-| C | `mistralai/Mistral-Small-3.2-24B-Instruct-2506` | Independent-family comparison for document work and instruction/tool behavior | Select and pin an appropriate quantization after compatibility and quality checks |
+| 9B | `3885219b6810b007914f3a7950a8d1b469d598a5` | 5680522464 / `03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8` | 918166080 / `f70dc3509053962b0d0d3ee8a7eacebf5d60aa560cad78254ae8698516ae029f` |
+| 35B-A3B | `bc014a17be43adabd7066b7a86075ff935c6a4e2` | 22016023168 / `3b46d1066bc91cc2d613e3bc22ce691dd77e6f0d33c9060690d24ce6de494375` | 899283648 / `a516ab92e8240da4734d68352bdfba84c16e830ee40010b8fac80d69c77272ff` |
+| 27B | `3221f178a6b842d04f1fb42f1c413534adcc0a6a` | 16740812704 / `84b5f7f112156d63836a01a69dc3f11a6ba63b10a23b8ca7a7efaf52d5a2d806` | 927607040 / `458bc46d8f275866fde5d88c9c554d9d462a6e8e3a028090d9850e17ab6a1217` |
+| 4B | `e87f176479d0855a907a41277aca2f8ee7a09523` | 2740937888 / `00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4` | 672423616 / `cd88edcf8d031894960bb0c9c5b9b7e1fea6ebee02b9f7ce925a00d12891f864` |
 
-The Qwen model cards publish native 262,144-token contexts. That is a model specification, not a statement that our server can serve those contexts. [Candidate A model card](https://huggingface.co/Qwen/Qwen3.5-35B-A3B-FP8), [candidate B model card](https://huggingface.co/Qwen/Qwen3.5-27B).
+### Existing Gemma asset
 
-Mistral's model card describes improvements to instruction following and function calling; its published configuration sets `max_position_embeddings` to 131,072. Candidate C therefore participates up to its supported limit and is not expected to pass a 256K native-context test. Its Arabic quality remains an open evaluation question. [Candidate C model card](https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506), [published configuration](https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506/raw/main/config.json).
+Read-only local inspection (`ollama list`, `ollama show`, `/api/tags`) found:
 
-Published multilingual scores are screening evidence only. They do not establish reliable Arabic, Egyptian dialect understanding, numerical correctness, citation quality, or company-document performance. Recheck cards, licenses, immutable revisions, and serving support before acquiring artifacts. Do not copy unpinned `latest` or multi-GPU example commands into our single-card deployment.
+- Tag: `gemma4:12b`; full manifest digest `6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b`.
+- GGUF, `gemma4` architecture, 11.9B parameters, Q4_K_M; stored bundle 8,021,618,941 bytes; runner metadata `llamacpp`.
+- Advertised context 262,144; minimum runtime metadata 0.30.9; installed Ollama 0.40.3. Version comparison is not an inference test.
+- Local metadata includes a 52.38M projector; catalogue additionally identifies an assistant draft model. Existing parameters enable thinking by default and `draft_num_predict=3`.
 
-All three candidates are evaluated sequentially; we do not need three resident model servers. The initial production design uses one active generation configuration. Automatic failover between unvalidated models is excluded.
+Count all active components and their caches when benchmarking; do not silently compare a draft-enabled Gemma run with a differently configured Qwen. Use a short text-only baseline and explicitly test thinking/draft settings later. Preserve its current files and configuration now. The catalogue lists Apache-2.0; archive the license and trace the precise conversion lineage before company deployment. A local manifest digest is not the SHA-256 of an individual weight file. [Matching Ollama catalogue entry](https://ollama.com/library/gemma4:12b), [Google model overview](https://ai.google.dev/gemma/docs/core).
 
-## 4. What can be tested before the server is available
+The existing Ollama runner is the first route for testing this exact asset. Standalone llama.cpp compatibility of its specific unified 12B bundle, draft and image components remains a separate gate; support for other Gemma 4 sizes is insufficient proof. Re-export/import or a different GGUF must be a separately pinned configuration, not an invisible model change.
 
-| Test | Can run now? | What it establishes |
-|---|---|---|
-| Gateway requests, streaming normalization, errors, timeouts, cancellation | Yes, against deterministic fake endpoints | Application and adapter contracts |
-| Capability rejection, output schemas, malicious tool arguments | Yes | Trusted application validation |
-| Workspace permissions, RLS, downloads, revocation | Yes, with local PostgreSQL and actual serving roles | Application/database isolation on the tested setup |
-| Deterministic table operations, provenance, exports | Yes, with synthetic fixtures | Calculation and lineage correctness |
-| Basic format parsing, job retries, source previews | Yes, with bounded fixtures and available local dependencies | Functional behavior on those fixtures |
-| Tokenizer budgets for the actual candidates | Yes, if approved tokenizer artifacts can be obtained and supported locally | Token accounting; no answer-quality or GPU-capacity claims |
-| Real embedding/retrieval evaluation on a small corpus | Potentially, using a separately bounded CPU profile | Retrieval quality for that embedding/corpus, independent of generation |
-| Tiny 1–4B local model smoke test | Optional, only if resources permit | HTTP/streaming plumbing, not quality of A/B/C |
-| Full A/B/C Arabic, vision, reasoning, or context benchmarks | Not on the assumed laptop as a credible acceptance setup | Requires suitable measured compute |
-| Production memory, throughput, 64K/128K capacity, offline cold start | No | Requires target hardware and deployment |
+### Quantization and model-size tradeoffs
 
-CPU execution or heavy offloading of a large quantized candidate might be technically possible on some machines. We will not make that a dependency for this 16 GB laptop or treat it as a proxy for production serving. Check actual free RAM/storage before any optional model download; do not fetch large weights as part of ordinary development setup.
+Q4_K_M is a starting point for memory/quality comparison, not proof of acceptable Arabic. Low-bit conversion can change factual recall, negation, table interpretation, structured outputs and refusal. If the 9B baseline has enough headroom but insufficient quality, compare a pinned higher-bit 9B artifact before assuming a larger model is necessary. More bits can increase memory traffic; more parameters can increase compute. Neither direction guarantees a better user experience.
 
-If suitable company-controlled alternative compute becomes available, the same harness can run there and record that hardware. Its results remain preliminary for target-server capacity. Hosted testing is not part of the default plan and company content must not be sent to an external service.
+The 35B MoE can reduce activated computation relative to dense models, but all quantized expert weights, shared layers, embeddings and runtime state still count toward RAM and memory traffic. Do not size it as a 3B model or predict its speed from activated parameters. Compare fixed tasks, prompt lengths and generation limits on the actual CPU.
 
-When compute is unavailable, benchmark results are **pending**, never passed, zero-scored, or replaced with invented mock scores. Development continues on independent work; release selection waits.
+## 6. Whole-server RAM budget
 
-## 5. Constitution implementation
+The server is described as 64 GB RAM; actual OS-visible bytes must be measured. If that means 64 billion bytes, it is about 59.6 GiB. Use a conservative **59 GiB planning envelope** until inventory confirms more usable memory. Reduce it further for hypervisor limits or other company workloads. GB in download metadata is decimal; GiB in this budget is binary.
 
-Keep one authoritative `CONSTITUTION.md` at the enterprise repository root. Repository entry instructions, including `AGENTS.md`, reference it instead of copying its rules. Development agents read it and relevant local instructions before changes.
+### Initial 9B application profile — estimates and proposed caps
 
-Implement these supporting artifacts:
+| Component / reserve | GiB | Included workload and control |
+|---|---:|---|
+| OS and operational reserve | 8 | Kernel, system services, monitoring and ordinary overhead; verify other host workloads separately |
+| Generation service | 24 | All charged weight pages, context/recurrent state, runtime buffers, tokenizer and any enabled image components; not 24 GiB of weights |
+| PostgreSQL/pgvector | 5 | Shared buffers, connections, query/index work and charged cache; bounded connections and maintenance |
+| API, reverse proxy and light services | 2 | Upload buffers, history, source metadata and delivery limits |
+| Durable-job coordination / worker supervisor | 1 | PostgreSQL scheduling client and small supervisor; no extra resident broker assumed |
+| Embedding/reranking allowance | 3 | One bounded worker; load larger components on demand or evaluate sequentially |
+| Shared heavy-job allowance | 6 | At most one admitted extraction/OCR OR spreadsheet/report process, not 6 GiB for each |
+| Unallocated peak/uncertainty guard | 10 | Never spend automatically; protects against loading peaks, reclaim pressure and imperfect estimates |
+| **Total planning envelope** | **59** | Service allowances total 41 GiB, plus 18 GiB reserve/guard |
 
-- `docs/governance/rule-ledger.yaml`: one row for each of the 55 rule IDs, including owner, enforcement location, verification reference, state, last validated release, and known gaps.
-- `policy/manifest.yaml`: constitution version/hash, mandatory runtime sections, task-specific sections, and referenced rule IDs.
-- `policy/templates/`: reviewed runtime instruction templates; derived assets are not independent policy sources.
-- `scripts/build_policy.py`: deterministic assembly and validation of mandatory core plus applicable task rules.
-- `tests/policy/`: missing-core, stale-hash, unknown-rule, malformed-manifest, evidence-separation, and adversarial instruction cases.
+The generation allowance deliberately exceeds the expected short-context 9B footprint. It is a ceiling, not a target to fill. Optional image encoding must fit within that generation allowance; it does not receive a hidden additional allocation. During image work, other heavy work is paused, and the 6 GiB heavy-job allowance is not automatically reassigned to a second vision process.
 
-The build must detect constitution changes and require regeneration/review of affected instructions. Record the assembled instruction hash and constitution version with traces. A missing or invalid mandatory core stops the affected generation call.
+Candidate 27B/35B experiments need a different **explicit operator-selected** profile. Example application experiment: generation 32 + database 5 + API 2 + coordination 1 + embeddings 3 + OS 8 + guard 8 = **59 GiB**, with OCR/analysis disabled. If a 35B configuration cannot stay within 32 GiB, do not load it into that profile. A fixed-evidence standalone experiment may use generation 36, database 5, API 2, coordination 1, OS 8 and guard 7 = 59 GiB with embedding/heavy workers unloaded; it does not qualify full end-to-end service capacity. A model needing still more memory fails this envelope rather than borrowing OS headroom.
 
-Always include the mandatory runtime core. Select additional task sections through trusted application routing; the model does not decide which mandatory policies apply. Evidence and tool output remain in separate data fields. Do not send the entire constitution with every request or rely on prompting to enforce permissions, network isolation, or arithmetic.
+### What memory measurements mean
 
-The ledger distinguishes developer checks, application enforcement, deployment controls, and measured model behavior. A constitution version change triggers the relevant tests and evaluation slices before release.
+- **Disk size:** bytes in GGUF, projector and other files. This is not total process memory.
+- **Mapped address space:** a runtime can map a model file without every page being resident. Virtual size is not RAM consumption.
+- **Resident/charged memory:** includes touched model pages and private allocations. Mapped file pages may be reported as both process RSS and filesystem cache; do not double-count the same physical pages. Inspect cgroup charge and PSS where available.
+- **Loading peak:** conversion, repacking, initialization, warmup, template/image/draft setup and temporary buffers can exceed steady state. Record cold and warm starts separately.
+- **Total application peak:** database/query memory, OCR, Python/Arrow buffers, uploads and analysis can overlap. A quiet standalone model measurement is insufficient.
 
-## 6. Target architecture
+Do not use a generic dense-transformer KV formula as an exact forecast for Qwen3.5's hybrid recurrent/attention implementation. Record the selected runtime's allocations and actual context tests. A mapped MoE file is not a free substitute for resident working memory; major page faults can destroy responsiveness.
 
-```text
-User browser
-    |
-Internal HTTPS reverse proxy — only user-facing service
-    |
-Frontend + FastAPI
-    |-- Identity / workspace authorization / policy assembly
-    |-- PostgreSQL + pgvector: metadata, ACLs, elements, jobs, history
-    |-- Durable file store: originals, extraction, previews, datasets, outputs
-    |-- DB outbox -> local broker -> bounded workers
-    |                         |-- parsing / OCR / preview / indexing
-    |                         |-- isolated deterministic analysis
-    |-- Retrieval -> authorized evidence -> ModelGateway
-    |                                      |
-    |                              Internal model service
-    |                              weights + tokenizer + engine
-    |
-Restricted local metrics, audit, backup, and administration
+### Enforcement and spill
+
+Use Linux cgroup v2/verified container limits for total process-group memory and swap, plus a host admission policy. Monitor `memory.current`, `memory.peak`, `memory.events`, host available memory, major faults, swap activity, CPU pressure and disk use. A limit can kill a process; it does not guarantee that the request succeeds. Admission checks should prevent unsafe starts, while a last-resort kill protects the host and is recorded as a failed job/configuration. [Kernel cgroup documentation](https://docs.kernel.org/admin-guide/cgroup-v2.html).
+
+For analytics, begin with a 4 GiB DuckDB buffer-manager limit inside a 6 GiB whole-process allowance, one thread, approved scratch storage and a bounded spill quota (for example 20 GiB as an initial policy, subject to available disk). Arrow/Python and some operators can allocate outside DuckDB's buffer manager; never treat its `memory_limit` as a process limit. Use chunked workbook/table ingestion, row/column/output limits, and bounded partitions; not every operation can spill. Stop and report oversized jobs instead of letting them consume the server. [DuckDB memory management](https://duckdb.org/2024/07/09/memory-management), [limits](https://duckdb.org/docs/lts/operations_manual/limits).
+
+Configure PostgreSQL conservatively: a small connection pool, bounded `work_mem`, modest shared buffers and serialized index/maintenance work. Per-operation and per-worker allocations can multiply, so default percentages of total host RAM are inappropriate for this shared server. Freeze exact settings after discovery and workload tests. [PostgreSQL resource settings](https://www.postgresql.org/docs/16/runtime-config-resource.html).
+
+Swap is emergency protection, not planned model capacity or a performance solution. Do not solve weight shortages by paging indefinitely. Disk-spilled analytical intermediates are different from swapping model working memory. Reserve scratch free space and stop admission before disk exhaustion. Size persistent storage from originals + extraction + previews + datasets + indexes + outputs + model/runtime versions + scratch + growth, with separate backups; do not infer storage capacity from RAM.
+
+## 7. CPU scheduling and queue policy
+
+Initial operating policy, subject to benchmark refinement:
+
+1. One active generation service request globally, including visual generation. Users may be simultaneously connected but wait in a bounded application queue.
+2. Start with at most one queued interactive request per user and eight queued interactive requests overall. These are admission policies, not throughput promises. Return a clear busy/queued state, support cancellation, and expire abandoned work.
+3. Interactive answers take priority over bulk summaries, comparison reductions, vision jobs and ingestion. Break long workflows into durable section/page tasks so an interactive task can run between them.
+4. Do not overlap heavy OCR, full indexing, large reranking batches or workbook analysis with latency-sensitive generation initially. One heavy task may run while generation is idle. Light metadata/API/database operations continue.
+5. Use one server-wide lease/admission coordinator shared by all workers; separate per-process semaphores are insufficient. A lease records resource class, owner, heartbeat and expiry. Recovery must not accidentally double-admit a still-running process.
+6. After discovering physical cores, test generation thread counts that leave capacity for the API/OS. If at least four physical cores exist, initially reserve roughly two; on smaller machines start more conservatively. Tune prompt and generation threads separately and measure memory-bandwidth/NUMA effects. More threads are not automatically faster.
+7. Limit OCR, BLAS, OpenMP and analysis thread pools per admitted job to avoid hidden nested parallelism. Do not let every library use all logical CPUs. Exact environment options must match pinned packages.
+8. Choose memory caps before launching a model/job. The application never receives a Docker socket or host privilege to enlarge its own limits. Operator profile changes require draining/revalidation.
+
+Cold model loading, index maintenance, backups, restore drills and large experiments are scheduled activities. Queue retries must be idempotent and bounded; do not restart an OOMing large-model job forever. Keep one production generation model resident at a time. Do not add speculative/draft models or a second vision model without measuring their combined cost.
+
+## 8. Context and large-document strategy
+
+Published native context and a configured server limit are different. The Qwen family documents very large native windows, and local Gemma metadata reports 262,144 tokens. Neither establishes an efficient or accurate deployment context on this CPU. [Qwen model card](https://huggingface.co/Qwen/Qwen3.5-9B/raw/main/README.md).
+
+| Stage | Total context setting | Purpose / promotion condition |
+|---|---:|---|
+| Smoke | 4K | Tokenizer, template, streaming, one short evidence task, memory observation |
+| Baseline | 8K | First interactive benchmark candidate, not an SLA or guaranteed capacity |
+| Expansion | 16K then 32K | Only after earlier stages meet quality, memory and agreed responsiveness requirements |
+| Optional research | 64K, then 128K | Test only when justified and safely admissible; not pilot release requirements |
+| Beyond | Approximately 256K | No initial CPU deployment commitment; advertised capacity alone is not a reason to enable it |
+
+Reserve generated-output capacity within every total window, including supported reasoning tokens. Start benchmark outputs around 256–512 tokens; longer answers/reports use bounded steps. Count system instructions, history, evidence, tool schemas/results and images where applicable using the actual tokenizer/template. Record actual counts. Do not estimate Arabic by English word ratios or silently truncate necessary evidence.
+
+Use retrieval for targeted questions. Use section enumeration, hierarchical summaries, durable coverage records, and reductions for complete summaries/comparisons. Exhaustive extraction must traverse all required sections/versions and disclose failures. Keep tables with headers; return bounded aggregates and relevant rows instead of dumping an entire workbook into a prompt. Progressively retrieve/expand relevant evidence rather than fill the window by default.
+
+Long context must earn its place through position-sensitive Arabic/English tests and complete-workflow timings. Disable or explicitly handle context shifting/truncation; a fluent answer after dropping essential source material is not a successful result.
+
+## 9. Ingestion, OCR, images and source fidelity
+
+Supported product scope remains PDF, DOCX, XLSX, PPTX, CSV, TXT and Markdown, delivered incrementally. Reject macro-enabled/encrypted files initially; add legacy Office conversion and password/recalculation handling only through separately isolated, tested paths.
+
+Upload -> content/type/expansion limits -> quarantine/validation -> hash/version and durable original -> transactional job -> extraction/OCR -> normalized elements/tables -> validation -> indexing -> ready with warnings. Expose queued, extracting, needs_review, indexing, ready and failed states. Retrying must not duplicate evidence; a partially failed version must not publish inconsistent results.
+
+Native text/table extraction is the first path. Use a light PDF parser for good text PDFs; evaluate Docling's CPU layout/table path only on pages/formats that need it. Configure CPU explicitly, bound threads/page batches, and supply offline artifact directories; never allow first-use downloads. [Docling advanced options](https://docling-project.github.io/docling/usage/advanced_options/), [pipeline options](https://docling-project.github.io/docling/reference/pipeline_options/).
+
+For scans, test local Tesseract Arabic/English packs as a CPU baseline, including the speed/accuracy choices among compatible traineddata sets. Do not equate language-pack availability with acceptable Arabic OCR. Evaluate reading order, mixed RTL/LTR, negation, dates, Arabic/Western digits, decimal separators, small text and table alignment. Record uncertain numbers and reconcile before calculations. Retain original page images and locations. [Tesseract traineddata documentation](https://tesseract-ocr.github.io/tessdoc/Data-Files.html).
+
+Word preserves headings, paragraphs, lists, tables and explicit policies for revisions, headers/footers, footnotes/comments. PowerPoint preserves slide/shape locations, notes and previews; chart data is extracted where supported, otherwise clearly labeled visual interpretation. XLSX uses a dedicated adapter for cell types, formulas versus cached values, named/table ranges, units, leading-zero IDs, hidden-region inclusion, dates and provenance. CSV requires explicit encoding/delimiter/type checks. Hidden data is never a permission boundary.
+
+**Image support is retained as a separately qualified capability.** The model/projector pair and runtime must pass CPU image tests before enablement. Use on-demand queued inspection of selected authorized pages/regions, initially one image at a time with a tested pixel/token budget. Crop regions carefully; disclose downsampling/unreadability. Do not send every scanned page through a VLM or claim that image support makes OCR unnecessary.
+
+Vision consumes the same single inference slot and is scheduled around interactive text work. If its quality, RAM or response time is unacceptable, retain OCR/native extraction and visual previews, explicitly report visual interpretation unavailable/pending, and document the unmet capability before pilot scope approval. Do not silently claim chart/diagram understanding. No remote image fetching from document-provided URLs. llama.cpp requires a matching local projector for the multimodal path; explicitly keep it on CPU. [Multimodal documentation](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal.md).
+
+## 10. Retrieval, analysis and provenance
+
+Retain hybrid authorized retrieval with dense and indexed lexical candidates, deduplication, bounded reranking and parent-section expansion. Evaluate Arabic normalization separately from displayed source text and preserve identifiers. Start with the existing E5 baseline; benchmark BGE-M3 and the multilingual reranker under CPU limits rather than automatically replacing them. Reduce candidate batches/reranking depth if latency requires it, then measure recall consequences. No generation-model change requires re-embedding; an embedding change requires its own versioned index and validation.
+
+Begin structure-aware chunk experiments around 400–800 tokens, with table headers and source locations preserved. Candidate counts and retained evidence counts are tuning variables, not copied acceptance requirements. Keep exact supporting-element gold labels and realistic distractors; top-k exceeding tiny corpus size is not a useful ranking evaluation.
+
+Each evidence item includes workspace, document, immutable version/hash, element ID and location: PDF page/box, Word heading/paragraph/cell, slide/shape, or workbook sheet/table/range. Derived datasets and charts map to original inputs and preserve filters, operations, units, exclusions, row counts and execution time.
+
+For analysis, start with schema-validated read-only typed operations implemented by trusted code. DuckDB operates on authorized job-local snapshots, never the application database. Disable external access, extension auto-loading, uncontrolled file/network operations and setting changes; enforce OS limits. Use fixed/decimal monetary precision, check duplicates/joins/subtotals/units/currencies and stale formulas, and ask about material ambiguity. openpyxl preserves formula/cache information but is not a formula evaluator.
+
+The model explains computed results; it does not invent arithmetic. Combine policy retrieval and spreadsheet calculations through their separate evidence paths. Correlation does not establish cause, and forecasts require assumptions. Generated SQL is deferred until a parser/AST allowlist and sandbox tests exist; arbitrary generated Python is outside the initial release.
+
+## 11. Security, constitution, UX and operations
+
+All 55 constitutional rule IDs remain tracked. Constitution version 2.0.0 replaces the invalid hardware/context obligations. Keep one authoritative source with bounded derived runtime core/task instructions, recorded version/hash, independent tool validation and code/deployment enforcement. Documents, hidden cells, slide notes, quoted history and tool outputs remain untrusted evidence. No model can grant permissions or change policy.
+
+Use internal OIDC/SSO and workspace roles. Apply authorization before candidate retrieval and every later lookup, source preview, original download, dataset operation, history display and export. Use PostgreSQL RLS with non-owner, non-superuser, non-BYPASSRLS serving credentials and transaction-local identity. Separate migration/provisioning credentials, worker identity and tested pool reset. Track source dependencies and recheck revocation; begin without cross-user answer caching. [PostgreSQL row security](https://www.postgresql.org/docs/16/ddl-rowsecurity.html).
+
+Bundle browser assets internally, sanitize Markdown and filenames, protect every write/admin/query route, bound history and uploads, use appropriate TLS/cookies/CSRF/browser headers, and coordinate quotas. Keep logs/audit local; restrict full prompt retention, avoid document content in metrics and never log secrets. Define document/derived-data deletion and backup expiry behavior explicitly.
+
+The UI shows selected/used files and versions, job state, extraction warnings, queued generation, cancel/retry, precise source previews and calculation evidence. Arabic RTL and mixed-language tables/citations are required. Initial exports: CSV/XLSX result tables, PNG charts and Markdown reports, with formula-injection protection. Polished DOCX/PDF exports follow source attribution plus visual verification.
+
+Separate process liveness, core readiness and generation readiness. Inference outages leave authorized non-generation functions usable. Keep observability lightweight on the shared CPU. Back up PostgreSQL/files consistently with keys/configuration/manifests to a separate approved destination and test full restoration. Agree RPO/RTO and retention with IT. A single server remains one failure domain; HA is a separate infrastructure decision.
+
+## 12. CPU deployment and configuration examples
+
+These are **future implementation examples**, not deployed configuration or commands executed by this revision. Existing Compose files contain no model service or accelerator reservation to remove; do not mistake them for the finished CPU production stack.
+
+Proposed application settings:
+
+```dotenv
+GENERATION_BASE_URL=http://model:8080/v1
+GENERATION_MODEL_ALIAS=company-assistant
+GENERATION_PROFILE=cpu-qwen35-9b-q4km
+GENERATION_TOTAL_CONTEXT_TOKENS=8192
+GENERATION_MAX_OUTPUT_TOKENS=512
+GENERATION_ACTIVE_REQUESTS=1
+GENERATION_QUEUE_LIMIT=8
+GENERATION_VISION_ENABLED=false
+# Set timeout, thread counts and limits from the approved benchmark profile.
 ```
 
-Retain FastAPI, PostgreSQL/pgvector, and useful existing streaming/retrieval foundations. Use Alembic for schema evolution. Proposed queue implementation is Celery with a pinned, tested local Redis-compatible broker such as Valkey; PostgreSQL remains durable job truth. Review compatibility before locking versions.
-
-Use separate API, parser/OCR worker, analysis worker, and model-service images. Split heavyweight dependencies. No generation weights or model-engine imports in API startup. Embeddings, reranking, and OCR have their own replaceable interfaces; start CPU-first where practical and assign GPU use only after measuring the shared budget.
-
-Proposed parsing stack: evaluate Docling for structured conversion, a dedicated openpyxl workbook adapter for XLSX fidelity, Arrow/Parquet for normalized tables, and DuckDB for trusted analytics. These are implementation choices to validate and pin, not claims that every format or feature will work automatically.
-
-## 7. Environment profiles and configuration
-
-| Profile | Purpose | Defaults |
-|---|---|---|
-| `dev-lite` | Daily laptop work | API, small PostgreSQL, minimal worker/broker, local assets, fake generation and embeddings; resource target approximately 6–8 GB total, verified rather than assumed |
-| `dev-cpu-eval` | Optional limited extraction/retrieval checks | Small corpus, one heavy operation at a time, real bounded CPU models where supported |
-| `dev-model` | Optional tiny-model integration | Short context, one request, synthetic content; never an A/B/C acceptance substitute |
-| `server-staging` | Later integration and evaluation | Actual model service, representative internal corpus, isolated data/configuration |
-| `server-local` | Pilot/production | Pinned offline bundle, SSO, network controls, production limits and backup |
-
-Example application settings include `GENERATION_BASE_URL`, `GENERATION_MODEL_ALIAS`, `GENERATION_TIMEOUT_SECONDS`, `GENERATION_MAX_INPUT_TOKENS`, `GENERATION_MAX_OUTPUT_TOKENS`, and a server-owned model-profile identifier. Track the total configured context separately from input/output budgets. Credentials are server-side secrets.
-
-The stable serving alias is `company-assistant`. Each candidate profile records checkpoint, immutable revision, quantization artifact/hash, engine/image version, tokenizer/chat template, parser settings, actual capabilities, sampling/reasoning limits, context budget, and validated operating envelope. Validate configuration at startup. Mock identities and fake models must be visibly marked and prohibited in production configuration.
-
-## 8. Data and API contracts
-
-Establish schemas before format-specific expansion:
-
-- Users, groups, workspaces, memberships, roles, document permissions.
-- Documents and immutable versions with hashes and lifecycle state.
-- Stored artifacts, extraction runs, normalized elements, tables, and datasets.
-- Embeddings/index versions, durable jobs, outbox events, attempts, and failures.
-- Conversations/messages, source dependencies, tool runs, calculation records, generated artifacts, and audit events.
-
-An evidence locator contains workspace, document/version/hash, element ID, format, location, and extraction-quality metadata. Locations are page/box, heading/paragraph/table cell, slide/shape, or sheet/table/range as appropriate. Derived rows and outputs retain source mappings.
-
-Version gateway requests/results/events and ingestion/analysis schemas. Streaming supports text deltas, normalized completion/error status, usage or explicitly marked estimates, and cancellation/disconnect cleanup. Structured tool requests are validated against application schemas and scoped identity.
-
-API contract groups: identity/workspaces; documents/versions; uploads/jobs/retry; authorized originals/previews/elements; streaming/nonstreaming query; datasets/analysis; history; artifacts/exports; and restricted health/admin endpoints. Final route names follow repository inspection. Do not break existing deployment assumptions unintentionally.
-
-## 9. Delivery track A — work we can start now
-
-Each package has a reviewable deliverable and an exit check. Tests run at the layer appropriate to the change; avoid broad retesting without a relevant reason. Record deferred checks instead of treating unavailable infrastructure as a pass.
-
-### A0 — Repository baseline and project control
-
-**Work:** Inspect the current upstream, repository instructions, dependency graph, tests, routes, deployment, and known risks. Compare with the originally reviewed commit `2f0a0204a14f6659b97a061168ccb0bdd8c061f7`; deliberately select and record the implementation base rather than assuming it is still current. Create the isolated `enterprise-local` branch and short feature branches. Preserve existing public deployment/data boundaries.
-
-Install the constitution, agent entry instructions, rule ledger, execution backlog, decision log, and a baseline test report. Record existing failures separately from regressions. Separate synthetic public fixtures from internal acceptance data.
-
-**Deliverables:** reviewed base SHA; enterprise branch; governance files; dependency/runtime inventory; baseline report; ordered backlog.
-
-**Exit:** no company data added; every rule ID represented once in the ledger; branch/deployment isolation documented; current behavior and baseline checks recorded.
-
-### A1 — Lightweight foundation, gateway, and policy assembly
-
-**Work:** Add dependency injection for generation, embeddings, OCR, storage, and retrieval components. Remove heavy startup coupling. Split dependency groups and create reproducible dev-lite startup with fake endpoints. Introduce Alembic and migration discipline. Implement policy assembly and the ModelGateway contract plus HTTP adapter scaffold.
-
-Create candidate profiles A/B/C with unvalidated capabilities disabled until proven. Test protocol variants with fixtures: fragmented streams, malformed structured requests, missing usage, unsupported images/tools, timeouts, disconnects, and endpoint outage. Test that changing the configured profile does not change routes, frontend, retrieval, or indexed documents.
-
-**Deliverables:** dev-lite profile; lock strategy; migrations; interfaces/fakes; policy build; gateway schemas; three candidate manifests; contract tests.
-
-**Exit:** clean laptop startup without large downloads or generation weights; API non-generation features work with inference unavailable; fake profile swaps pass; invalid mandatory policy fails explicitly. These checks establish contracts, not actual A/B/C compatibility.
-
-### A2 — Identity, storage, authorization, and protected delivery
-
-**Work:** Implement users/workspaces/roles and a production OIDC integration path. Use explicit development identity until company settings are available. Create durable storage with staged writes, hashes, immutable versions, safe paths, authorized delivery, and orphan reconciliation.
-
-Implement application authorization plus RLS under the actual non-owner serving role. Scope workers and reset transaction identity safely. Add source dependencies and revocation handling for messages/artifacts. Protect all writes/admin/query paths; sanitize rendering, bundle browser dependencies locally, bound requests, and apply coordinated quotas.
-
-**Deliverables:** scoped identity and permissions; storage abstraction; migrations/policies; authenticated download/preview paths; revocation and route-isolation tests.
-
-**Exit:** one user/workspace cannot read another's originals, evidence, jobs, datasets, history, or artifacts by changing identifiers; pooled connections do not leak identity; revoked sources cannot reappear through history/export. Production SSO validation remains pending if internal identity is unavailable.
-
-### A3 — Durable PDF ingestion and source previews
-
-**Work:** Build upload validation, immutable original storage, DB job/outbox creation, queue delivery, idempotent extraction/indexing, and reconciliation. Start with text PDFs and basic TXT/Markdown; add scan routing and bounded Arabic/English OCR through replaceable interfaces. Preserve pages, structure, tables, locations, quality flags, and previews.
-
-Test parser limits, worker termination, duplicate delivery, retries, queue outage, partially failed extraction, and file/database cleanup. Only publish a consistent ready version; show review/failure states and gaps.
-
-**Deliverables:** durable job lifecycle; PDF adapter; source locator schemas; preview delivery; recovery fixtures; ingestion UI state.
-
-**Exit:** authorized upload survives restart; duplicate jobs do not duplicate elements; failures remain visible; citations resolve to the correct immutable source. Mock embeddings are sufficient for wiring tests; extraction quality is assessed independently.
-
-### A4 — Retrieval and the first end-to-end development slice
-
-**Work:** Implement authorized dense plus indexed lexical candidates, fusion/deduplication, bounded reranking, structure-aware chunking, and parent-section expansion. Compare current E5 baseline with BGE-M3 and a multilingual reranker when bounded local resources allow; otherwise prepare the runner and leave scores pending. Keep index dimensions/revisions explicit.
-
-Initial tuning ranges: approximately 400–800 tokens per child chunk, 30–50 candidates per search path, and roughly 6–12 retained evidence items; these are experiments, not fixed quality guarantees. Preserve headers when splitting tables. Evaluate Arabic normalization separately from displayed text and identifier handling. Do not label ordinary PostgreSQL full-text ranking as BM25.
-
-Resolve conversational references into a scoped search question; assemble budgeted evidence; validate source IDs; disclose searched scope and missing evidence. Implement chat streaming, source selection, and preview links. Test Arabic RTL and mixed identifiers from this stage.
-
-**Deliverables:** retrieval pipeline; gold evidence fixtures; citation validation; scoped chat/source UI; real-versus-mocked evaluation labels.
-
-**Exit:** authorized PDF upload -> durable job -> indexed elements -> fake streaming answer -> valid source preview works end to end. Retrieval metrics are meaningful only for real embeddings/reranking; fake output does not pass answer-quality gates. The later server slice replaces the fake provider and validates actual local answers.
-
-### A5 — Office formats and dataset normalization
-
-**Work:** Add DOCX, PPTX, XLSX, and CSV adapters and strengthen PDF/OCR fixtures. For Word, define final-view versus revision handling and inclusion of headers, footers, notes, and comments. For slides, preserve notes, text/tables, slide previews, and inspectable chart/image regions.
-
-For workbooks, preserve formulas separately from cached values, cell types, named/table ranges, identifiers, hidden-region policy, dates, units, and source mappings. Detect table regions and ambiguous headers; allow mapping confirmation. Do not imply formula recalculation. Reject unsupported encrypted/macro-enabled inputs explicitly. Disable or block external references and active content.
-
-**Deliverables:** per-format adapters and gold fixtures; normalized element/dataset schema; range/slide/paragraph locators; extraction warnings; library filtering and reprocessing controls.
-
-**Exit:** required text, values, relationships, and source locations match gold fixtures; unsupported content is disclosed; uncertain/stale values are flagged; memory/expansion limits work. Internal representative Arabic layouts remain a later acceptance requirement.
-
-### A6 — Deterministic analysis, charts, and result exports
-
-**Work:** Implement typed schemas for listing/describing datasets, filtering, aggregation, comparison, approved joins, and chart creation. Validate currencies, units, dates, duplicate keys, row counts, nulls, subtotals, and join multiplication. Ask for material mapping/metric ambiguity rather than guess.
-
-Run trusted operations against authorized job-local datasets in isolated workers. Lock DuckDB external access/extensions/settings and enforce OS resource/network/filesystem boundaries. Record calculations, source ranges, data versions, exclusions, and outputs. Generate CSV/XLSX results, PNG charts, and Markdown reports, with formula-injection protection and authorized delivery.
-
-**Deliverables:** analysis tool registry; data validation; isolated execution; provenance/calculation panel; charts/exports; critical numerical gold fixtures.
-
-**Exit:** exact expected numerical results within defined tolerances; correct handling of stale formula caches, mixed currencies, leading zeros, duplicate joins, and inaccessible data; bounded execution and attempted unauthorized file/network access fail safely. Model tool-planning quality remains a separate later test.
-
-### A7 — Coverage workflows, bounded vision, history, and UX
-
-**Work:** Add section enumeration and coverage records for complete summaries, exhaustive extraction, and comparisons across selected files/versions. Reduce bounded section results while preserving citations and gaps. Never claim complete coverage for skipped or failed regions. Surface source conflicts.
-
-Add application-controlled page inspection, image budgets, explicit capability failures, history with source dependencies, cancellation, progress, retry controls, and duplicate-submission prevention. Support Arabic RTL and mixed-language tables/citations. Vision requests send only authorized local inputs; do not fetch document-supplied URLs.
-
-**Deliverables:** summary/comparison/extraction workflow engines; coverage report; visual tool scaffold; polished core chat/library/evidence/results flows; history/revocation behavior.
-
-**Exit:** fixtures demonstrate every required section/version is visited or marked missing; unsupported vision is explicit; history respects revoked access; canceled work releases application resources. Actual visual interpretation and model synthesis quality remain pending until real inference tests.
-
-### A8 — Evaluation harness and deployment preparation
-
-**Work:** Build one reusable runner for gateway-only, retrieval-only, fixed-evidence generation, tool planning, complete end-to-end, context, vision, authorization, and load evaluations. Use the same cases and scoring definitions across candidate profiles. Preserve immutable results and configuration metadata. Build offline packaging scripts, release manifest templates, network policy, health checks, backup/restore tooling, and operator runbooks.
-
-**Deliverables:** runnable benchmark suite; reviewed synthetic baseline; internal-data import format; blank A/B/C scorecards marked pending; reproducible deployment bundle specification; release checklist and runbooks.
-
-**Exit:** the runner works against fakes and rejects invalid results without manufacturing quality scores; repeat runs record comparable configurations; laptop restore works on synthetic data; production bundle validation is explicitly deferred. Continue package preparation without asserting offline server acceptance.
-
-## 10. Delivery track B — when suitable company compute is available
-
-### B0 — Hardware and company integration inventory
-
-Record GPU vendor/model, usable/free VRAM, driver/runtime/kernel compatibility, CPU architecture/cores, RAM, storage, Linux environment, virtualization/passthrough, and competing workloads. Collect expected users, simultaneous requests, corpus volume, upload complexity, Arabic mix, permission groups, identity-provider details, internal dependencies, retention, and availability needs.
-
-Begin with 20–30 representative sanitized documents and 30 reviewed questions/calculations for initial integration. Review confidential samples only internally. Company IT supplies internal TLS/network/identity and backup decisions. Complete the hardware-specific model and artifact plan after inventory.
-
-**Exit:** an approved staging environment, measured resource inventory, internal identity/network path, and representative acceptance slice exist. If hardware is unsuitable, change candidate/runtime or deployment expectations explicitly; do not silently weaken the requirements.
-
-### B1 — Candidate serving and controlled benchmarks
-
-Acquire verified pinned artifacts on approved staging infrastructure and transfer them through the approved process. Test candidates sequentially. First verify 16K startup, tokenizer, text/streaming/tools/vision capabilities, cancellation, and no external fetches. Then test actual supported contexts and shared resource limits.
-
-Start with one active generation and increase only after measurement; test two and four where safe. Begin embeddings/reranking/OCR on bounded CPU resources to avoid unmeasured GPU contention. Do not assume a fixed percentage of VRAM or copy engine defaults blindly.
-
-Run the A/B/C test matrix in Section 12. Exclude unsupported context/capability cells explicitly. Record failed startups and OOMs as failures, not missing observations. A candidate's different quantization is a new tested configuration.
-
-**Exit:** real compatibility records, Arabic and evidence scores, 32K/64K/128K results where supported, and memory/latency/concurrency measurements. All required 128K tests must be attempted and documented; a failed priority goal cannot be called achieved. Decide whether a measured 64K deployment is acceptable or the priority goal needs a different candidate/configuration. Approximately 256K remains optional and is not required of candidate C.
-
-### B2 — Local integration, identity, OCR, and model swap
-
-Replace fakes with the validated local components. Validate company SSO, actual serving-role RLS, representative Arabic OCR, preview rendering, durable jobs, and the full authorized upload-to-answer path. Run complete analysis tasks where the model proposes plans and trusted tools calculate results.
-
-Demonstrate replacing one validated model with a second through model-service/profile changes only: drain requests, replace the configuration, warm and check readiness, run smoke tests, and resume. Application routes, frontend, retrieval logic, documents, and embedding index remain unchanged. Test rollback to the prior configuration. A new engine may require adapter work, kept within that boundary.
-
-**Exit:** two real local models satisfy the gateway swap contract; enabled features pass company-data tests; unsupported features fail explicitly; generation outage leaves authorized non-generation functions available.
-
-### B3 — Offline hardening, load, recovery, and pilot
-
-Build the final pinned bundle; remove public egress from both browser and services; cold-start from prepared artifacts on a clean runtime. Exercise all enabled formats, Arabic OCR, text and visual questions, workbook analysis, citations, exports, restart/retry, and cancellation. Inspect network-denial logs. Run mixed interactive/ingestion/report load and agreed user/concurrency budgets.
-
-Back up consistent database/files and required secrets/configuration to a separate approved destination. Restore into a clean staging deployment; verify permissions, originals, citations, datasets, retrieval, and calculations. Validate release rollback/forward recovery and document single-server downtime expectations.
-
-**Exit:** Section 13 gates pass for a named release; operator and user guides exist; known limitations are explicit; project owner and company IT accept the pilot scope and measured operating envelope. Public production rollout is a separate release action, not implied by drafting or merging code.
-
-## 11. Model swapping as an acceptance requirement
-
-The application must not import a candidate name into routes, retrieval logic, frontend behavior, or calculation logic. Candidate-specific templates, reasoning parsers, tool parsers, sampling settings, and response quirks stay in deployment profiles/adapters.
-
-Swap procedure:
-
-1. Select a prepared model profile and verify its artifact/license/runtime manifest.
-2. Run adapter and capability checks, then required quality evaluations.
-3. Record the new tokenizer/context limits, constitution/prompt version, and enabled capabilities.
-4. Drain pending generation; keep other authorized features available.
-5. Stop the old model process, start the replacement, warm it, and verify generation readiness.
-6. Run text, Arabic, citation, tools, and enabled-vision smoke cases.
-7. Resume within the measured operating envelope or revert the prior profile.
-
-No re-ingestion or re-embedding is required for a generation-only change. Embedding-model changes use a separate versioned index migration with validation and controlled cutover. Reranker changes require retrieval evaluation. Never assume two full generation models fit concurrently on the single card.
-
-## 12. Evaluation design
-
-### Corpus and scoring
-
-Build 200–300 reviewed cases with tuning and held-out splits. At least 100 cases are Arabic or mixed language and may be part of that total. Include matched English/Arabic questions; label Egyptian, formal Arabic, cross-language retrieval, scans, tables, exceptions/negation, missing answers, numerical analysis, conflicts/versions, and exhaustive tasks. Case tags may overlap; report unique-case counts and slice denominators.
-
-Each case records authorized identity/scope, immutable input versions, question, expected supporting elements, required facts or exact result, acceptable refusal, coverage requirement, language/task tags, and scoring rubric. Numerical fixtures define precision, rounding, units, and expected excluded rows. Human reviewers adjudicate ambiguous facts/citations and approve gold labels.
-
-Begin with a small reviewed slice, then grow the corpus throughout development. Never tune on held-out cases or use a model's own fluent answer as the gold result.
-
-### Candidate comparison matrix
-
-| Dimension | Procedure | Record |
-|---|---|---|
-| Arabic and English grounding | Same fixed evidence and reviewed questions for A/B/C | Required facts, unsupported claims, refusal, dialect/negation handling |
-| Retrieval | Hold generation out; compare embedding/index/reranker configurations | Recall@k, MRR/nDCG, exact element hits, per-language and ACL slices |
-| End-to-end answers | Same authorized corpus, question set, and pipeline | Answer correctness, citations, scope disclosure, extraction/retrieval/generation error attribution |
-| Tool planning | Same typed schemas and analytical tasks | Valid schema, correct dataset/filters/operations, ambiguity detection, bounded recovery |
-| Numerical outcomes | Trusted execution against gold tables | Exact expected values/tolerances, lineage, row counts, units and exclusions |
-| Long context | 32K/64K/128K total budgets; facts at different positions; realistic distractors | Quality, actual token count, latency, peak memory, failures, output reserve |
-| Vision | Same authorized page images and task limits | Correct supported interpretation, citations, uncertainty, memory and latency |
-| Injection and access | Adversarial files, notes, tool outputs, user scopes, revocation | Unauthorized content, blocked operations, safe explanations |
-| Serving | Fixed context/output budgets at 1/2/4 active requests where safe | Time to first token, generation rate, p50/p95 latency, queue wait, VRAM/RAM and cancellation |
-
-Use identical case content and defined budgets; tokenize separately for each model. For position-controlled context tests, construct inputs per tokenizer and report the differences. Include fixed-evidence tests to separate generation quality from retrieval quality. Keep tuning effort and inference budgets documented; record repeat runs for variable generation instead of assuming bit-for-bit determinism.
-
-Do not mix a published model benchmark, a laptop fixture result, and a server measurement into one undifferentiated score. Select a winner by required gates first, then compare quality, latency, resource needs, and operational complexity among candidates that pass. No aggregate score can compensate for an access leak or an unacceptable required Arabic slice.
-
-## 13. Acceptance gates and definition of done
-
-| Gate | Requirement | When assessed |
-|---|---|---|
-| G0 — Governance | Constitution installed; all 55 rule IDs tracked; instruction assembly/versioning checks pass | A0–A1, then every relevant change |
-| G1 — Development | Repeatable dev-lite startup; inference outage tolerated; no heavy generation dependency | A1 |
-| G2 — Isolation | Zero unauthorized content in dedicated access tests, including direct IDs, workers, history and exports | A2 onward; rerun on server |
-| G3 — Ingestion | Enabled formats pass gold extraction/location cases, durable retries, consistent publication, and limits | A3–A5; internal corpus later |
-| G4 — Retrieval | Proposed pilot target: at least 90% supporting-evidence recall@10 on answerable gold cases | Real embeddings/corpus only |
-| G5 — Grounding | Proposed pilot target: at least 95% manually reviewed citation precision, plus agreed factual correctness/refusal/coverage thresholds per required slice | Real model evaluation |
-| G6 — Analysis | 100% correct fixed critical numerical cases within stated tolerances; source lineage and sandbox checks pass | A6, then actual model-planned tasks |
-| G7 — Arabic | At least 100 reviewed Arabic/mixed cases; matched-language gap and required business slices meet frozen thresholds | B1–B2 |
-| G8 — Context and load | 64K normal target measured; 128K priority tests completed with explicit outcome; selected operating envelope meets agreed latency/concurrency limits | B1–B3 |
-| G9 — Replacement | Two validated real local models swap without application/retrieval changes or re-ingestion/re-embedding | B2 |
-| G10 — Offline and recovery | Clean offline boot, enabled workflows, restricted-network checks, backup restore and recovery runbook validated | B3 |
-| G11 — Release | Every mandatory applicable rule verified for the named release or explicitly resolved through authorized policy change; known limitations and pilot scope accepted | B3 |
-
-Before held-out evaluation, project owner/reviewers freeze: Arabic task correctness thresholds, permitted unsupported-claim rate, calibrated refusal criteria, extraction/OCR tolerances, whole-document coverage requirements, matched-language gap, and intended latency/concurrency. These are decision records, not values invented after seeing favorable results. Preliminary recall/citation targets remain proposed until the baseline review confirms definitions and thresholds.
-
-Passing the minimum reviewed-case count alone does not pass the Arabic gate. A documented failure of 128K is not a pass for 128K capability; it requires an explicit scope/candidate decision. If 64K cannot meet requirements, revisit the model/runtime/hardware rather than silently declaring 16K sufficient. Optional 256K failure does not block the agreed pilot unless later made a requirement.
-
-Application-complete, model-validated, and production-accepted are separate statuses. The first does not imply the other two.
-
-## 14. Proposed repository layout and review packages
-
-Adapt this layout to existing repository conventions after A0; avoid gratuitous rewrites.
-
-```text
-CONSTITUTION.md
-AGENTS.md
-docs/
-  execution-plan.md
-  governance/rule-ledger.yaml
-  decisions/
-  operations/
-policy/
-  manifest.yaml
-  templates/
-backend/
-  gateway/              # interfaces, normalized events, HTTP adapters
-  auth/                 # identity, workspace scope, permissions
-  storage/              # durable originals/artifacts, reconciliation
-  ingestion/            # format adapters, normalized extraction
-  jobs/                 # durable state, outbox, retries
-  analysis/             # typed operations, validation, execution, lineage
-  retrieval.py          # extend or split as repository warrants
-  migrations/
-frontend/                # internally bundled assets and source/result UI
-deployment/
-  profiles/
-  model-profiles/       # A/B/C manifests; no weights in Git
-  offline/
-scripts/
-tests/
-eval/
-  synthetic/
-  schemas/
-  runners/
+The 8K value is an explicit initial experiment. Input accounting must subtract actual instructions/template/history/tool/image cost and output reserve. Never treat these settings as proof that the configuration passed.
+
+Illustrative offline CPU server command after approved artifact preparation:
+
+```bash
+/opt/llama/bin/llama-server \
+  --model /models/Qwen3.5-9B-Q4_K_M.gguf \
+  --alias company-assistant --host 0.0.0.0 --port 8080 \
+  --ctx-size 8192 --parallel 1 \
+  --threads "${GENERATION_THREADS:?set after CPU discovery}" \
+  --threads-batch "${PROMPT_THREADS:?set after CPU discovery}" \
+  --n-gpu-layers 0 --no-mmproj-offload \
+  --jinja --no-context-shift --cache-ram 0 --no-webui
 ```
 
-Suggested PR sequence into `enterprise-local`: `local-00-governance`, `local-01-foundation`, `local-02-access-storage`, `local-03-durable-ingest`, `local-04-retrieval-chat`, `local-05-formats`, `local-06-analysis`, `local-07-coverage-ux`, `local-08-eval-packaging`, then server-specific integration/hardening PRs. Split packages further where review size warrants it.
+This text-only profile omits the projector and rejects image requests in the application. An enabled vision profile adds the exact matching local `--mmproj` file, stays CPU-only and requires its own measured budget. Do not use remote `-hf` auto-download paths in production. Validate flags against the pinned binary's `--help`. Server API/slot/thread controls are documented, but this command has not been run here. [Server reference](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
 
-Each change records the concrete behavior, affected rule IDs, relevant verification, and deferred server checks. Avoid coupling large model downloads or server-only tests to ordinary public CI. Sensitive internal runners must never execute untrusted external PR code with production access.
+Illustrative model-service fragment for a future Linux Compose deployment:
 
-## 15. Constitution coverage ownership
+```yaml
+model:
+  image: ${CPU_MODEL_IMAGE:?supply tested image pinned by digest}
+  # The image owns the reviewed command/profile above; no automatic downloads.
+  volumes:
+    - ./offline-models/qwen35-9b:/models:ro
+  networks: [inference_internal]
+  mem_limit: 24g
+  memswap_limit: 24g
+  cpus: ${MODEL_CPU_QUOTA:?set after hardware discovery}
+  pids_limit: 128
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  # No host port, database secret, company-document mount, or Docker socket.
+```
 
-Every ID below gets an individual ledger row; ranges here describe ownership only.
+Only the API and model join the inference network. The reverse proxy handles internal HTTPS elsewhere. Enforce offline egress at host/network level; a container flag alone is insufficient. The image must create/use a non-root runtime user and bounded scratch where required. Validate actual limits on the target OS; do not assume resource fields are enforced merely because Compose parses them.
 
-| Rules | Primary work packages |
+For an optional Ollama profile, verify `OLLAMA_NO_CLOUD=1`, `OLLAMA_MAX_LOADED_MODELS=1`, `OLLAMA_NUM_PARALLEL=1`, a small explicit `OLLAMA_CONTEXT_LENGTH`, and a bounded `OLLAMA_MAX_QUEUE`. Select the validated local model digest, inspect CPU placement and disable cloud/web features. Do not apply these settings to the user's existing laptop service during this task.
+
+Use CPU-only dependency builds for embedding/OCR/analysis where applicable; no GPU-specific package indexes, accelerator reservations, engine image variants or toolchains in the default path. Remove unused Streamlit/hosted-inference dependencies from the enterprise API group. Pin transitive packages, parser models, tokenizers, traineddata, fonts, binaries and image digests in the release manifest. A future GPU can replace the inference-service profile after validation without changing application contracts; it is not a pilot prerequisite.
+
+## 13. Hardware discovery checklist — first execution step
+
+Run these read-only commands on the actual server when access is available. Do not assume the laptop or Docker VM reports the server's hardware. Record outputs internally, omitting serial numbers or sensitive host identifiers from public reports.
+
+### Linux server
+
+```bash
+uname -m
+cat /etc/os-release
+lscpu
+lscpu -e=CPU,CORE,SOCKET,NODE,ONLINE
+free -b
+cat /proc/meminfo
+lsblk -d -o NAME,MODEL,SIZE,ROTA,TRAN
+df -hT
+vmstat 1 5
+ps -eo pid,comm,rss,pcpu --sort=-rss
+```
+
+Where installed/authorized: `numactl --hardware` for NUMA topology and `sudo dmidecode --type memory` for populated memory slots/configuration. `lscpu` flags distinguish x86 AVX2/AVX-512/VNNI/BF16 or ARM features; no particular instruction set is assumed. Installed DIMM speeds do not measure bandwidth. Later run an approved CPU-only bandwidth benchmark and the pinned runtime benchmark; record virtualization/container CPU and RAM restrictions too.
+
+If Docker is used:
+
+```bash
+docker version
+docker info --format '{{.NCPU}} CPUs; {{.MemTotal}} bytes visible'
+```
+
+### Windows server or laptop discovery
+
+```powershell
+Get-CimInstance Win32_Processor |
+  Select-Object Name,Manufacturer,NumberOfCores,NumberOfLogicalProcessors,MaxClockSpeed
+Get-CimInstance Win32_ComputerSystem |
+  Select-Object TotalPhysicalMemory,HypervisorPresent
+Get-CimInstance Win32_OperatingSystem |
+  Select-Object Caption,Version,OSArchitecture,TotalVisibleMemorySize,FreePhysicalMemory
+Get-CimInstance Win32_PhysicalMemory |
+  Select-Object Capacity,Speed,ConfiguredClockSpeed,DeviceLocator,PartNumber
+Get-PhysicalDisk | Select-Object FriendlyName,MediaType,Size,HealthStatus
+Get-Volume | Select-Object DriveLetter,FileSystem,Size,SizeRemaining
+```
+
+Memory values from the OS class use KiB; physical-module capacities are bytes. If ISA detail is needed, use an approved Microsoft Sysinternals Coreinfo binary (`coreinfo64.exe -f`); do not infer full vector support from CPU branding. If WSL is part of the intended path, inspect `wsl --status`, `wsl --list --verbose`, its VM memory limit and CPU visibility.
+
+Linux is the provisional production host recommendation for the full service/isolation stack. If the server runs Windows, first decide with IT between a supported Linux VM and a separately validated native deployment; subtract VM/host overhead. Native Windows model support does not prove that the full Linux Compose/sandbox design runs unchanged on Windows Server.
+
+**Discovery deliverable:** CPU/ISA/topology, measured visible RAM, current utilization, memory-channel/NUMA observations, storage/scratch free space, OS/runtime limits, expected user/corpus profile, internal identity/network/backup requirements. These determine binary selection, thread counts, admissible model/context, worker overlap, response-time goals and whether the initial resource envelope must shrink.
+
+## 14. Laptop and offline workflow
+
+| Profile | Runs where | Resource policy / evidence |
+|---|---|---|
+| `dev-lite` | 16 GB laptop | Mock generation/embeddings, small PostgreSQL, lightweight worker, synthetic fixtures; aim for roughly 4–6 GiB application memory and leave OS/IDE headroom; measure |
+| `dev-existing-gemma` | Laptop, optional after resuming tests | Reuse installed Gemma via Ollama; short 2K–4K text-only test and one request; stop other heavy services first if needed; monitor RAM before loading |
+| `dev-small-cpu` | Laptop, optional later | Qwen4B short-context plumbing/quality exploration only if approved artifacts/resources exist; no mandatory download |
+| `server-cpu-staging` | Company 64 GB server | One candidate at a time; full CPU/Arabic/image/context/resource measurements |
+| `server-cpu-local` | Company server after gates | Pinned offline release, real identity/permissions and measured operating envelope |
+
+The Gemma disk bundle alone is about half the laptop's installed RAM before runtime, cache, OS and development services. Its presence makes future testing convenient, not guaranteed comfortable. Do not load all downloaded models or run an unbounded native context. No laptop run substitutes for server CPU/memory-bandwidth testing. Cloud inference is excluded.
+
+Prepare approved artifacts on a connected staging machine and verify after transfer. The production bundle includes exact model/projector/draft files where enabled, tokenizers/templates, runtime/CPU ISA build, Python/native packages, extraction/OCR artifacts, internal browser assets and licenses/checksums. Production cold start must not fetch anything. A prepared release should support a documented startup command after provisioning; first installation still needs CPU/OS validation, configuration, credentials, transfer and acceptance. It is not instantly production-ready merely because RAM is known.
+
+## 15. Benchmark and acceptance plan
+
+### Procedure
+
+1. Discover hardware and freeze reproducible case definitions before tuning. Review 20–30 sanitized documents and 30 initial questions/calculations for the first slice.
+2. Verify the exact runtime/artifact/template/tokenizer without asserting quality. Benchmark text-only 4K first, then 8K; capture cold loading and warmed runs.
+3. Compare 9B, 35B-A3B and 27B on the same task content and budgets, with 4B as the lighter comparison and Gemma as the existing independent comparator. Do not force an unsafe large candidate to load. Record rejection/OOM/timeout as an outcome.
+4. Use fixed-evidence generation tests to separate model quality from extraction/retrieval quality. Run retrieval-only tests and true end-to-end tasks separately.
+5. Expand context to 16K/32K only after previous stages pass. Optional 64K/128K is research, not an inherited release obligation.
+6. Test one active request; then two and four connected users under the **single-active queue policy**. Measure queue delay separately. Parallel generation greater than one is a separate optional experiment requiring a new resource decision.
+7. Test native extraction, OCR and images independently. Then test realistic overlap/recovery with scheduler limits, company identity and offline controls.
+
+Record runtime/build/ISA, all artifact hashes, quantization, tokenizer/template, constitution/prompt hash, context and actual token counts, batch/thread settings, thinking/draft configuration, active components, case seed/repetition and hardware state. Use the same semantic evidence across models while measuring each tokenizer's actual count; position-controlled context cases may require different filler amounts. Exclude private reasoning from reports/history while measuring its resource cost when present.
+
+### Measurements and release requirements
+
+| Dimension | Measure | Gate |
+|---|---|---|
+| Arabic | Formal Arabic, Egyptian questions, mixed terms, Arabic-to-English retrieval, negation/conditions, scans and numerical wording | At least 100 reviewed Arabic/mixed cases; freeze required slice thresholds and matched-English quality-gap criteria before held-out evaluation |
+| Corpus | 200–300 reviewed cases, realistic distractors, long docs, absent/conflicting answers, versions and exhaustive tasks | Separate tuning/held-out sets; representative company data reviewed internally |
+| Extraction/OCR | Text coverage, digit/cell accuracy, table headers, reading order, locations and review flags | Format-specific gold tolerances; uncertain critical figures cannot be silently accepted |
+| Retrieval | Supporting-element recall@k, MRR/nDCG, cross-language and permission slices | Proposed pilot objective ≥90% evidence recall@10, confirmed after baseline with defined denominators |
+| Answers | Required facts, unsupported claims, calibrated refusal, citation precision/coverage, source/version validity | Proposed ≥95% manually reviewed citation precision; task correctness/refusal/coverage thresholds frozen separately |
+| Complete documents | All required sections/versions visited, coverage gaps and citation lineage | No false claims of complete coverage; required extraction/summary/comparison gold cases pass |
+| Numerical analysis | Exact results, units/filters/joins, freshness, row counts/exclusions, provenance | 100% correct fixed critical numerical fixtures within defined precision/rounding tolerances |
+| Images | Chart/diagram tasks, small text, crops, unsupported-capability behavior | Exact image-enabled configuration passes quality, latency and RAM limits before enablement; otherwise an explicit unresolved capability |
+| Context | Beginning/middle/end evidence with distractors at each tested total window | Choose the smallest passing window; no unsupported production context claim |
+| Responsiveness | Cold load, prompt/prefill time, time to first user-visible token, decode rate, total completion/workflow time, p50/p95 and queue wait | Business task deadlines set with the owner after hardware baseline and before held-out acceptance; no invented rates |
+| Resources | Model and whole-host peak RAM, cgroup events, pressure, major faults/swap, CPU utilization and scratch/disk | No host OOM or sustained swapping in the accepted envelope; every job stays within enforced limits or fails explicitly |
+| Access and tools | Cross-workspace IDs, actual serving role, revocation/history/cache/export, injection, sandbox/network attempts | Zero unauthorized content in dedicated tests; no free-form unsafe execution |
+| Operations | Cancel, retries, restart, duplicate delivery, dependency outage, offline cold start and full restore | Recovery and offline release drill pass with all enabled workflows |
+
+Timed-out cases are not excluded to improve averages. Test watchdogs must be recorded as test policy rather than advertised latency. If none of the candidates meets the required Arabic quality and acceptable task time simultaneously, the pilot remains unaccepted. Options are narrower explicitly approved scope, queued asynchronous tasks, better CPU/bandwidth hardware, or a later GPU upgrade—not a cloud fallback or fabricated performance result.
+
+Select models by mandatory gates first, then compare quality, actual wait time, memory and operating complexity. A fast fluent answer with unsupported facts is a failure. No aggregate score compensates for an access leak or a failing required Arabic slice.
+
+## 16. Updated phased backlog and first milestone
+
+The earlier implementation is a starting point to review, not a reason to skip hardware correction or security gates.
+
+| Phase | Work / dependency | Deliverable and exit gate | Indicative remaining engineering effort |
+|---|---|---|---|
+| P0 — Hardware and policy reconciliation | First execution step; obtain read-only server inventory, user/corpus needs, review prior WIP, remove stale GPU/context assumptions | Discovery report, CPU profile/binary decision, updated rule ledger, initial reviewed cases and explicit blocked decisions | 2–4 days, excluding access wait |
+| P1 — Lightweight foundation and scoped storage | Rebase unfinished migrations/configuration/storage on reviewed baseline; separate owner/serving credentials; dev identity only locally; SSO integration path | Practical laptop setup, durable originals, migrations, workspace/RLS/revocation tests using actual serving role; policy tests aligned with v2 | 4–7 days |
+| P2 — CPU baseline and authorized PDF slice | P0 CPU information needed for real inference; prepare approved 9B artifact or reuse Gemma only for laptop integration; pin one runtime; add durable jobs, basic extraction and retrieval | Authorized PDF upload -> durable extraction -> evidence -> local streamed answer -> precise source preview; actual CPU/RAM and task-quality record | 5–8 days |
+| P3 — CPU OCR and Office fidelity | Native-first PDF, Arabic/English OCR, DOCX/PPTX/XLSX/CSV adapters, offline models, job limits | Format gold cases preserve required text/cells/locations; failures/review states visible; bounded CPU/RAM | 6–10 days |
+| P4 — Deterministic analysis | Typed operations, mappings, Parquet/DuckDB, sandbox, spill quotas, provenance, charts/exports | Numerical gold suite and isolation pass; representative workbook job fits policy | 6–10 days |
+| P5 — Coverage, optional vision and model comparison | Complete summaries/comparisons, history, RTL UX, queued image tests, 35B/27B/4B/Gemma comparisons and model swapping | Coverage/citation tests; measured enabled capabilities; two validated configurations swap without app/retrieval changes or re-ingestion | 5–9 days |
+| P6 — Offline hardening and pilot | Real SSO, safe browser assets, quotas, load/scheduler, backup/restore, clean offline boot | Named release meets all applicable gates, documented service envelope and explicit residual limitations | 5–8 days |
+
+These rough allowances sum to **33–56 remaining engineering days**, about 7–12 five-day working weeks for one developer with AI assistance. They are planning estimates, not calendar commitments; access delays, document review, CPU benchmark run time and compatibility repairs can extend elapsed time. Re-estimate after P0/P1. CPU inference speed can affect product feasibility and evaluation duration; it cannot be inferred from development effort.
+
+Engineering owns implementation, artifact manifests, tests and measured evidence. The project owner owns priorities, business task deadlines and acceptance/policy decisions. Company IT owns server inventory/access, OS/runtime approval, internal identity/TLS/network, retention and recovery requirements. Domain reviewers own Arabic/document/numerical gold judgments. Name these owners at kickoff; one person may hold multiple roles. Progress reports distinguish implemented code, verified behavior, open failures and external dependencies.
+
+**First practical milestone:** after discovery, complete the protected small-PDF workflow with one local CPU model, a small measured context, one active generation, exact source previews, durable retry and a reviewed bilingual test slice. Until server access exists, the same workflow can be built/tested with explicit fixtures and optional short laptop Gemma integration. Mock-only success is a development milestone, not acceptance of CPU model quality.
+
+Track P0–P6 in the backlog. Retain A0–A8/B0–B3 only as historical references. Every change has rule IDs, test evidence, known gaps and server-dependent items. Do not mark all 55 rules verified because a subset of foundation tests passed. No production release until actual serving-role isolation, representative Arabic tasks, memory/scheduler, offline and restore gates pass.
+
+## 17. Artifact reconciliation and model replacement
+
+Planning changes from this revision:
+
+- Replace this existing plan in place; the repository copy mirrors the same version.
+- Amend the existing constitution to version 2.0.0 with stable rule IDs and corrected CPU/context/resource obligations.
+- Refresh only derived policy **metadata** for the amended constitution, update the rule ledger/backlog, and mark previous deployment-candidate records superseded. New candidate records are planning-only and production-disabled.
+- Keep source-code WIP and current containers unchanged. Do not run migrations, restart services, perform inference or download model weights during this planning task.
+
+When implementation resumes, update version/count assumptions in existing tests and replace stale candidate configuration consumers; rerun the relevant checks. Historical tests reference constitution v1 and three candidates, so their old pass counts do not validate the amended plan. Review uncommitted storage/migration work before enabling any route. Archive old source ZIPs as historical snapshots; do not treat their embedded v1 plan as current deployment instructions.
+
+Generation swap procedure: prepare verified CPU artifacts/config; run adapter/tokenizer/text/Arabic/tools/vision-if-enabled and resource tests; drain requests; stop the previous process; start/warm the replacement; check readiness and smoke cases; resume or roll back. Keep application alias `company-assistant`. Engine-specific settings remain in adapters/profiles. No generation-only change requires application-route/frontend/retrieval rewrites or re-ingestion/re-embedding. An embedding-model change is a different versioned-index migration. A runtime change can require adapter code but must remain within that boundary.
+
+Release manifests record source/image/runtime revisions, CPU/ISA build, model/projector/draft/tokenizer/template files and hashes, parser/OCR versions, embedding index/schema versions, constitution/prompt version, limits, licenses and measured acceptance results. Keep the previous compatible release and tested data-recovery path.
+
+## 18. Risks and decisions blocked by unknown CPU information
+
+| Risk / open decision | Provisional response |
 |---|---|
-| LOC-001, LOC-002, LOC-003, LOC-004 | A0–A2, A8, B0–B3 |
-| SEC-001, SEC-002, SEC-003, SEC-004, SEC-005, SEC-006, SEC-007 | A1–A2; exercised by all feature packages and B2–B3 |
-| MOD-001, MOD-002, MOD-003, MOD-004, MOD-005, MOD-006, MOD-007, MOD-008 | A1, A8, B0–B2 |
-| ING-001, ING-002, ING-003, ING-004, ING-005, ING-006, ING-007 | A2–A5, B2–B3 |
-| EVD-001, EVD-002, EVD-003, EVD-004, EVD-005 | A4, A7, A8, B1–B2 |
-| ANA-001, ANA-002, ANA-003, ANA-004, ANA-005, ANA-006, ANA-007 | A5–A6, B1–B3 |
-| UX-001, UX-002, UX-003 | A3–A7, B2 |
-| DEV-001, DEV-002, DEV-003 | A0–A1, continuous review |
-| OPS-001, OPS-002, OPS-003, OPS-004 | A1–A3, A6–A8, B0–B3 |
-| VAL-001, VAL-002, VAL-003, VAL-004, VAL-005, VAL-006, VAL-007 | A0, A8, B0–B3, release review |
+| Old or low-bandwidth CPU makes even 9B too slow | Test smaller 4B and existing Gemma; measure task times; preserve asynchronous workflows and explicit feasibility decision |
+| ISA/OS/virtualization unknown | P0 determines portable binary, native build, Linux VM overhead and supported isolation path |
+| Large Qwen fits disk/RAM but misses task deadlines | Retain as scheduled quality experiment only if useful; do not promote on parameter count |
+| MoE runtime/kernel/repacking issues | Exact pinned load test and cold peak; reject failed configuration or choose another tested artifact |
+| Smaller quantized model misses Arabic exceptions or calculations | Slice-based evaluation, stronger retrieval, trusted arithmetic and ambiguity handling; higher-bit/sized candidate comparison without assuming success |
+| Vision or Arabic OCR has high CPU cost or poor fidelity | Native-first extraction, one queued OCR/image task, previews/review flags; explicit unmet visual scope if gates fail |
+| Background tasks consume inference bandwidth/RAM | Global admission leases, one expensive job, thread limits, paused batches and measured overlap before promotion |
+| Loading/repacking or workbook peaks exceed estimates | Guard reserve, process/cgroup caps, chunking and spill limits; failed job/configuration, no host-wide overcommit |
+| Source revocation leaves stale history/cache/output | Dependency tracking and reauthorization at display/export/tool boundaries |
+| Egress or first-use downloads break locality | Prepacked artifacts, local-only runtime configuration, host/network denial and clean offline acceptance |
+| Existing Gemma tag changes remotely | Preserve inspected local manifest/blobs; verify hashes and license before transfer; never silently pull over the pinned asset |
+| Limited laptop RAM | Default mocks; optional single short model session with other heavy services stopped; no target-server capacity claims |
+| Single host or disk fails | Separate consistent backups, tested restore, explicit RPO/RTO; additional hardware for HA is separate |
 
-## 16. Risks and planned responses
+Blocked choices include exact thread counts, instruction-optimized binary, useful maximum context, latency/concurrency targets, safe overlap, large-model admissibility, image enablement and final model/runtime. Product scope, modular contracts, authorization, provenance, durable jobs and test design can proceed independently once implementation is resumed.
 
-| Risk or dependency | Response |
-|---|---|
-| No server access now | Complete track A; keep performance/model acceptance pending; retain a runnable later test bundle |
-| Candidate/quantization does not fit or kernels fail | Benchmark another pinned configuration/candidate; preserve gateway contract; record failed configuration |
-| Long context harms latency/concurrency | Publish measured profiles, queue and limit concurrency, use bounded coverage workflows, and explicitly resolve unmet targets |
-| Arabic OCR loses numbers or reading order | Preserve previews and uncertain values; compare local OCR alternatives; require review where quality is inadequate |
-| Fluent but unsupported answers | Evaluate required facts/citations/refusal; validate source IDs and scope; revise retrieval/prompts or candidate based on attributed errors |
-| Spreadsheet layout or formulas are ambiguous | Confirm mappings, preserve cached-value uncertainty, require refreshed/confirmed data before dependent calculations |
-| Queue/worker crashes or repeated delivery | Durable DB state, outbox/reconciliation, idempotent steps, staged publication and recovery tests |
-| Permission change exposes historical content | Track source dependencies, recheck display/history/export, invalidate scoped caches |
-| Parser/model tries external access | No public egress, controlled local image paths, sandbox limits, offline acceptance checks |
-| Company SSO/data/retention decisions unavailable | Use explicit development substitutes; continue independent work; block production acceptance of affected integration |
-| Single-server failure | Separate backups, tested restoration, agreed downtime and RPO/RTO; HA remains a separate infrastructure decision |
+## 19. Obsolete assumptions removed
 
-## 17. Effort, responsibilities, and progress reporting
+1. A single GPU with 64 GB VRAM: replaced by 64 GB system RAM and no dedicated GPU.
+2. A 44–50 GiB GPU allocation or weights-only memory estimate: replaced by a whole-host RAM envelope including other services and peaks.
+3. FP8 Qwen checkpoint as the default deployment artifact: replaced by pinned CPU-oriented quantized GGUF candidates.
+4. vLLM as an inherited default: replaced by a provisional llama.cpp primary and documented Ollama alternative; vLLM CPU remains a future measured option.
+5. Accelerator reservations, GPU runtime images/toolchains, tensor-parallel settings or GPU kernel checks as prerequisites: removed from the default CPU path.
+6. 64K normal and 128K priority production context: replaced by staged 4K/8K/16K/32K tests; larger windows optional only.
+7. Two/four active generations as launch settings: replaced by one active request and bounded queued users.
+8. Embeddings/reranking can later use spare VRAM: replaced by CPU time/RAM admission and bounded loading.
+9. Vision can cheaply share the generation hardware: replaced by separately tested image components and queued workload limits.
+10. RAM/disk fit implies acceptable response time, or 3B activated parameters imply a 3B memory footprint: explicitly rejected.
+11. Broker infrastructure is mandatory from the first slice: replaced by a PostgreSQL durable queue initially.
+12. Downloaded laptop Gemma implies validated company accuracy or target-server speed: explicitly rejected while preserving it as a useful existing asset.
+13. The previous 32–51-day estimate or source ZIP is a current CPU release commitment: superseded by this version's phased estimates and acceptance gates.
 
-The original 32–51 engineering-day estimate remains a rough planning envelope for one developer with AI assistance, subject to re-estimation after A0–A1. It is not a promised calendar schedule or a validated estimate for all added governance and three-model evaluation work. Benchmark runs, corpus review, hardware access, SSO, and company approvals can add elapsed time. Do not count unavailable-server waiting as completed engineering work.
+## 20. Immediate next execution batch after plan review
 
-Engineering owns implementation, tests, model adapters, packaging, and evidence records. The project owner owns business priorities, representative questions, acceptance definitions, and policy decisions. Company IT owns hardware/access, internal identity/TLS/network, approved transfer, retention, and recovery requirements. Domain reviewers approve factual/citation/numerical gold answers and Arabic task judgments. One person may hold multiple roles; name the responsible people at kickoff.
+1. Obtain read-only server discovery outputs and record actual visible RAM/CPU/OS constraints.
+2. Review the preserved repository WIP and revised constitutional obligations; align tests/config consumers before claiming a working checkpoint.
+3. Finalize the small CPU runtime/artifact acquisition list and resource profile; prepare approved dependencies without first-run downloads.
+4. Complete/test scoped identity, migrations, storage, RLS and durable jobs on synthetic data using actual serving credentials.
+5. Build the protected PDF slice with mocks; optionally test the already-installed Gemma in a short isolated laptop session after resource checks.
+6. On the server, benchmark the 9B baseline at small contexts, then the agreed challengers sequentially under explicit memory budgets.
+7. Freeze required task/Arabic/latency thresholds and progress through format, analysis, coverage, optional vision and offline-pilot gates.
 
-Track each package as not started, in progress, implemented awaiting verification, verified, or blocked on a named dependency. Progress reports state what works, what was measured, unresolved failures, and the next independent task. Record server-dependent items separately so they do not stop useful laptop work or disappear from release requirements.
+This is the execution order, not permission to resume application implementation during the present planning task.
 
-## 18. Immediate execution batch
+## 21. Primary-source record
 
-1. Inspect and record the upstream base and repository instructions; initialize the enterprise branch without modifying the public deployment.
-2. Install the constitution and this plan, add agent entry references, and create the 55-rule ledger and decision log.
-3. Run existing checks, record baseline failures, and prepare small synthetic PDF/workbook/Arabic fixtures.
-4. Implement dev-lite, injection interfaces, policy assembly, fake model endpoint, and versioned gateway contracts.
-5. Add A/B/C profile manifests and fake profile-swap tests; prepare the real benchmark runner with pending scorecards.
-6. Implement migrations, scoped identity, durable storage, RLS, and protected source delivery before expanding the corpus.
-7. Build the first durable PDF upload-to-citation workflow with clearly labeled fake generation.
-8. Continue formats, deterministic analysis, coverage workflows, UX, and packaging through track A while server access is unavailable.
+Technical recommendations above combine documented facts with explicitly labeled engineering decisions. Sources were checked on 18 October 2026; mutable documentation and catalogue entries must be rechecked against the pinned runtime/artifacts at acquisition. General API support and source code are not substitutes for exact-build execution tests.
 
-The first useful development milestone is an authorized, durable, cited workflow on the laptop. The first validated company milestone is the same workflow using tested local components on approved infrastructure. Production acceptance follows the full gates above.
-
-## 19. Baseline documents and future amendments
-
-This plan consolidates the supplied `RAGBase_Local_Enterprise_Implementation_Plan.md`, constitution version 1.0.0, revised context/Arabic requirements, and the decision to prepare three candidates while server testing is unavailable. It supersedes the earlier execution sequence where they differ; it does not silently amend mandatory constitutional rules.
-
-Architecture, candidate shortlist, tuning ranges, and effort are engineering decisions or estimates. Published model specifications are linked in Section 3 and must be pinned/rechecked before implementation. Runtime behavior, model quality, server capacity, and operational readiness require the verification described here.
-
-Record amendments with date, rationale, affected package/gate/rule IDs, and required revalidation. Keep one canonical repository copy of this plan after implementation begins; the delivered Markdown file is the handoff baseline.
+- Repository baseline: [RAGBase reviewed snapshot](https://github.com/ElMolla10/ragbase/tree/2f0a0204a14f6659b97a061168ccb0bdd8c061f7).
+- Qwen originals/licenses: [4B](https://huggingface.co/Qwen/Qwen3.5-4B), [9B](https://huggingface.co/Qwen/Qwen3.5-9B), [27B](https://huggingface.co/Qwen/Qwen3.5-27B), [35B-A3B](https://huggingface.co/Qwen/Qwen3.5-35B-A3B).
+- Exact converted-file repositories and revisions are linked in Section 5; their reported hashes require later local verification.
+- Runtime, model-template, grammar, build, OCR, extraction, database, analytics and memory-control primary references are linked next to the claims they support.
+- Gemma local metadata was inspected read-only; [Google's overview](https://ai.google.dev/gemma/docs/core) and [Ollama's matching entry](https://ollama.com/library/gemma4:12b) support its documented identity/capability context, not a performance claim.

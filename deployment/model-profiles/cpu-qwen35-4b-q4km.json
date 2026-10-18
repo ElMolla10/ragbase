@@ -1,0 +1,35 @@
+{
+  "schema_version": 2,
+  "id": "cpu-qwen35-4b-q4km",
+  "role": "lightweight_development_fallback",
+  "status": "planning_only_cpu_benchmark_pending",
+  "production_enabled": false,
+  "checkpoint": "Qwen/Qwen3.5-4B",
+  "artifact_publisher": "unsloth/Qwen3.5-4B-GGUF",
+  "immutable_revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+  "quantization": "Q4_K_M",
+  "filename": "Qwen3.5-4B-Q4_K_M.gguf",
+  "artifact_bytes": 2740937888,
+  "publisher_reported_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+  "local_checksum_verified": false,
+  "serving_alias": "company-assistant",
+  "proposed_runtime": "llama.cpp-cpu",
+  "validated_capabilities": [],
+  "benchmark_results": null,
+  "validated_context_limit": null,
+  "staged_context_tests": [
+    4096,
+    8192,
+    16384,
+    32768
+  ],
+  "vision": {
+    "proposed_file": "mmproj-F16.gguf",
+    "bytes": 672423616,
+    "publisher_reported_sha256": "cd88edcf8d031894960bb0c9c5b9b7e1fea6ebee02b9f7ce925a00d12891f864",
+    "enabled": false,
+    "tested": false
+  },
+  "license": "apache-2.0",
+  "planning_version": "2.0"
+}
