@@ -304,7 +304,7 @@ GitHub Actions runs on every push to master:
 
 ## Demo protection and evaluation
 
-Uploads default to a 20 MiB file limit (`MAX_UPLOAD_BYTES`). Oversized files
+Uploads default to a 50 MB file limit (`MAX_UPLOAD_BYTES=50000000`). Oversized files
 return HTTP 413; multipart Content-Length is also checked before parsing with
 64 KiB allowed for form overhead. Requests without Content-Length still receive
 the file check after multipart parsing; use an ingress body limit for strict

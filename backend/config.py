@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     pdf_layout_extraction: bool = True
 
     # Demo protection; write API key is opt-in, queries stay public.
-    max_upload_bytes: int = Field(default=20 * 1024 * 1024, gt=0)
+    max_upload_bytes: int = Field(default=50_000_000, gt=0)
     query_rate_limit: int = Field(default=30, ge=0)
     ingest_rate_limit: int = Field(default=5, ge=0)
     rate_limit_window_seconds: int = Field(default=60, gt=0)
