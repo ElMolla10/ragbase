@@ -5,7 +5,7 @@ import re
 
 import httpx
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -36,11 +36,16 @@ async def ready() -> JSONResponse:
     return await forward("/health/ready")
 
 
+@app.get("/health/generation")
+async def generation_health():
+    return await forward("/health/generation")
+
+
 @app.api_route("/api/{rest:path}", methods=["GET", "POST"])
 async def storage_proxy(rest: str, request: Request):
     path = request.url.path
     if not re.fullmatch(
-        r"/api/workspaces(?:/[0-9a-f-]{36}(?:/documents|/versions/[0-9a-f-]{36}/(?:file|extraction|cancel|process)))?",
+        r"/api/workspaces(?:/[0-9a-f-]{36}(?:/documents|/versions/[0-9a-f-]{36}/(?:file|extraction|cancel|process)|/sources/[0-9a-f-]{36}|/search|/answers(?:/[0-9a-f-]{36}/cancel)?))?",
         path,
     ):
         raise HTTPException(404, "Route not available")
@@ -56,6 +61,59 @@ async def storage_proxy(rest: str, request: Request):
             for key in ("authorization", "x-filename", "content-type")
             if key in request.headers
         }
+        if path.endswith("/answers") and request.method == "POST":
+            client = httpx.AsyncClient(
+                timeout=180, trust_env=False, follow_redirects=False
+            )
+            try:
+                upstream = await client.send(
+                    client.build_request(
+                        "POST",
+                        "http://api:8000" + path,
+                        content=bytes(data),
+                        headers=forwarded,
+                    ),
+                    stream=True,
+                )
+                if upstream.status_code != 200:
+                    body = await upstream.aread()
+                    await upstream.aclose()
+                    await client.aclose()
+                    return Response(
+                        body[:65536],
+                        status_code=upstream.status_code,
+                        media_type="application/json",
+                        headers={
+                            "Cache-Control": "no-store",
+                            "X-Content-Type-Options": "nosniff",
+                        },
+                    )
+            except BaseException:
+                await client.aclose()
+                raise
+
+            async def relay():
+                size = 0
+                try:
+                    async for piece in upstream.aiter_bytes():
+                        size += len(piece)
+                        if size > 262144:
+                            yield b'{"event":"error","code":"stream_limit"}\n'
+                            return
+                        yield piece
+                finally:
+                    await upstream.aclose()
+                    await client.aclose()
+
+            return StreamingResponse(
+                relay(),
+                media_type="application/x-ndjson",
+                headers={
+                    "Cache-Control": "no-store",
+                    "X-Content-Type-Options": "nosniff",
+                    "X-Accel-Buffering": "no",
+                },
+            )
         async with (
             httpx.AsyncClient(
                 timeout=30, trust_env=False, follow_redirects=False

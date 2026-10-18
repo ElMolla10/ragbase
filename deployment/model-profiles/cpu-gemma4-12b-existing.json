@@ -2,7 +2,7 @@
   "schema_version": 2,
   "id": "cpu-gemma4-12b-existing",
   "role": "existing_independent_comparator",
-  "status": "local_metadata_verified_inference_not_tested",
+  "status": "historical_metadata_verified_current_tag_absent",
   "production_enabled": false,
   "ollama_tag": "gemma4:12b",
   "ollama_manifest_digest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
@@ -24,6 +24,7 @@
   "benchmark_results": null,
   "advertised_context": 262144,
   "validated_context_limit": null,
-  "download_required_for_laptop": false,
-  "planning_version": "2.0"
+  "download_required_for_laptop": null,
+  "planning_version": "2.0",
+  "current_inventory_status": "Not listed in the current laptop Ollama inventory on 18 October 2026"
 }

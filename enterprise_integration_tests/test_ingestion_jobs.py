@@ -42,7 +42,7 @@ async def test_upload_commits_job_and_text_result_with_lineage(world):
     assert result["sha256"] == record["sha256"]
     assert result["pages"][0]["content"].startswith("Ù…ØµØ¯Ø± ØªØ¬Ø±ÙŠØ¨ÙŠ")
     assert result["pages"][0]["location"]["line_end"] == 2
-    assert result["retrieval_ready"] is False
+    assert result["retrieval_ready"] is True
     assert not await process(world)
 
 

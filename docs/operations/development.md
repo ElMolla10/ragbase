@@ -1,6 +1,6 @@
 # Enterprise development storage
 
-This profile is a development-only storage foundation. It accepts UTF-8 TXT/Markdown and PDF originals, retains immutable files and metadata, and checks workspace access on uploads, status/evidence and downloads. A separate worker performs bounded native extraction. Retrieval, generation, SSO, OCR, analysis and a graphical enterprise interface remain pending. The legacy docker-compose.yml remains a separate public-demo application.
+This profile is a development-only storage foundation. It accepts UTF-8 TXT/Markdown and PDF originals, retains immutable files and metadata, and checks workspace access on uploads, status/evidence and downloads. A separate worker performs bounded native extraction. Versioned lexical retrieval and exact-quote answers/source previews are implemented. Generation is disabled by default. Company SSO, OCR, general analysis and a graphical enterprise interface remain pending. The legacy docker-compose.yml remains a separate public-demo application.
 
 ## Start
 
@@ -69,11 +69,11 @@ Do not add --volumes unless intentionally deleting this development project's st
 
 ## Durable native extraction
 
-New uploads automatically enqueue extraction in the metadata transaction. GET /api/workspaces/{workspace}/versions/{version}/extraction returns status, original hash, extractor and page/line locations. It never reports retrieval_ready=true. Blank native pages require OCR/visual review. Encrypted PDFs are stored for audit but fail extraction with an explanation; provide an unlocked original. PDF text, tables, images, layout and Arabic quality still need representative review.
+New uploads automatically enqueue extraction in the metadata transaction. GET /api/workspaces/{workspace}/versions/{version}/extraction returns status, original hash, extractor and page/line locations. retrieval_ready=true means that an extracted source has its lexical index; it does not qualify answer or Arabic quality. Blank native pages require OCR/visual review. Encrypted PDFs are stored for audit but fail extraction with an explanation; provide an unlocked original. PDF text, tables, images, layout and Arabic quality still need representative review.
 
 POST /api/workspaces/{workspace}/versions/{version}/process idempotently queues an older original with no job. It returns any existing job without resetting it. POST .../cancel prevents an active job from publishing. An already-running child may continue for its bounded deadline (up to 30 seconds). Production worker provisioning and general operator retry handling are pending.
 
-The worker uses explicit synthetic actor scopes and the ordinary serving role. It reads original files through a read-only mount and publishes results only after rechecking permission. Pending jobs whose requester loses write permission are cancelled by narrow database maintenance; no administrator identity is impersonated. Generation remains unloaded.
+The worker uses explicit synthetic actor scopes and the ordinary serving role. It reads original files through a read-only mount and publishes results only after rechecking permission. Pending jobs whose requester loses write permission are cancelled by narrow database maintenance; no administrator identity is impersonated. Generation is disabled unless explicitly configured; the optional local-model bridge is separate from extraction.
 
 ```powershell
 docker compose --env-file .env.enterprise -f compose.enterprise.yaml stop worker
@@ -83,3 +83,26 @@ python scripts/smoke_enterprise_ingestion.py --verify-existing
 ```
 
 This persists a synthetic two-page PDF job while the worker is stopped, then verifies the same saved job after recreation. Safe status polling tolerates the startup gap; uploads are not automatically retried. The Linux worker enforces parser CPU/RAM/time/output limits. It has no public egress route on the internal Compose network; full offline and per-document network isolation are not yet qualified.
+
+## Phase 3 lookup and local-model bridge
+
+The normal Compose profile does not load a model. Search and source previews work independently. The optional laptop-only override enables the installed pinned Qwen checkpoint, with no pull endpoint:
+
+```powershell
+docker compose --env-file .env.enterprise -f compose.enterprise.yaml -f compose.enterprise-ollama.yaml up -d --build
+Invoke-RestMethod http://127.0.0.1:8800/health/generation
+python scripts/smoke_enterprise_answers.py --output .local/phase3-live-evidence.json
+```
+
+The relay is a fifth steady service, has no document/database access, and reaches only host.docker.internal:11434. It has an edge network for this development path; it is not a production offline boundary. It requires the preexisting local model with the exact configured digest. Missing or changed models fail closed. Do not change the checkpoint without adapter/context and quality checks. No candidate has been production-qualified.
+
+POST /api/workspaces/{workspace}/search accepts question and version_ids. POST .../answers accepts the same fields plus an optional UUID client_request_id for duplicate protection. Unknown fields, including endpoint overrides, are rejected. The answer response is NDJSON: queued, progress, then a validated answer and done, or error. Text is released only after schema, quote and citation validation. Preserve queued run_id for POST .../answers/{run_id}/cancel. Cancellation stops publication and closes the upstream transport before releasing admission; engine-level cancellation still needs runtime qualification.
+
+GET /api/workspaces/{workspace}/sources/{source_id} returns an authenticated plain-text preview. Source identity/hash/character offsets are returned with quotes. Search rank is a retrieval ordering signal, not confidence. A no-hit response means insufficient evidence in the selected scope, not corpus-wide absence. Dense retrieval, full cross-language retrieval and exhaustive reviews are later acceptance work.
+
+```powershell
+$version = (Get-Content .local/ingestion-smoke.json -Raw | ConvertFrom-Json).version_id
+python scripts/query_enterprise.py --version $version --question "What were Quarter 2 sales?" --preview
+```
+
+Core /health/ready remains separate from /health/generation. Raw questions, prompts and answers are not stored in answer-run metadata; hashes, source dependencies and resource/provenance metadata are retained. There is no answer-history replay yet. The 4K setting and synthetic smoke do not validate a full 4K evidence load, larger contexts or target-server capacity. See docs/governance/phase3-completion.md for measured limits and remaining gates.

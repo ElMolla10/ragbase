@@ -17,5 +17,8 @@ for implementation/verification state.
 The current development entry point is `backend.enterprise:app`. With explicit
 enterprise configuration it exposes authenticated PDF/TXT/Markdown originals,
 durable native extraction jobs, page evidence and downloads backed by PostgreSQL
-RLS. A separate bounded worker uses explicit development actor scopes. Retrieval,
-generation, SSO and analysis are not implemented. Do not add unprotected data routes to this scaffold.
+RLS. A separate bounded worker uses explicit development actor scopes. Versioned
+lexical retrieval and exact-quote answers/source previews are implemented. Default
+generation is disabled; the optional Ollama bridge is development-only. Company
+SSO, dense retrieval, general analysis and the graphical UI remain pending. Never
+add unprotected routes or label local smoke results production qualification.

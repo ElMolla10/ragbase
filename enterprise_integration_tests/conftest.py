@@ -49,6 +49,7 @@ async def world(tmp_path):
         storage_root=tmp_path / "artifacts",
         dev_tokens={tokens[key]: ids[key] for key in tokens},
         max_upload_bytes=10000,
+        generation_mode="fixture",
     )
     app = create_app(settings)
     try:
@@ -69,6 +70,10 @@ async def world(tmp_path):
     finally:
         async with owner.begin() as conn:
             for table in (
+                "answer_sources",
+                "answer_runs",
+                "document_chunks",
+                "retrieval_indexes",
                 "extracted_pages",
                 "ingestion_jobs",
                 "document_versions",

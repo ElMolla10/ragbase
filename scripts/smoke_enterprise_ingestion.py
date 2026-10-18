@@ -99,7 +99,7 @@ def main(queue_only, verify_existing):
         and "180" in result["pages"][1]["content"]
     )
     assert result["sha256"] == record["sha256"] == hashlib.sha256(payload).hexdigest()
-    assert result["retrieval_ready"] is False
+    assert result["retrieval_ready"] is True
     assert call(path, user="bob")[0] == 404
     assert call(path, user="viewer")[0] == 200
     assert call(f"/versions/{record['version_id']}/file")[1] == payload
@@ -112,7 +112,7 @@ def main(queue_only, verify_existing):
                 "native_text_and_lineage": True,
                 "cross_workspace_denied": True,
                 "resumed_existing_job": verify_existing,
-                "retrieval_ready": False,
+                "retrieval_ready": True,
             }
         )
     )

@@ -1,19 +1,17 @@
-# Execution backlog â€” CPU-only revision
+# Execution backlog — CPU-only revision
 
-Updated: 18 October 2026. Canonical package definitions: `docs/execution-plan.md`, version 2.0. Constitution: 2.0.0. The previous A/B package sequence is superseded by P0â€“P6.
+Updated: 18 October 2026. Canonical plan: execution-plan.md v2.0; constitution: 2.0.0. Seven main phases, P0–P6.
 
-| Phase | State | Next evidence needed |
+| Phase | Current state | Remaining acceptance/work |
 |---|---|---|
-| P0 hardware/policy reconciliation | Laptop inventory complete; actual server discovery pending | Actual server CPU/ISA/OS/visible RAM, utilization, storage and internal requirements |
-| P1 lightweight foundation/scoped storage | Local storage slice running; 103 checks passed; production gates pending | Company SSO/provisioning, broader authorization, backup/restore and production controls; see cpu-storage-progress.md |
-| P2 CPU baseline/PDF slice | Durable native extraction running; partial P2 only | Versioned chunks, authorized retrieval, citations, fixture answers, measured local inference and bilingual gold cases |
-| P3 CPU OCR/Office formats | Not implemented | Native-first adapters, bounded Arabic/English OCR, preserved structure/cells/locations |
-| P4 deterministic analysis | Not implemented | Typed tools, data validation, sandbox, process RAM and spill quotas, numerical gold fixtures |
-| P5 coverage/vision/model comparison | Not implemented | Whole-document coverage, 9B/35B/27B/4B plus existing Gemma comparison, qualified images, real swaps |
-| P6 offline hardening/pilot | Pending preceding gates | SSO, offline cold start, scheduler/load envelope, safe assets, backups/restore and acceptance report |
+| P0 / Phase 1: Discovery | Plan/constitution and laptop inventory complete | Actual server inventory, company requirements and reviewed acceptance cases |
+| P1 / Phase 2: Foundation | Local scoped storage implemented and tested | Production SSO/provisioning, full authorization and release controls |
+| P2 / Phase 3: PDF Q&A | Local implementation complete; 156 tests and live CPU smoke pass | Actual-server baseline and reviewed company-case acceptance remain pending |
+| P3 / Phase 4: OCR/Office | Pending | Arabic/English OCR and fidelity-preserving DOCX/PPTX/XLSX/CSV adapters |
+| P4 / Phase 5: Analysis | Pending | Typed calculations, data validation, sandbox, lineage and exports |
+| P5 / Phase 6: Coverage/model qualification | Pending | Whole-document workflows, graphical/RTL UX, hybrid retrieval qualification, optional vision and model comparisons/swaps |
+| P6 / Phase 7: Hardening/pilot | Pending | Company SSO, offline bundle, network denial, load envelope, backup restoration and acceptance |
 
-Execution resumed on the project owner’s subsequent instruction. See cpu-storage-progress.md for measured implementation evidence. Historical foundation counts remain superseded.
+Current evidence: [Phase 3 completion record](phase3-completion.md). Earlier storage/native-extraction reports are historical checkpoints. Local completion does not qualify company-server capacity or production use. No model weights were downloaded. The installed Qwen3 1.7B was used only as a development integration model; Gemma is absent from the current inventory and all production candidates remain unqualified.
 
-Next execution continues with P2 retrieval and cited-answer integration; durable jobs and bounded native extraction are now running while company-server discovery remains pending. The development storage boundary and policy/profile checks now pass. No model weights have been downloaded. The already-installed `gemma4:12b` can be considered for later short laptop tests after resource checks; it has not been benchmarked.
-
-Current P2 evidence: [durable native extraction progress](cpu-ingestion-progress.md). P0 server discovery and all later release gates remain open.
+Next implementation phase is P3 / Phase 4. Keep outstanding P0/server and production gates open; do not invent their results or silently turn a local smoke into a release acceptance.

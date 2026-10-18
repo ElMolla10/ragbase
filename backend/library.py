@@ -260,6 +260,20 @@ async def extracted_pages(
         "authorization_revoked": "The requesting identity no longer has permission to process this source.",
         "retry_limit": "Processing stopped after repeated interruptions; operator review is required.",
     }
+    indexed = False
+    if row["status"] == "extracted":
+        from backend.search.index import INDEX_VERSION
+
+        async with database.scope(principal.user_id, workspace_id) as conn:
+            await database.authorize(conn, workspace_id)
+            indexed = bool(
+                await conn.scalar(
+                    text(
+                        "SELECT 1 FROM enterprise.retrieval_indexes WHERE version_id=:v AND index_version=:i"
+                    ),
+                    {"v": version_id, "i": INDEX_VERSION},
+                )
+            )
     return {
         **dict(row),
         "error_detail": details.get(
@@ -271,7 +285,7 @@ async def extracted_pages(
         "workspace_id": workspace_id,
         "version_id": version_id,
         "pages": pages,
-        "retrieval_ready": False,
+        "retrieval_ready": indexed,
     }
 
 

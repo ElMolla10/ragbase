@@ -10,7 +10,7 @@ Project: [ElMolla10/ragbase](https://github.com/ElMolla10/ragbase)
 
 Status: revised planning baseline. Implementation is paused for this revision. No model weights were downloaded, inference performed, or live deployment changed by this planning task. Earlier implementation work is preserved, including unfinished changes that have not passed integration tests.
 
-> Execution resumed on 18 October 2026 by the project owner. The planning-time status descriptions below are historical; see the [current implementation record](governance/cpu-ingestion-progress.md) for running features, tests and remaining gates.
+> Execution resumed on 18 October 2026 by the project owner. The planning-time status descriptions below are historical; see the [current implementation record](governance/phase3-completion.md) for running features, tests and remaining gates.
 
 ## 1. The correction and its consequences
 

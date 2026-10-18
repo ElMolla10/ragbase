@@ -1,0 +1,24 @@
+# Development-only bridge to the already installed host model. No weights pulled.
+services:
+  api:
+    environment:
+      ENTERPRISE_GENERATION_MODE: ollama
+      ENTERPRISE_MODEL_ENDPOINT: http://model-relay:8001
+      ENTERPRISE_MODEL_NAME: qwen3:1.7b
+      ENTERPRISE_MODEL_DIGEST: 8f68893c685c3ddff2aa3fffce2aa60a30bb2da65ca488b61fff134a4d1730e7
+  model-relay:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enterprise
+      target: runtime
+    command: [uvicorn, backend.gateway.ollama_relay:app, --host, "0.0.0.0", --port, "8001"]
+    environment:
+      DEV_OLLAMA_MODEL: qwen3:1.7b
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 96m
+    cpus: 0.25
+    pids_limit: 32
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    networks: [edge, enterprise]

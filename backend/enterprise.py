@@ -1,4 +1,4 @@
-"""Enterprise dev-lite entry point with optional scoped original-file storage."""
+"""Development originals, native extraction, lexical search and verified quote answers."""
 
 import os
 from contextlib import asynccontextmanager
@@ -10,7 +10,7 @@ from backend.enterprise_config import EnterpriseSettings
 from backend.policy import assemble
 
 
-def create_app(settings: EnterpriseSettings | None = None):
+def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
     settings = settings or EnterpriseSettings.from_env()
 
     @asynccontextmanager
@@ -20,6 +20,32 @@ def create_app(settings: EnterpriseSettings | None = None):
         app.state.settings = settings
         app.state.instructions = assemble("retrieval")
         app.state.database = None
+        app.state.gateway = gateway
+        app.state.model_record = {
+            "alias": "company-assistant",
+            "checkpoint": settings.model_name,
+            "digest": settings.model_digest,
+            "adapter": settings.generation_mode,
+            "adapter_version": "phase3-quotes-v1",
+            "production_qualified": False,
+            "enabled_capabilities": ["text", "structured_quote_output", "streaming"],
+            "disabled_capabilities": [
+                "vision",
+                "tools",
+                "analysis",
+                "whole_document_coverage",
+            ],
+        }
+        if gateway is None and settings.generation_mode == "fixture":
+            from backend.answers.fixtures import FixtureQuoteGateway
+
+            app.state.gateway = FixtureQuoteGateway()
+        elif gateway is None and settings.generation_mode == "ollama":
+            from backend.gateway.ollama import OllamaGateway
+
+            app.state.gateway = OllamaGateway(
+                settings.model_endpoint, settings.model_name, settings.model_digest
+            )
         if settings.database_url:
             from backend.enterprise_db import EnterpriseDatabase
             from backend.storage.local import LocalArtifactStore
@@ -54,10 +80,12 @@ def create_app(settings: EnterpriseSettings | None = None):
     if settings.database_url:
         from sqlalchemy.exc import SQLAlchemyError
 
+        from backend.answers.api import router as answers_router
         from backend.library import router
         from backend.storage.local import ArtifactError
 
         app.include_router(router)
+        app.include_router(answers_router)
 
         async def unavailable(request, exc):
             return JSONResponse(
@@ -81,13 +109,45 @@ def create_app(settings: EnterpriseSettings | None = None):
             raise HTTPException(503, "Enterprise dependencies need attention") from exc
         return {
             "status": "storage_ready" if app.state.database else "foundation_ready",
-            "generation": "fixture_only",
+            "generation": settings.generation_mode,
             "documents": "original_storage_and_native_extraction"
             if app.state.database
             else "not_implemented",
             "constitution_version": instructions.constitution_version,
             "instruction_sha256": instructions.sha256,
         }
+
+    @app.get("/health/generation")
+    async def generation_health():
+        available = settings.generation_mode == "fixture"
+        if settings.generation_mode == "ollama":
+            import httpx
+
+            try:
+                async with httpx.AsyncClient(
+                    timeout=3, trust_env=False, follow_redirects=False
+                ) as client:
+                    response = await client.get(settings.model_endpoint + "/api/tags")
+                available = (
+                    response.status_code == 200
+                    and len(response.content) <= 65536
+                    and any(
+                        item.get("name") == settings.model_name
+                        and item.get("digest") == settings.model_digest
+                        for item in response.json().get("models", [])
+                    )
+                )
+            except (httpx.HTTPError, ValueError, AttributeError, TypeError):
+                available = False
+        return JSONResponse(
+            {
+                "mode": settings.generation_mode,
+                "installed_checkpoint_available": available,
+                "model_loaded_by_probe": False,
+                "production_qualified": False,
+            },
+            status_code=200 if available else 503,
+        )
 
     return app
 

@@ -28,7 +28,7 @@ def test_live_and_ready_are_honest_about_development_state(monkeypatch):
     with TestClient(app) as client:
         assert client.get("/health/live").json()["development_only"]
         status = client.get("/health/ready").json()
-        assert status["generation"] == "fixture_only"
+        assert status["generation"] == "disabled"
         assert status["documents"] == "not_implemented"
         assert client.post("/query", json={"query": "secret"}).status_code == 404
 

@@ -1,0 +1,22 @@
+"""Explicit integration fixture. Never evidence of model answer quality."""
+
+import json
+
+from backend.gateway.contracts import GatewayEvent
+
+
+class FixtureQuoteGateway:
+    async def stream(self, request):
+        request.validate()
+        if not request.evidence:
+            result = {"insufficient": True, "claims": []}
+        else:
+            source = json.loads(request.evidence[0])
+            result = {
+                "insufficient": False,
+                "claims": [
+                    {"source_id": source["source_id"], "quote": source["text"][:200]}
+                ],
+            }
+        yield GatewayEvent("text", json.dumps(result))
+        yield GatewayEvent("done", finish_reason="stop")

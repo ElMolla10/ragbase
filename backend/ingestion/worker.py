@@ -15,6 +15,7 @@ from sqlalchemy import text
 from backend.enterprise_config import EnterpriseSettings
 from backend.enterprise_db import EnterpriseDatabase
 from backend.ingestion.extract import extract
+from backend.search.index import index_pages, index_pending
 from backend.storage.local import ArtifactError, LocalArtifactStore, StoredArtifact
 
 
@@ -28,7 +29,11 @@ async def run_once(database, store, actors):
             # Narrow global maintenance returns no source or job data. Revoked
             # jobs must not consume queue capacity forever or be impersonated.
             await lock.execute(text("SELECT enterprise.reap_revoked_ingestion()"))
+            await lock.execute(text("SELECT enterprise.reap_answers()"))
             await lock.commit()
+            if await lock.scalar(text("SELECT enterprise.answers_waiting()")):
+                await lock.commit()
+                return False
             for actor in actors:
                 async with database.scope(actor) as conn:
                     workspaces = (
@@ -45,6 +50,8 @@ async def run_once(database, store, actors):
                     try:
                         async with database.scope(actor, workspace) as conn:
                             await database.authorize(conn, workspace, write=True)
+                            if await index_pending(conn, workspace):
+                                return True
                             job = await conn.scalar(
                                 text("SELECT enterprise.claim_ingestion(:token)"),
                                 {"token": token},
@@ -65,8 +72,12 @@ async def run_once(database, store, actors):
                         continue
             return False
         finally:
-            await lock.execute(text("SELECT pg_advisory_unlock(728003)"))
-            await lock.commit()
+            try:
+                await lock.execute(text("SELECT pg_advisory_unlock(728003)"))
+                await lock.commit()
+            except BaseException:
+                await lock.invalidate()
+                raise
 
 
 async def process_claim(database, store, actor, workspace, job):
@@ -122,6 +133,7 @@ async def publish(database, actor, workspace, job_id, token, result):
                         "warnings": json.dumps(page["warnings"]),
                     },
                 )
+            await index_pages(conn, workspace, job["version_id"], result["pages"])
         await conn.execute(
             text("""
             UPDATE enterprise.ingestion_jobs SET status=:status,error_code=:error,

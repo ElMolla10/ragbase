@@ -58,16 +58,24 @@
         "backend/auth/development.py",
         "backend/enterprise_db.py",
         "backend/library.py",
-        "backend/migrations/versions/0001_workspace_storage.py"
+        "backend/migrations/versions/0001_workspace_storage.py",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
         "enterprise_tests/",
-        "enterprise_integration_tests/test_access_storage.py"
+        "enterprise_integration_tests/test_access_storage.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -82,7 +90,12 @@
         "backend/migrations/versions/0001_workspace_storage.py",
         "backend/ingestion/",
         "backend/migrations/versions/0002_ingestion_jobs.py",
-        "backend/migrations/versions/0003_revoked_jobs.py"
+        "backend/migrations/versions/0003_revoked_jobs.py",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
@@ -90,11 +103,14 @@
         "enterprise_integration_tests/test_access_storage.py",
         "docs/governance/cpu-ingestion-progress.md",
         "enterprise_tests/test_native_extraction.py",
-        "enterprise_integration_tests/test_ingestion_jobs.py"
+        "enterprise_integration_tests/test_ingestion_jobs.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -109,7 +125,12 @@
         "backend/migrations/versions/0001_workspace_storage.py",
         "backend/ingestion/",
         "backend/migrations/versions/0002_ingestion_jobs.py",
-        "backend/migrations/versions/0003_revoked_jobs.py"
+        "backend/migrations/versions/0003_revoked_jobs.py",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
@@ -117,11 +138,14 @@
         "enterprise_integration_tests/test_access_storage.py",
         "docs/governance/cpu-ingestion-progress.md",
         "enterprise_tests/test_native_extraction.py",
-        "enterprise_integration_tests/test_ingestion_jobs.py"
+        "enterprise_integration_tests/test_ingestion_jobs.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -136,7 +160,12 @@
         "backend/migrations/versions/0001_workspace_storage.py",
         "backend/ingestion/",
         "backend/migrations/versions/0002_ingestion_jobs.py",
-        "backend/migrations/versions/0003_revoked_jobs.py"
+        "backend/migrations/versions/0003_revoked_jobs.py",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
@@ -144,11 +173,14 @@
         "enterprise_integration_tests/test_access_storage.py",
         "docs/governance/cpu-ingestion-progress.md",
         "enterprise_tests/test_native_extraction.py",
-        "enterprise_integration_tests/test_ingestion_jobs.py"
+        "enterprise_integration_tests/test_ingestion_jobs.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -162,18 +194,26 @@
         "backend/ingestion/",
         "backend/library.py",
         "backend/migrations/versions/0002_ingestion_jobs.py",
-        "backend/migrations/versions/0003_revoked_jobs.py"
+        "backend/migrations/versions/0003_revoked_jobs.py",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
         "enterprise_tests/test_policy.py",
         "enterprise_tests/test_gateway.py",
         "docs/governance/cpu-ingestion-progress.md",
         "enterprise_tests/test_native_extraction.py",
-        "enterprise_integration_tests/test_ingestion_jobs.py"
+        "enterprise_integration_tests/test_ingestion_jobs.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -185,45 +225,71 @@
         "backend/auth/development.py",
         "backend/enterprise_db.py",
         "backend/library.py",
-        "backend/migrations/versions/0001_workspace_storage.py"
+        "backend/migrations/versions/0001_workspace_storage.py",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
         "enterprise_tests/",
-        "enterprise_integration_tests/test_access_storage.py"
+        "enterprise_integration_tests/test_access_storage.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
       "id": "SEC-007",
       "owner": "engineering",
       "work_packages": "P1/P2/P4/P5/P6",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
+      ],
+      "verification_references": [
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
       "id": "MOD-001",
       "owner": "engineering",
       "work_packages": "P0/P2/P5",
-      "state": "implemented_partial",
+      "state": "partially_implemented_development_checks_passed",
       "enforcement_locations": [
         "backend/enterprise.py",
-        "docker/Dockerfile.enterprise"
+        "docker/Dockerfile.enterprise",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
-        "enterprise_tests/test_foundation.py"
+        "enterprise_tests/test_foundation.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Lightweight startup verified; full enterprise services and model storage isolation not implemented."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -232,62 +298,96 @@
       "work_packages": "P0/P2/P5",
       "state": "partially_implemented_development_checks_passed",
       "enforcement_locations": [
-        "backend/gateway/"
+        "backend/gateway/",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
         "enterprise_tests/",
-        "enterprise_integration_tests/test_access_storage.py"
+        "enterprise_integration_tests/test_access_storage.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
       "id": "MOD-003",
       "owner": "engineering",
       "work_packages": "P0/P2/P5",
-      "state": "implemented_partial",
+      "state": "partially_implemented_development_checks_passed",
       "enforcement_locations": [
         "backend/gateway/contracts.py",
-        "backend/gateway/http.py"
+        "backend/gateway/http.py",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
-        "enterprise_tests/test_gateway.py"
+        "enterprise_tests/test_gateway.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Unsupported images/tools rejected in scaffold; real capability registry qualification pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
       "id": "MOD-004",
       "owner": "engineering",
       "work_packages": "P0/P2/P5",
-      "state": "implemented_partial",
+      "state": "partially_implemented_development_checks_passed",
       "enforcement_locations": [
         "backend/policy.py",
-        "deployment/model-profiles/"
+        "deployment/model-profiles/",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
-        "enterprise_tests/test_policy.py"
+        "enterprise_tests/test_policy.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Policy hashes and candidate metadata scaffolds exist; real traces and runtime revisions pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
       "id": "MOD-005",
       "owner": "engineering",
       "work_packages": "P0/P2/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
+      ],
+      "verification_references": [
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -436,16 +536,24 @@
         "backend/ingestion/",
         "backend/library.py",
         "backend/migrations/versions/0002_ingestion_jobs.py",
-        "backend/migrations/versions/0003_revoked_jobs.py"
+        "backend/migrations/versions/0003_revoked_jobs.py",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
         "docs/governance/cpu-ingestion-progress.md",
         "enterprise_tests/test_native_extraction.py",
-        "enterprise_integration_tests/test_ingestion_jobs.py"
+        "enterprise_integration_tests/test_ingestion_jobs.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -478,36 +586,66 @@
       "id": "EVD-001",
       "owner": "engineering",
       "work_packages": "P2/P3/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
+      ],
+      "verification_references": [
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
       "id": "EVD-002",
       "owner": "engineering",
       "work_packages": "P2/P3/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
+      ],
+      "verification_references": [
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
       "id": "EVD-003",
       "owner": "engineering",
       "work_packages": "P2/P3/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
+      ],
+      "verification_references": [
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -655,12 +793,22 @@
       "id": "UX-003",
       "owner": "engineering",
       "work_packages": "P2/P3/P4/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
+      ],
+      "verification_references": [
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -721,34 +869,50 @@
         "backend/ingestion/",
         "backend/library.py",
         "backend/migrations/versions/0002_ingestion_jobs.py",
-        "backend/migrations/versions/0003_revoked_jobs.py"
+        "backend/migrations/versions/0003_revoked_jobs.py",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
         "docs/governance/cpu-ingestion-progress.md",
         "enterprise_tests/test_native_extraction.py",
-        "enterprise_integration_tests/test_ingestion_jobs.py"
+        "enterprise_integration_tests/test_ingestion_jobs.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
       "id": "OPS-002",
       "owner": "engineering",
       "work_packages": "P0/P1/P2/P4/P6",
-      "state": "implemented_partial",
+      "state": "partially_implemented_development_checks_passed",
       "enforcement_locations": [
         "backend/enterprise.py",
-        "backend/dev_proxy.py"
+        "backend/dev_proxy.py",
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
       ],
       "verification_references": [
         "enterprise_tests/test_foundation.py",
-        "enterprise_tests/test_proxy.py"
+        "enterprise_tests/test_proxy.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Process/foundation health only; database/queue/model readiness and local metrics pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
@@ -828,15 +992,24 @@
       "owner": "engineering",
       "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "partially_implemented_development_checks_passed",
-      "enforcement_locations": [],
+      "enforcement_locations": [
+        "backend/search/",
+        "backend/answers/",
+        "backend/gateway/ollama.py",
+        "backend/migrations/versions/0004_retrieval_answers.py",
+        "backend/migrations/versions/0005_heavy_lease_guard.py"
+      ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
         "enterprise_tests/",
-        "enterprise_integration_tests/test_access_storage.py"
+        "enterprise_integration_tests/test_access_storage.py",
+        "docs/governance/phase3-completion.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_pdf_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
       ]
     },
     {
