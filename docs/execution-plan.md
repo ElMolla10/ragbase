@@ -10,7 +10,7 @@ Project: [ElMolla10/ragbase](https://github.com/ElMolla10/ragbase)
 
 Status: revised planning baseline. Implementation is paused for this revision. No model weights were downloaded, inference performed, or live deployment changed by this planning task. Earlier implementation work is preserved, including unfinished changes that have not passed integration tests.
 
-> Execution resumed on 18 October 2026 by the project owner. The planning-time status descriptions below are historical; see the [current implementation record](governance/cpu-storage-progress.md) for running features, tests and remaining gates.
+> Execution resumed on 18 October 2026 by the project owner. The planning-time status descriptions below are historical; see the [current implementation record](governance/cpu-ingestion-progress.md) for running features, tests and remaining gates.
 
 ## 1. The correction and its consequences
 
@@ -429,6 +429,8 @@ Timed-out cases are not excluded to improve averages. Test watchdogs must be rec
 Select models by mandatory gates first, then compare quality, actual wait time, memory and operating complexity. A fast fluent answer with unsupported facts is a failure. No aggregate score compensates for an access leak or a failing required Arabic slice.
 
 ## 16. Updated phased backlog and first milestone
+
+The execution has **seven main phases (P0–P6)**. See the [specific phase roadmap and current status](governance/phase-roadmap.md).
 
 The earlier implementation is a starting point to review, not a reason to skip hardware correction or security gates.
 

@@ -92,6 +92,33 @@ services:
     tmpfs:
       - /tmp:size=16m
     networks: [enterprise]
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enterprise
+      target: runtime
+    command: [python, -m, backend.ingestion.worker]
+    init: true
+    environment:
+      ENTERPRISE_DATABASE_URL: ${ENTERPRISE_DATABASE_URL:?Development configuration required}
+      ENTERPRISE_STORAGE_ROOT: /data
+      # Explicit synthetic development scope; never infer actors from document content.
+      ENTERPRISE_WORKER_ACTORS: 11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222
+    volumes:
+      - enterprise_artifacts:/data:ro
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 768m
+    memswap_limit: 768m
+    cpus: 1
+    pids_limit: 32
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    networks: [enterprise]
   proxy:
     build:
       context: .

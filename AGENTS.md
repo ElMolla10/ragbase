@@ -15,6 +15,7 @@ for implementation/verification state.
   authorization, data scope, execution, and network limits in trusted code.
 
 The current development entry point is `backend.enterprise:app`. With explicit
-enterprise configuration it exposes authenticated TXT/Markdown original storage
-and downloads backed by PostgreSQL RLS. Extraction, generation, SSO and analysis
-are not implemented. Do not add unprotected data routes to this scaffold.
+enterprise configuration it exposes authenticated PDF/TXT/Markdown originals,
+durable native extraction jobs, page evidence and downloads backed by PostgreSQL
+RLS. A separate bounded worker uses explicit development actor scopes. Retrieval,
+generation, SSO and analysis are not implemented. Do not add unprotected data routes to this scaffold.

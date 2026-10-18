@@ -82,7 +82,7 @@ def create_app(settings: EnterpriseSettings | None = None):
         return {
             "status": "storage_ready" if app.state.database else "foundation_ready",
             "generation": "fixture_only",
-            "documents": "original_storage_only"
+            "documents": "original_storage_and_native_extraction"
             if app.state.database
             else "not_implemented",
             "constitution_version": instructions.constitution_version,

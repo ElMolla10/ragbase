@@ -48,7 +48,7 @@ async def world(tmp_path):
         database_url=os.environ["ENTERPRISE_TEST_APP_URL"],
         storage_root=tmp_path / "artifacts",
         dev_tokens={tokens[key]: ids[key] for key in tokens},
-        max_upload_bytes=1024,
+        max_upload_bytes=10000,
     )
     app = create_app(settings)
     try:
@@ -67,6 +67,28 @@ async def world(tmp_path):
                 "root": settings.storage_root,
             }
     finally:
+        async with owner.begin() as conn:
+            for table in (
+                "extracted_pages",
+                "ingestion_jobs",
+                "document_versions",
+                "documents",
+                "memberships",
+            ):
+                await conn.execute(
+                    text(
+                        f"DELETE FROM enterprise.{table} WHERE workspace_id IN (:a,:b)"
+                    ),
+                    {"a": ids["a"], "b": ids["b"]},
+                )
+            await conn.execute(
+                text("DELETE FROM enterprise.workspaces WHERE id IN (:a,:b)"),
+                {"a": ids["a"], "b": ids["b"]},
+            )
+            await conn.execute(
+                text("DELETE FROM enterprise.users WHERE id IN (:a,:b,:v)"),
+                {"a": ids["alice"], "b": ids["bob"], "v": ids["viewer"]},
+            )
         await owner.dispose()
 
 

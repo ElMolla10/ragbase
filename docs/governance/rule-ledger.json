@@ -79,16 +79,22 @@
         "backend/auth/development.py",
         "backend/enterprise_db.py",
         "backend/library.py",
-        "backend/migrations/versions/0001_workspace_storage.py"
+        "backend/migrations/versions/0001_workspace_storage.py",
+        "backend/ingestion/",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
         "enterprise_tests/",
-        "enterprise_integration_tests/test_access_storage.py"
+        "enterprise_integration_tests/test_access_storage.py",
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {
@@ -100,16 +106,22 @@
         "backend/auth/development.py",
         "backend/enterprise_db.py",
         "backend/library.py",
-        "backend/migrations/versions/0001_workspace_storage.py"
+        "backend/migrations/versions/0001_workspace_storage.py",
+        "backend/ingestion/",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
         "enterprise_tests/",
-        "enterprise_integration_tests/test_access_storage.py"
+        "enterprise_integration_tests/test_access_storage.py",
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {
@@ -121,34 +133,47 @@
         "backend/auth/development.py",
         "backend/enterprise_db.py",
         "backend/library.py",
-        "backend/migrations/versions/0001_workspace_storage.py"
+        "backend/migrations/versions/0001_workspace_storage.py",
+        "backend/ingestion/",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
         "enterprise_tests/",
-        "enterprise_integration_tests/test_access_storage.py"
+        "enterprise_integration_tests/test_access_storage.py",
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {
       "id": "SEC-005",
       "owner": "engineering",
       "work_packages": "P1/P2/P4/P5/P6",
-      "state": "implemented_partial",
+      "state": "partially_implemented_development_checks_passed",
       "enforcement_locations": [
         "backend/policy.py",
-        "backend/gateway/http.py"
+        "backend/gateway/http.py",
+        "backend/ingestion/",
+        "backend/library.py",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
       ],
       "verification_references": [
         "enterprise_tests/test_policy.py",
-        "enterprise_tests/test_gateway.py"
+        "enterprise_tests/test_gateway.py",
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Instruction/evidence separation tested; full injection/authorization defenses and model behavior pending."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {
@@ -318,40 +343,64 @@
       "enforcement_locations": [
         "backend/storage/local.py",
         "backend/storage/reconcile.py",
-        "backend/library.py"
+        "backend/library.py",
+        "backend/ingestion/",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
         "enterprise_tests/",
-        "enterprise_integration_tests/test_access_storage.py"
+        "enterprise_integration_tests/test_access_storage.py",
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {
       "id": "ING-002",
       "owner": "engineering",
       "work_packages": "P1/P2/P3",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/ingestion/",
+        "backend/library.py",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {
       "id": "ING-003",
       "owner": "engineering",
       "work_packages": "P1/P2/P3",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/ingestion/",
+        "backend/library.py",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {
@@ -382,12 +431,21 @@
       "id": "ING-006",
       "owner": "engineering",
       "work_packages": "P1/P2/P3",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/ingestion/",
+        "backend/library.py",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {
@@ -398,16 +456,22 @@
       "enforcement_locations": [
         "backend/storage/local.py",
         "backend/storage/reconcile.py",
-        "backend/library.py"
+        "backend/library.py",
+        "backend/ingestion/",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
         "enterprise_tests/",
-        "enterprise_integration_tests/test_access_storage.py"
+        "enterprise_integration_tests/test_access_storage.py",
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Only the development storage/gateway slice has passed these checks; complete rule coverage and production qualification remain pending."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {
@@ -570,12 +634,21 @@
       "id": "UX-002",
       "owner": "engineering",
       "work_packages": "P2/P3/P4/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/ingestion/",
+        "backend/library.py",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {
@@ -643,12 +716,21 @@
       "id": "OPS-001",
       "owner": "engineering",
       "work_packages": "P0/P1/P2/P4/P6",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/ingestion/",
+        "backend/library.py",
+        "backend/migrations/versions/0002_ingestion_jobs.py",
+        "backend/migrations/versions/0003_revoked_jobs.py"
+      ],
+      "verification_references": [
+        "docs/governance/cpu-ingestion-progress.md",
+        "enterprise_tests/test_native_extraction.py",
+        "enterprise_integration_tests/test_ingestion_jobs.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Revised CPU-only obligation; hardware discovery, implementation alignment and real benchmarks pending."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
       ]
     },
     {

@@ -40,7 +40,7 @@ async def ready() -> JSONResponse:
 async def storage_proxy(rest: str, request: Request):
     path = request.url.path
     if not re.fullmatch(
-        r"/api/workspaces(?:/[0-9a-f-]{36}(?:/documents|/versions/[0-9a-f-]{36}/file))?",
+        r"/api/workspaces(?:/[0-9a-f-]{36}(?:/documents|/versions/[0-9a-f-]{36}/(?:file|extraction|cancel|process)))?",
         path,
     ):
         raise HTTPException(404, "Route not available")

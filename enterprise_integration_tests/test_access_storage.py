@@ -23,7 +23,7 @@ async def test_authorized_upload_listing_and_original_download(world):
     assert response.status_code == 201, response.text
     record = response.json()
     assert record["status"] == "stored"
-    assert record["extraction"] == "not_implemented"
+    assert record["extraction"] == "queued"
     listing = await world["client"].get(
         f"/api/workspaces/{world['ids']['a']}/documents", headers=headers(world)
     )
@@ -255,11 +255,11 @@ async def test_every_data_table_has_forced_rls_and_nonowner_serving_role(world):
         rows = (
             await conn.execute(
                 text(
-                    "SELECT relrowsecurity,relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='enterprise' AND c.relname IN ('users','workspaces','memberships','documents','document_versions')"
+                    "SELECT relrowsecurity,relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='enterprise' AND c.relname IN ('users','workspaces','memberships','documents','document_versions','ingestion_jobs','extracted_pages')"
                 )
             )
         ).all()
-        assert len(rows) == 5 and all(enabled and forced for enabled, forced in rows)
+        assert len(rows) == 7 and all(enabled and forced for enabled, forced in rows)
 
 
 @pytest.mark.parametrize(
@@ -283,7 +283,7 @@ async def test_unsafe_or_unimplemented_inputs_are_rejected(world, filename):
 
 
 async def test_oversized_and_empty_body_leave_no_metadata_or_artifacts(world):
-    for content in [b"", b"a" * 1025]:
+    for content in [b"", b"a" * (world["app"].state.settings.max_upload_bytes + 1)]:
         response = await upload(world, content=content)
         assert response.status_code in {400, 413}
     assert not list(world["root"].glob("*/*/*.bin"))

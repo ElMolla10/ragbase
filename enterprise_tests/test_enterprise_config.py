@@ -45,6 +45,12 @@ def test_subject_is_server_owned():
     assert authenticate("Bearer " + "a" * 40, {"a" * 40: actor}).user_id == actor
 
 
+@pytest.mark.parametrize("limit", [0, 5_000_001])
+def test_upload_limit_cannot_exceed_parser_and_proxy_boundary(limit):
+    with pytest.raises(ValueError, match="bounded parser"):
+        EnterpriseSettings(max_upload_bytes=limit)
+
+
 @pytest.mark.parametrize("tokens", ["[]", "null", '{"short":"not-a-uuid"}'])
 def test_invalid_token_configuration_fails_without_exposing_secrets(
     monkeypatch, tokens

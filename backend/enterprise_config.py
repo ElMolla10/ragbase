@@ -24,8 +24,10 @@ class EnterpriseSettings:
             raise ValueError("Enterprise database requires the async PostgreSQL driver")
         if self.database_url and not self.storage_root:
             raise ValueError("Enterprise storage root is required with a database")
-        if not 1 <= self.max_upload_bytes <= 50_000_000:
-            raise ValueError("Upload byte limit must be between 1 and 50000000")
+        if not 1 <= self.max_upload_bytes <= 5_000_000:
+            raise ValueError(
+                "Upload byte limit must be between 1 and 5000000 for the bounded parser"
+            )
         if any(
             len(token) < 32 or not isinstance(actor, UUID)
             for token, actor in self.dev_tokens.items()

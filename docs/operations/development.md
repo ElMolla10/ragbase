@@ -1,6 +1,6 @@
 # Enterprise development storage
 
-This profile is a development-only storage foundation. It accepts UTF-8 TXT/Markdown originals, retains immutable files and metadata, and checks workspace access on every upload/list/download. Extraction, generation, SSO, analysis and a graphical enterprise interface are pending. The legacy docker-compose.yml remains a separate public-demo application.
+This profile is a development-only storage foundation. It accepts UTF-8 TXT/Markdown and PDF originals, retains immutable files and metadata, and checks workspace access on uploads, status/evidence and downloads. A separate worker performs bounded native extraction. Retrieval, generation, SSO, OCR, analysis and a graphical enterprise interface remain pending. The legacy docker-compose.yml remains a separate public-demo application.
 
 ## Start
 
@@ -14,7 +14,7 @@ Invoke-RestMethod http://127.0.0.1:8800/health/ready
 
 Run initialization only once. If configuration already exists it stops without replacing secrets. The ignored .env.enterprise contains database credentials and development tokens; .local/dev-access.json contains tokens for synthetic Alice, Bob and Viewer accounts. Never commit, publish, print or reuse these secrets in production. They are development identities, not company SSO. No real company documents belong in this environment.
 
-Startup orders database health, migration, synthetic provisioning, API and proxy. Three services remain running; migration/seed services exit successfully. Only the proxy publishes a host port, bound to loopback 8800. The API uses a non-owner, non-BYPASSRLS PostgreSQL role. The generation model is not loaded. The initial build requires package access and is not an offline release bundle.
+Startup orders database health, migration, synthetic provisioning, API and proxy. Four services remain running: database, API, proxy and native-extraction worker; migration/seed services exit successfully. Only the proxy publishes a host port, bound to loopback 8800. The API uses a non-owner, non-BYPASSRLS PostgreSQL role. The generation model is not loaded. The initial build requires package access and is not an offline release bundle.
 
 ## Synthetic smoke and persistence
 
@@ -66,3 +66,20 @@ docker compose --env-file .env.enterprise -f compose.enterprise.yaml down
 ```
 
 Do not add --volumes unless intentionally deleting this development project's stored documents and database. Existing public-demo and unrelated containers are separate. Full offline network enforcement, internal TLS, production SSO, release locking, backup restoration and server qualification remain pending.
+
+## Durable native extraction
+
+New uploads automatically enqueue extraction in the metadata transaction. GET /api/workspaces/{workspace}/versions/{version}/extraction returns status, original hash, extractor and page/line locations. It never reports retrieval_ready=true. Blank native pages require OCR/visual review. Encrypted PDFs are stored for audit but fail extraction with an explanation; provide an unlocked original. PDF text, tables, images, layout and Arabic quality still need representative review.
+
+POST /api/workspaces/{workspace}/versions/{version}/process idempotently queues an older original with no job. It returns any existing job without resetting it. POST .../cancel prevents an active job from publishing. An already-running child may continue for its bounded deadline (up to 30 seconds). Production worker provisioning and general operator retry handling are pending.
+
+The worker uses explicit synthetic actor scopes and the ordinary serving role. It reads original files through a read-only mount and publishes results only after rechecking permission. Pending jobs whose requester loses write permission are cancelled by narrow database maintenance; no administrator identity is impersonated. Generation remains unloaded.
+
+```powershell
+docker compose --env-file .env.enterprise -f compose.enterprise.yaml stop worker
+python scripts/smoke_enterprise_ingestion.py --queue-only
+docker compose --env-file .env.enterprise -f compose.enterprise.yaml up -d --force-recreate api worker proxy
+python scripts/smoke_enterprise_ingestion.py --verify-existing
+```
+
+This persists a synthetic two-page PDF job while the worker is stopped, then verifies the same saved job after recreation. Safe status polling tolerates the startup gap; uploads are not automatically retried. The Linux worker enforces parser CPU/RAM/time/output limits. It has no public egress route on the internal Compose network; full offline and per-document network isolation are not yet qualified.

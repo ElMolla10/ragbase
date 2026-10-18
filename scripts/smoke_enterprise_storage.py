@@ -32,7 +32,10 @@ def main(verify_existing):
             return error.code, error.read()
 
     status, body = call("/health/ready")
-    assert status == 200 and json.loads(body)["documents"] == "original_storage_only"
+    assert (
+        status == 200
+        and json.loads(body)["documents"] == "original_storage_and_native_extraction"
+    )
     path = f"/api/workspaces/{access['workspace_a']}"
     record_path = ROOT / ".local/storage-smoke.json"
     if verify_existing:

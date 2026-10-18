@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-HEAD_REVISION = "0001_workspace_storage"
+HEAD_REVISION = "0003_revoked_jobs"
 
 
 class EnterpriseDatabase:
