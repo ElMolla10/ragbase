@@ -35,10 +35,10 @@ def filename_from_header(value: str | None) -> str:
         raise HTTPException(
             400, "A plain filename of at most 240 characters is required"
         )
-    if not value.lower().endswith((".txt", ".md", ".pdf")):
+    if not value.lower().endswith((".txt", ".md", ".pdf", ".csv")):
         raise HTTPException(
             415,
-            "Supported originals are UTF-8 TXT, Markdown and native PDFs",
+            "Supported originals are UTF-8 TXT, Markdown, comma-separated CSV and native PDFs",
         )
     return value
 
@@ -113,7 +113,7 @@ async def store_original(
         if not await conn.scalar(text("SELECT enterprise.admit_ingestion()")):
             raise HTTPException(429, "Processing queue is full; wait for existing jobs")
         body = await bounded_body(request, request.app.state.settings.max_upload_bytes)
-        if filename.lower().endswith((".txt", ".md")):
+        if filename.lower().endswith((".txt", ".md", ".csv")):
             try:
                 body.decode("utf-8")
             except UnicodeError as exc:
@@ -254,6 +254,8 @@ async def extracted_pages(
             )
             pages = [dict(page) for page in result.mappings()]
     details = {
+        "invalid_csv": "CSV must contain valid UTF-8 comma-separated records with correctly quoted fields.",
+        "csv_structure_limit": "CSV exceeds the 1,000-row or 100-column development limit.",
         "encrypted_pdf_unsupported": "Encrypted PDFs are unsupported; provide an unlocked copy.",
         "invalid_or_unsupported_pdf": "The PDF could not be validated or parsed.",
         "artifact_unavailable": "The original is missing or failed its integrity check; operator review is required.",

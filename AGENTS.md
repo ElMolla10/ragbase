@@ -15,10 +15,11 @@ for implementation/verification state.
   authorization, data scope, execution, and network limits in trusted code.
 
 The current development entry point is `backend.enterprise:app`. With explicit
-enterprise configuration it exposes authenticated PDF/TXT/Markdown originals,
+enterprise configuration it exposes authenticated PDF/TXT/Markdown/CSV originals,
 durable native extraction jobs, page evidence and downloads backed by PostgreSQL
 RLS. A separate bounded worker uses explicit development actor scopes. Versioned
 lexical retrieval and exact-quote answers/source previews are implemented. Default
 generation is disabled; the explicitly opted-in OpenRouter relay is development-only. Read docs/openrouter-byok.md for the current hosted-generation implementation and pending free-access validation; never expose credentials or silently change modes. Company
-SSO, dense retrieval, general analysis and the graphical UI remain pending. Never
+Phase 4 is in progress: bounded CSV ingestion is implemented; OCR and Office
+formats remain pending. SSO, dense retrieval, general analysis and the graphical UI remain pending. Never
 add unprotected routes or label local smoke results production qualification.

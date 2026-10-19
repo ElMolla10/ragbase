@@ -19,11 +19,18 @@ ERROR_CODES = {
     "parser_timeout",
     "parser_failed",
     "artifact_unavailable",
+    "unsupported_format",
+    "invalid_csv",
+    "csv_structure_limit",
 }
 
 
 def extract(data: bytes, filename: str):
-    kind = "pdf" if filename.lower().endswith(".pdf") else "text"
+    kind = {".pdf": "pdf", ".txt": "text", ".md": "text", ".csv": "csv"}.get(
+        Path(filename).suffix.lower()
+    )
+    if kind is None:
+        return {"error_code": "unsupported_format"}
     with tempfile.TemporaryFile() as output:
         try:
             process = subprocess.run(

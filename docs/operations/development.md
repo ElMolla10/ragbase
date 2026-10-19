@@ -110,3 +110,14 @@ python scripts/query_enterprise.py --version $version --question "What were Quar
 ```
 
 Core /health/ready remains separate from /health/generation. Raw questions, prompts and answers are not stored in answer-run metadata; hashes, source dependencies and resource/provenance metadata are retained. There is no answer-history replay yet. The 4K setting and synthetic smoke do not validate a full 4K evidence load, larger contexts or target-server capacity. See docs/governance/phase3-completion.md for measured limits and remaining gates.
+
+## Interactive enterprise test
+
+After starting the services, run `python scripts/try_enterprise.py` from the
+repository folder. It prompts for a supported file path, uploads it as the local
+Alice development identity, waits up to 120 seconds for durable processing, then
+accepts questions and shows citation previews. A timed-out client does not cancel
+its durable job. `--version UUID` reuses a ready version without uploading again;
+`--file PATH --question TEXT` runs one question. No credentials are displayed.
+Use nonconfidential files only with hosted generation enabled. There is no
+enterprise browser UI yet; opening port 8800 is not a chat interface.

@@ -4,6 +4,7 @@ Invoked by absolute path with Python isolated mode. Linux resource limits are
 mandatory for execution; Windows development uses the Linux test/worker image.
 """
 
+import csv
 import io
 import json
 import logging
@@ -15,7 +16,69 @@ class RejectedError(ValueError):
     pass
 
 
+def parse_csv(data):
+    # RFC-style comma-separated UTF-8 only. Do not infer numbers, dates, formulas,
+    # header semantics or delimiters: identifiers and empty cells remain strings.
+    content = data.decode("utf-8-sig")
+    if re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", content):
+        raise RejectedError("text_limit_or_binary")
+    if len(content) > 1_000_000:
+        raise RejectedError("extracted_text_limit")
+    csv.field_size_limit(100_000)
+    reader = csv.reader(io.StringIO(content, newline=""), strict=True)
+    pages, total, previous_line, width = [], 0, 0, None
+    warnings = ["csv_strings_only_no_header_type_or_formula_inference"]
+    try:
+        for ordinal, row in enumerate(reader, 1):
+            if ordinal > 1_000 or len(row) > 100:
+                raise RejectedError("csv_structure_limit")
+            if width is None and row:
+                width = len(row)
+            row_warnings = []
+            if row and len(row) != width:
+                row_warnings.append("csv_inconsistent_column_count")
+            if any(cell.lstrip().startswith(("=", "+", "-", "@")) for cell in row):
+                row_warnings.append("csv_formula_like_text_not_executed")
+            # Canonical JSON preserves cell boundaries, quotes and leading zeros.
+            rendered = json.dumps(row, ensure_ascii=False)
+            total += len(rendered)
+            if len(rendered) > 100_000 or total > 1_000_000:
+                raise RejectedError("extracted_text_limit")
+            pages.append(
+                {
+                    "ordinal": ordinal,
+                    "content": rendered,
+                    "warnings": row_warnings,
+                    "location": {
+                        "kind": "csv_row",
+                        "row": ordinal,
+                        "line_start": previous_line + 1,
+                        "line_end": reader.line_num,
+                        "column_count": len(row),
+                    },
+                }
+            )
+            previous_line = reader.line_num
+    except csv.Error as exc:
+        raise RejectedError("invalid_csv") from exc
+    if not pages or not any(page["location"]["column_count"] for page in pages):
+        raise RejectedError("invalid_csv")
+    needs_review = any(
+        "csv_inconsistent_column_count" in page["warnings"] for page in pages
+    )
+    if needs_review:
+        warnings.append("csv_inconsistent_column_count")
+    return {
+        "extractor": "csv-utf8-strings-v1",
+        "status": "needs_review" if needs_review else "extracted",
+        "warnings": warnings,
+        "pages": pages,
+    }
+
+
 def parse(data, kind):
+    if kind == "csv":
+        return parse_csv(data)
     if kind == "text":
         content = data.decode("utf-8")
         if len(content) > 1_000_000 or re.search(

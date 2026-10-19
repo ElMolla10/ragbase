@@ -4,7 +4,7 @@ Development branch for an access-controlled document question-answering and anal
 system, with Arabic and mixed-language evaluation planned throughout delivery.
 
 **Updated: 19 October 2026.** Phase 3's document Q&A implementation is complete
-in local development. The current working setup uses OpenRouter BYOK, with GPT-OSS
+in local development; Phase 4 has started with bounded CSV ingestion. The current working setup uses OpenRouter BYOK, with GPT-OSS
 120B through Groq as primary and Gemini 3.8 Flash as fallback. Company-server
 acceptance and production qualification remain open.
 
@@ -14,11 +14,11 @@ enterprise application. The enterprise entry point is `backend.enterprise:app`.
 
 ## What works today
 
-- Authenticated PDF, UTF-8 TXT and Markdown uploads, with durable immutable
+- Authenticated PDF, UTF-8 TXT, Markdown and comma-separated CSV uploads, with durable immutable
   originals and version/hash tracking.
 - PostgreSQL workspace permissions and forced row-level security, including
   cross-workspace isolation, permission revocation and integrity checks.
-- Durable extraction jobs, bounded native PDF text extraction, page/line lineage,
+- Durable extraction jobs, bounded native PDF/CSV text extraction, page/line/row lineage,
   extraction warnings and versioned lexical search over authorized evidence.
 - Extractive answers: the model selects source quotations; trusted application
   code validates the schema, source identifiers and exact quoted text before
@@ -70,8 +70,8 @@ See [BYOK implementation and evidence](docs/openrouter-byok.md).
 
 | Check | Recorded result |
 |---|---|
-| Unit and contract suite | 163 passed |
-| Isolated PostgreSQL integration suite | 58 passed |
+| Unit and contract suite | 181 passed |
+| Isolated PostgreSQL integration suite | 62 passed |
 | Lint, formatting and policy consistency | Passed |
 | Gemini through Google AI Studio | HTTP 200 with an answer |
 | GPT-OSS 120B through Groq | HTTP 200 with an answer |
@@ -141,6 +141,36 @@ If the synthetic ingestion smoke was run previously, its version ID is available
 in `.local/ingestion-smoke.json`. Retrieval is scoped to the selected versions;
 a missing top-k result does not prove a fact is absent from the entire corpus.
 
+## Try the enterprise version now
+
+The local API is running at `http://127.0.0.1:8800`. There is no graphical
+enterprise UI yet. From this repository folder, launch the interactive client:
+
+```powershell
+python scripts/try_enterprise.py
+```
+
+Paste a file path when prompted, then type questions. The client uploads the
+original, waits for extraction/indexing, and displays validated quotations with
+source previews. It uses the local synthetic Alice development identity without
+printing its token. Use nonconfidential test files: retrieved evidence is sent
+through the enabled OpenRouter route. Supported inputs are native PDF, UTF-8
+TXT/Markdown and comma-separated UTF-8 CSV, up to 5 MB. Leave a question blank to
+exit. Uploads remain in the development workspace after exiting.
+
+You can also supply a path and question directly:
+
+```powershell
+python scripts/try_enterprise.py --file "C:\path\test.pdf" --question "What are the main terms?"
+```
+
+CSV is the first Phase 4 slice: up to 1,000 records and 100 columns, with original
+strings, row/physical-line locations and quoted multiline cells preserved. No
+header/type/date inference, formula execution or calculations are performed.
+Inconsistent row widths require review and are blocked from Q&A. CSV answers
+currently quote JSON arrays of source cells. OCR, DOCX, PPTX and XLSX remain
+unsupported. See [Phase 4 progress](docs/governance/phase4-progress.md).
+
 ## Run checks
 
 The disposable integration stack uses synthetic data and a separate database:
@@ -168,7 +198,7 @@ public CI. See [development operations](docs/operations/development.md).
 | 1 / P0 | Hardware discovery, policy and acceptance cases | CPU plan and laptop inventory recorded; company-server inventory and reviewed cases pending |
 | 2 / P1 | Foundation and scoped original storage | Development implementation tested; production identity and release gates pending |
 | 3 / P2 | Native PDF ingestion, retrieval and cited answers | Local implementation complete; BYOK routing added and live-tested; server/company acceptance pending |
-| 4 / P3 | Arabic/English OCR and Office formats | Pending |
+| 4 / P3 | Arabic/English OCR and Office formats | In progress: bounded CSV ingestion tested; OCR and DOCX/PPTX/XLSX pending |
 | 5 / P4 | Trusted numerical analysis, charts and exports | Pending |
 | 6 / P5 | Complete-document coverage, RTL UX and model qualification | Pending |
 | 7 / P6 | Hardening, SSO, backup/restore and company pilot | Pending |
@@ -186,7 +216,7 @@ implemented access, scope and validation controls. A written rule is not proof
 that every model follows it. [AGENTS.md](AGENTS.md) directs development agents to
 that source; [the rule ledger](docs/governance/rule-ledger.json) records gaps.
 
-Next implementation work is Phase 4: bounded OCR and Office fidelity. Company
+Phase 4 is in progress: bounded CSV ingestion is implemented; next are OCR and Office fidelity. Company
 hardware discovery and representative Arabic/mixed-language acceptance cases
 remain parallel requirements. Dense retrieval, deterministic calculations,
 complete-document workflows, graphical/RTL UX, company SSO, production networking,

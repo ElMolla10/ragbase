@@ -546,11 +546,15 @@
         "enterprise_integration_tests/test_access_storage.py",
         "docs/governance/cpu-ingestion-progress.md",
         "enterprise_tests/test_native_extraction.py",
-        "enterprise_integration_tests/test_ingestion_jobs.py"
+        "enterprise_integration_tests/test_ingestion_jobs.py",
+        "enterprise_tests/test_csv_extraction.py",
+        "enterprise_integration_tests/test_csv_ingestion.py",
+        "docs/governance/phase4-progress.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending.",
+        "Phase 4 CSV slice: bounded UTF-8 string extraction and physical-row lineage, ragged-row review blocking and authorization pass; no calculations/type inference. OCR and DOCX/PPTX/XLSX remain pending. Whole suite: 181 unit/contract +62 PostgreSQL checks; live synthetic CSV row quotation/preview smoke passes."
       ]
     },
     {
@@ -588,11 +592,15 @@
       "verification_references": [
         "docs/governance/cpu-ingestion-progress.md",
         "enterprise_tests/test_native_extraction.py",
-        "enterprise_integration_tests/test_ingestion_jobs.py"
+        "enterprise_integration_tests/test_ingestion_jobs.py",
+        "enterprise_tests/test_csv_extraction.py",
+        "enterprise_integration_tests/test_csv_ingestion.py",
+        "docs/governance/phase4-progress.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending.",
+        "Phase 4 CSV slice: bounded UTF-8 string extraction and physical-row lineage, ragged-row review blocking and authorization pass; no calculations/type inference. OCR and DOCX/PPTX/XLSX remain pending. Whole suite: 181 unit/contract +62 PostgreSQL checks; live synthetic CSV row quotation/preview smoke passes."
       ]
     },
     {
@@ -601,10 +609,15 @@
       "work_packages": "P1/P2/P3",
       "state": "specified_not_verified",
       "enforcement_locations": [],
-      "verification_references": [],
+      "verification_references": [
+        "enterprise_tests/test_csv_extraction.py",
+        "enterprise_integration_tests/test_csv_ingestion.py",
+        "docs/governance/phase4-progress.md"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Full rule verification pending; see foundation progress report.",
+        "Phase 4 CSV slice: bounded UTF-8 string extraction and physical-row lineage, ragged-row review blocking and authorization pass; no calculations/type inference. OCR and DOCX/PPTX/XLSX remain pending. Whole suite: 181 unit/contract +62 PostgreSQL checks; live synthetic CSV row quotation/preview smoke passes."
       ]
     },
     {
@@ -613,10 +626,15 @@
       "work_packages": "P1/P2/P3",
       "state": "specified_not_verified",
       "enforcement_locations": [],
-      "verification_references": [],
+      "verification_references": [
+        "enterprise_tests/test_csv_extraction.py",
+        "enterprise_integration_tests/test_csv_ingestion.py",
+        "docs/governance/phase4-progress.md"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Full rule verification pending; see foundation progress report.",
+        "Phase 4 CSV slice: bounded UTF-8 string extraction and physical-row lineage, ragged-row review blocking and authorization pass; no calculations/type inference. OCR and DOCX/PPTX/XLSX remain pending. Whole suite: 181 unit/contract +62 PostgreSQL checks; live synthetic CSV row quotation/preview smoke passes."
       ]
     },
     {
@@ -641,11 +659,15 @@
         "enterprise_integration_tests/test_ingestion_jobs.py",
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_tests/test_csv_extraction.py",
+        "enterprise_integration_tests/test_csv_ingestion.py",
+        "docs/governance/phase4-progress.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "Phase 4 CSV slice: bounded UTF-8 string extraction and physical-row lineage, ragged-row review blocking and authorization pass; no calculations/type inference. OCR and DOCX/PPTX/XLSX remain pending. Whole suite: 181 unit/contract +62 PostgreSQL checks; live synthetic CSV row quotation/preview smoke passes."
       ]
     },
     {
