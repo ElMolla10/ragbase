@@ -107,7 +107,7 @@ async def test_async_sdk_always_carries_provider_allowlist(stream):
 
 
 @pytest.mark.parametrize(
-    "providers", [(), ("together",), ("fireworks",), ("groq", "google-ai-studio")]
+    "providers", [(), ("together",), ("fireworks",), ("google-ai-studio", "groq")]
 )
 def test_cannot_expand_or_reorder_provider_allowlist(providers):
     with pytest.raises(ValueError):
@@ -147,3 +147,8 @@ def test_removed_mistral_cannot_be_selected():
         routing_body(("mistral",))
     with pytest.raises(ValueError):
         completion_args(model="mistralai/mistral-large-4-0")
+
+
+def test_groq_is_primary_with_google_as_only_fallback():
+    assert MODELS == ("openai/gpt-oss-120b", "google/gemini-3.8-flash")
+    assert PROVIDERS == ("groq", "google-ai-studio")

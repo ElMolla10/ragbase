@@ -1,9 +1,9 @@
 # OpenRouter BYOK generation
 
 The public app now uses the shared OpenAI SDK adapter for both complete and
-streamed answers. Primary model: `google/gemini-3.8-flash`; fallback:
-`openai/gpt-oss-120b`. Every request restricts provider `only` and `order` to
-`google-ai-studio`, `groq`, with fallback enabled. Mistral is excluded. Low
+streamed answers. Primary model: `openai/gpt-oss-120b`; fallback:
+`google/gemini-3.8-flash`. Every request restricts provider `only` and `order` to
+`groq`, `google-ai-studio`, with fallback enabled. Mistral is excluded. Low
 reasoning is enabled; Gemini requires it. Existing answer function signatures
 and return types are preserved, and the selected model is logged without prompts.
 
@@ -48,7 +48,7 @@ $env:OPENROUTER_API_KEY_FILE = ".local/openrouter-api-key"
 python scripts/test_openrouter_fallbacks.py
 ```
 
-Probes cover standard routing, Groq only, and Gemini-primary with only Groq
+Probes cover standard routing, Google only, and GPT-OSS-primary with only Google
 allowed to force same-request model fallback. This does not inject a real 429 or
 qualify Arabic, image handling, latency or production reliability. No local
 generation weights are required; existing local embedding setup is unchanged.

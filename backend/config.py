@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     # fixes active generation routing independently of these historical values.
     llm_provider: Literal["openrouter", "groq", "ollama"] = "openrouter"
     llm_base_url: str = "http://localhost:11434/v1"
-    llm_model: str = "google/gemini-3.8-flash"
+    llm_model: str = "openai/gpt-oss-120b"
     llm_max_tokens: int = 512
 
 

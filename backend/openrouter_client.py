@@ -10,10 +10,10 @@ from pathlib import Path
 
 BASE_URL = "https://openrouter.ai/api/v1"
 MODELS = (
-    "google/gemini-3.8-flash",
     "openai/gpt-oss-120b",
+    "google/gemini-3.8-flash",
 )
-PROVIDERS = ("google-ai-studio", "groq")
+PROVIDERS = ("groq", "google-ai-studio")
 logger = logging.getLogger(__name__)
 
 

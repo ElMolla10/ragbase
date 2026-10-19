@@ -22,10 +22,10 @@ def main(output=None):
     with sync_client() as client:
         cases = (
             ("standard", MODELS[0], PROVIDERS, MODELS),
-            ("groq_only", MODELS[1], PROVIDERS[1:], (MODELS[1],)),
-            # Keep Gemini primary while excluding its provider: OpenRouter must
+            ("google_only", MODELS[1], PROVIDERS[1:], (MODELS[1],)),
+            # Keep GPT-OSS primary while excluding its provider: OpenRouter must
             # select the fallback model within this same completion request.
-            ("google_unavailable", MODELS[0], PROVIDERS[1:], (MODELS[1],)),
+            ("groq_unavailable", MODELS[0], PROVIDERS[1:], (MODELS[1],)),
         )
         for label, primary, providers, expected_models in cases:
             try:

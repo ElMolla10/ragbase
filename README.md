@@ -34,13 +34,13 @@ this public app.
 
 | Role | Model ID | Provider |
 |---|---|---|
-| Primary | `google/gemini-3.8-flash` | Google AI Studio |
-| Fallback | `openai/gpt-oss-120b` | Groq |
+| Primary | `openai/gpt-oss-120b` | Groq |
+| Fallback | `google/gemini-3.8-flash` | Google AI Studio |
 
 The backend uses the OpenAI Python SDK with
 `https://openrouter.ai/api/v1`. Every completion includes the model fallback list
 and provider `order`, `only` and `allow_fallbacks`. The approved providers are
-`google-ai-studio` and `groq`; Mistral and other providers are excluded.
+`groq` then `google-ai-studio`; Mistral and other providers are excluded.
 Both routes use low reasoning. Gemini requires reasoning enabled; reasoning text
 is excluded from the requested response.
 
@@ -245,7 +245,7 @@ body limit for strict protection before arbitrary uploads are fully read.
 
 ## Verification and development
 
-The BYOK port passed **15 focused tests** covering SDK payloads, provider
+The BYOK port passed **16 focused tests** covering SDK payloads, provider
 restrictions, sync/async and streaming paths, and generation return contracts.
 Repository lint, formatting and Compose validation passed. Shared routing was
 also live-tested with both providers and same-request fallback using synthetic
@@ -267,8 +267,8 @@ $env:OPENROUTER_API_KEY_FILE = ".local/openrouter-api-key"
 python scripts/test_openrouter_fallbacks.py
 ```
 
-The probes cover the standard chain, Groq alone, and a Gemini-primary request
-restricted to Groq to force fallback. They do not inject a real provider 429.
+The probes cover the standard chain, Google alone, and a GPT-OSS-primary request
+restricted to Google to force fallback. They do not inject a real provider 429.
 
 The full application tests need installed dependencies, the embedding model and
 an isolated pgvector database. **Use a disposable database:** fixtures create and
