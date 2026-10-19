@@ -1,399 +1,317 @@
-> Generation now uses Gemini 3.8 Flash with GPT-OSS 120B fallback through OpenRouter BYOK. See [setup and provider restrictions](docs/openrouter-byok.md).
-
 # RAGBase
 
-![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green?style=flat-square&logo=fastapi)
-![Railway](https://img.shields.io/badge/Deployment-Railway-black?style=flat-square)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker)
-![pgvector](https://img.shields.io/badge/pgvector-Postgres%2016-336791?style=flat-square&logo=postgresql)
-![CI](https://img.shields.io/badge/CI-GitHub%20Actions-181717?style=flat-square&logo=githubactions)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+Upload PDFs, ask questions in English, Arabic or mixed language, and inspect the
+source pages used for an answer. RAGBase combines local multilingual embeddings,
+PostgreSQL/pgvector retrieval and hosted generation through OpenRouter BYOK.
+Language support is a capability to evaluate on your documents, not a guarantee
+of business accuracy.
 
-A production RAG (Retrieval-Augmented Generation) platform that lets you upload research papers and chat with them. Ask questions in **any language** — Arabic, English, or mixed — and get cited answers pulled from the actual document content, with full ML observability built in.
+**Public demo:** [ragbase.up.railway.app](https://ragbase.up.railway.app)  
+**Branch:** `master` — public application  
+**Updated:** 19 October 2026
 
-**Live demo:** [RAGBase on Railway](https://ragbase.up.railway.app)
+For the separate access-controlled implementation and its roadmap, see the
+[enterprise branch](https://github.com/ElMolla10/ragbase/tree/enterprise).
+Enterprise storage, permissions and quote-validation controls are not part of
+this public app.
 
----
+## What the app does
 
-## Quick Start with Docker
+- Extracts native PDF text, preserving page numbers and using layout-aware
+  handling for common columns and ruled tables.
+- Creates page-scoped chunks and multilingual E5 embeddings locally.
+- Combines vector similarity and PostgreSQL full-text retrieval by default,
+  optionally restricted to a selected document.
+- Answers with retrieved context, page citations and recent conversation history.
+- Streams answer text and exposes the retrieved passages and source PDFs.
+- Stores documents, compressed PDF originals, extracted chunks, embeddings, and
+  query/answer records in PostgreSQL. Older uploads without stored PDF bytes
+  must be uploaded again to enable their PDF preview.
+- Reports query counts, latency and document/chunk totals. Metabase is available
+  as an optional database dashboard.
 
-Install Docker with Compose, then run:
+## Generation and fallback
 
-```bash
-git clone https://github.com/ElMolla10/ragbase.git
+| Role | Model ID | Provider |
+|---|---|---|
+| Primary | `google/gemini-3.8-flash` | Google AI Studio |
+| Fallback | `openai/gpt-oss-120b` | Groq |
+
+The backend uses the OpenAI Python SDK with
+`https://openrouter.ai/api/v1`. Every completion includes the model fallback list
+and provider `order`, `only` and `allow_fallbacks`. The approved providers are
+`google-ai-studio` and `groq`; Mistral and other providers are excluded.
+Both routes use low reasoning. Gemini requires reasoning enabled; reasoning text
+is excluded from the requested response.
+
+Fallback happens inside the same request when OpenRouter cannot serve the
+primary. It is not continuation of a partially delivered reply. The SDK adds no
+separate automatic retry loop. No local generation model or GPU is needed;
+embedding inference still runs locally on CPU.
+
+In OpenRouter's **same workspace as the application API key**:
+
+1. Add valid Google AI Studio and Groq keys as prioritized BYOK provider keys.
+2. Allow the corresponding model on each key if using model filters.
+3. Set **Never use shared capacity for any model on this provider** for both.
+
+The provider allowlist alone does not enforce that workspace setting. Keep the
+provider accounts on the intended free plans. Free tiers have quotas, and
+OpenRouter BYOK fees/allowances are separate: this is not unlimited or guaranteed
+zero-cost inference. See [the BYOK setup guide](docs/openrouter-byok.md).
+
+## Run locally with Docker
+
+Requirements: Git, Docker with Compose, Python 3.11+ for the hidden key prompt,
+and an OpenRouter workspace configured as above.
+
+```powershell
+git clone --branch master https://github.com/ElMolla10/ragbase.git
 cd ragbase
-./start.sh
+Copy-Item .env.example .env
+python scripts/configure_openrouter.py
+docker compose up -d --build postgres backend frontend
 ```
 
-The script creates `.env` from `.env.example` only when it is missing, preserves
-existing configuration, and builds/starts the services. Set `OPENROUTER_API_KEY` in
-`.env` and run `./start.sh` again to enable answers. The UI is at
-http://localhost:8501, API docs at http://localhost:8000/docs, and optional
-Metabase at http://localhost:3000. The first build downloads the embedding model.
+On an existing checkout, keep your `.env` instead of overwriting it. On Linux or
+macOS, use `cp .env.example .env` for the initial copy.
 
----
+The setup script asks for the **OpenRouter application key**, not a Google or
+Groq key, and saves it in ignored `.local/openrouter-api-key`. Compose mounts that
+file only in the backend as `/run/secrets/openrouter_api_key`. The file is required
+by this Compose configuration even if an environment key is supplied. Git and
+Docker builds exclude local secrets.
 
-## Features
+The first backend build installs CPU PyTorch and downloads the embedding model;
+it needs internet access and enough RAM/disk space for those dependencies. No
+generation weights are downloaded. PostgreSQL data uses a persistent volume.
 
-- **Multilingual questions** — ask in Arabic, English, or mixed language and get cited answers. Retrieval uses multilingual E5-small; quality varies by language and corpus.
-- **PDF ingestion** — upload any PDF, chunks are embedded and stored in pgvector
-- **Hybrid search (on by default)** — combines pgvector cosine similarity and PostgreSQL full-text search using reciprocal rank fusion
-- **Cited answers** — every answer references the exact source pages it used
-- **ML observability** — every query is logged: latency, token count, timestamp, sources
-- **Live stats** — total queries, avg latency, documents, and chunks shown in real time
-- **Metabase dashboard** — visual monitoring of query patterns and system health
+| Service | Local URL |
+|---|---|
+| Frontend | `http://localhost:8501` |
+| API documentation | `http://localhost:8000/docs` |
+| API health | `http://localhost:8000/health` |
+| Optional Metabase | `http://localhost:3000` |
 
----
+Start the optional dashboard with `docker compose up -d metabase`. Stop services
+with `docker compose down`; avoid `down -v` unless you intend to delete the data
+volumes. Uploaded public-demo data is shared across visitors.
 
-## Architecture
+## Deploy on Railway
 
-```text
-Browser → HTML/Tailwind frontend (Railway public HTTPS URL)
-                ↓ BACKEND_URL
-          FastAPI (Railway) → Groq API (server-side key)
-                ↓
-          Postgres + pgvector (Railway)
-          documents · chunks · query_logs
-                ↑
-          Metabase (optional)
-```
+Use three services: pgvector-enabled PostgreSQL, the backend and the frontend.
+Select the `master` branch for both application services. Keep the repository
+root as their build context.
 
-PDFs are processed in memory. Filenames, metadata, extracted text, embeddings,
-and query logs persist in Postgres; original PDF files are not stored.
-The nullable `file_path` column remains for compatibility with existing databases.
-External PDF storage is optional and is not part of this deployment.
+### Database
 
----
+Use a pgvector-enabled PostgreSQL template or `pgvector/pgvector:pg16` with a
+persistent volume. Standard PostgreSQL does not gain pgvector just by running
+SQL; the extension's files must already be installed.
 
-## Stack
+For a manually configured image, set database credentials, mount the database
+volume, and use `PGDATA=/var/lib/postgresql/data/pgdata` when the volume is mounted
+at `/var/lib/postgresql/data`. Use the database's private connection URL for the
+backend. Startup enables the `vector` extension and creates application tables;
+the database role must have the necessary permissions.
 
-| Layer | Technology |
-|-------|-----------|
-| Backend | Python, FastAPI, async SQLAlchemy |
-| Embeddings | sentence-transformers (intfloat/multilingual-e5-small) |
-| Vector DB | pgvector on Railway Postgres |
-| LLM | Groq API — llama-3.3-70b-versatile |
-| Frontend | HTML/Tailwind + Python static server |
-| Observability | Metabase + query_logs table |
-| Infrastructure | Railway backend + frontend + Postgres |
-| Containers | Docker Compose |
-| CI | GitHub Actions (ruff lint + pytest) |
+### Backend
 
----
+Create a repository service named `backend` and set its variables:
 
-## API Endpoints
+| Variable | Value |
+|---|---|
+| `RAILWAY_DOCKERFILE_PATH` | `docker/Dockerfile.backend` |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}`, adapting the database service name |
+| `OPENROUTER_API_KEY` | Your OpenRouter application key |
+| `EMBEDDING_MODEL` | `intfloat/multilingual-e5-small`, or leave unset |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Health check |
-| POST | `/ingest` | Upload PDF — returns document_id and chunk count |
-| POST | `/query` | Ask a question — returns answer, sources, latency |
-| GET | `/documents` | List all uploaded documents |
-| GET | `/stats` | Total queries, avg latency, document count |
+**Set the OpenRouter key in Railway itself.** A key saved on your laptop is not
+sent by GitHub pushes, and Railway does not receive the local Compose secret.
+Open the backend service's Variables, add `OPENROUTER_API_KEY`, apply the change,
+and redeploy. Keep provider keys in OpenRouter BYOK settings.
 
-### Example: Ingest a PDF
+Leave the start command unset so the Dockerfile handles startup and Railway's
+`PORT`. Set the healthcheck path to `/health`, generate a backend domain and
+check `https://YOUR_BACKEND_DOMAIN/health`. Health checks do not verify model
+credentials or free-tier capacity.
+
+### Frontend
+
+Create another repository service named `frontend`:
+
+| Variable | Value |
+|---|---|
+| `RAILWAY_DOCKERFILE_PATH` | `docker/Dockerfile.frontend` |
+| `BACKEND_URL` | `https://YOUR_BACKEND_DOMAIN`, without a trailing slash |
+
+Leave its start command unset and use `/health` for its healthcheck. Generate a
+frontend domain, then upload a nonconfidential PDF and test a question.
+The frontend injects `BACKEND_URL` for browser requests, so the backend URL must
+be publicly reachable. Visitors do not supply API keys; generation uses the
+backend owner's provider quotas. Never put `OPENROUTER_API_KEY` in frontend
+variables or browser code.
+
+Back up existing PostgreSQL data before a database cutover. Preserve documents,
+PDF bytes, chunks and query logs together, and verify the destination before
+retiring the old deployment. Keep source PDFs separately as well.
+
+## Configuration
+
+Copy [.env.example](.env.example) for local settings. On Railway, use backend
+service variables rather than committing an `.env` file.
+
+| Setting | Default / purpose |
+|---|---|
+| `OPENROUTER_API_KEY` | Application credential; takes precedence over a key file |
+| `OPENROUTER_API_KEY_FILE` | Optional private key file; Compose sets the mounted path |
+| `DATABASE_URL` | PostgreSQL connection; common postgres URL schemes are accepted |
+| `BACKEND_URL` | Frontend setting pointing to the API |
+| `EMBEDDING_MODEL` | `intfloat/multilingual-e5-small`, 384 dimensions |
+| `USE_HYBRID_SEARCH` | `true`; set `false` for vector-only retrieval |
+| `PDF_LAYOUT_EXTRACTION` | `true`; set `false` for sorted plain-text extraction |
+| `CHUNK_SIZE` / `CHUNK_OVERLAP` | `512` / `50` approximate units, four characters per unit |
+| `MAX_UPLOAD_BYTES` | `50000000` — 50 MB file limit |
+| `QUERY_RATE_LIMIT` / `INGEST_RATE_LIMIT` | `30` / `5` per client per configured window |
+| `RATE_LIMIT_WINDOW_SECONDS` | `60` |
+| `WRITE_API_KEY` | Optional `X-API-Key` protection for uploads and document deletion |
+
+The generation model/provider chain is owned by
+[backend/openrouter_client.py](backend/openrouter_client.py). Legacy Groq/Ollama
+configuration fields remain parseable but no longer select generation routes.
+Changing the generation model does not require re-embedding existing documents.
+Changing the embedding model requires re-ingestion; equal dimensions do not make
+different embedding spaces compatible. Other vector dimensions require a schema
+change. Re-ingest to apply new chunking or extraction settings as well.
+
+## API
+
+Interactive schemas are available at `/docs`.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/health` | Application health |
+| POST | `/ingest` | Upload a PDF as multipart field `file` |
+| GET | `/documents` | List documents |
+| GET | `/documents/{document_id}/file` | View a stored source PDF |
+| DELETE | `/documents/{document_id}` | Delete a document and its chunks |
+| POST | `/query` | Return an answer, sources, latency, usage and selected model |
+| POST | `/query/stream` | Stream source, token, completion or error events over SSE |
+| GET | `/stats` | Aggregate query/document statistics |
+| DELETE | `/stats` | Clear query logs |
+
+For example, from a shell with curl:
 
 ```bash
-curl -X POST http://localhost:8000/ingest \
-  -F "file=@paper.pdf"
-```
-
-Response:
-```json
-{
-  "document_id": "abc123",
-  "filename": "paper.pdf",
-  "num_chunks": 31
-}
-```
-
-### Example: Query (Arabic)
-
-```bash
+curl -X POST http://localhost:8000/ingest -F "file=@paper.pdf"
 curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
-  -d '{"query": "ما هي المنهجية المستخدمة في هذا البحث؟"}'
+  -d '{"query":"What is the main finding?","document_id":1}'
 ```
 
-### Example: Query (English)
+Use the actual integer ID returned by ingestion. Omit `document_id` to search
+across documents. The optional `history` field accepts user/assistant turns.
+On Windows PowerShell, use `curl.exe` for these curl examples.
+
+## Data, privacy and limits
+
+This is a public demo, not an enterprise authorization boundary. Queries,
+document listings and source PDFs are publicly accessible. Optional write-key
+protection does not add workspace isolation, SSO or private per-user collections.
+Do not upload confidential company data.
+
+PDF parsing and embeddings run in the backend. Questions, recent conversation
+history and retrieved passages are sent to OpenRouter and its selected provider.
+Query/answer text and retrieved chunk IDs are also stored in `query_logs` locally
+in the database. Provider privacy and retention policies still apply to BYOK.
+
+Native PDFs are supported; scans require OCR, which is not implemented here.
+Complex layouts and tables can be extracted incorrectly. There is no reranker,
+exhaustive document-coverage workflow or trusted spreadsheet calculation engine.
+Page citations are generated from retrieved evidence; this app does not use the
+enterprise branch's exact-quote validation before releasing answers.
+
+The synchronous answer path records actual returned model/usage when available.
+Streaming completion metadata currently uses the configured primary model and an
+approximate answer-length token count, even if fallback occurred. Use SDK logs
+for the actual selected streaming model; do not treat UI statistics as a billing
+or tokenizer measurement.
+
+Rate limits are in memory per worker, reset at restart and are not shared across
+replicas. Current query throttling covers `/query`; `/query/stream` does not use
+that limiter. `WRITE_API_KEY` protects upload/document deletion, not stats reset.
+Proxy addresses must be trusted correctly for client-IP limits. Use an ingress
+body limit for strict protection before arbitrary uploads are fully read.
+
+## Verification and development
+
+The BYOK port passed **15 focused tests** covering SDK payloads, provider
+restrictions, sync/async and streaming paths, and generation return contracts.
+Repository lint, formatting and Compose validation passed. Shared routing was
+also live-tested with both providers and same-request fallback using synthetic
+data; HTTP 200 does not prove free-only billing, Arabic accuracy or production
+reliability. These results do not replace the full application test suite.
+
+Run the lightweight mocked tests without model downloads:
+
+```powershell
+python -m pytest tests_byok -q
+ruff check .
+ruff format --check .
+```
+
+For synthetic live probes from a local Python environment with dependencies:
+
+```powershell
+$env:OPENROUTER_API_KEY_FILE = ".local/openrouter-api-key"
+python scripts/test_openrouter_fallbacks.py
+```
+
+The probes cover the standard chain, Groq alone, and a Gemini-primary request
+restricted to Groq to force fallback. They do not inject a real provider 429.
+
+The full application tests need installed dependencies, the embedding model and
+an isolated pgvector database. **Use a disposable database:** fixtures create and
+drop application tables. Never point them at the running app's database.
 
 ```bash
-curl -X POST http://localhost:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"query": "What is the main contribution of this paper?"}'
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/ragbase_test \
+  python -m pytest tests/ tests_byok/ -v
 ```
 
-Response:
-```json
-{
-  "answer": "The paper introduces a two-phase screening tool...",
-  "sources": [
-    {"document": "paper.pdf", "page": 8, "score": 0.91},
-    {"document": "paper.pdf", "page": 3, "score": 0.87}
-  ],
-  "latency_ms": 1749,
-  "tokens_used": 312
-}
-```
+GitHub Actions is configured to run lint/format checks and both test directories
+against its own pgvector service on pushes/PRs to `master`. The small retrieval
+regression and [evaluation corpus](eval/README.md) are development evidence, not
+company acceptance benchmarks.
 
----
+## Troubleshooting
 
-## Local Setup
+| Symptom | Check |
+|---|---|
+| `OPENROUTER_API_KEY is not configured` on Railway | Set the variable on the **backend** service and redeploy; local files are not transferred |
+| Same error locally | Run the hidden setup prompt for Compose; direct Python needs `OPENROUTER_API_KEY` or `OPENROUTER_API_KEY_FILE` |
+| Provider returns `Invalid API Key` | Replace that provider's key in OpenRouter BYOK settings; it is separate from the application key |
+| `429` / unavailable generation | Check provider quotas and model access; fallback cannot create more quota when both providers are exhausted |
+| Frontend cannot reach API | Verify its public `BACKEND_URL`, backend health and service deployment |
+| PostgreSQL reports missing `vector` | Use a pgvector-enabled database image and a role allowed to enable the extension |
+| PDF preview unavailable for an older upload | Re-upload the original; earlier records may not contain PDF bytes |
+| Bad or missing evidence | Inspect extraction, selected document and retrieved passages; scans/layouts and cross-language recall need separate review |
 
-### Prerequisites
+## Project map
 
-- Docker + Docker Compose
-- OpenRouter API key with Google AI Studio and Groq BYOK configured
+| Path | Responsibility |
+|---|---|
+| `backend/main.py` | Public API and SSE responses |
+| `backend/ingest.py` | Native PDF extraction, chunking and embedding |
+| `backend/retrieval.py` | Vector/hybrid retrieval |
+| `backend/openrouter_client.py` | Fixed BYOK route and SDK clients |
+| `backend/llm.py` | Context/history assembly and generation contracts |
+| `backend/models.py`, `backend/database.py` | PostgreSQL persistence |
+| `backend/logger.py` | Query/answer observability |
+| `frontend/` | HTML frontend and Python static server |
+| `scripts/` | Credential setup, routing probes and evaluation helpers |
+| `tests/`, `tests_byok/` | Application and focused adapter tests |
+| `docker/`, `docker-compose.yml` | Images and local deployment |
 
-### Run locally
-
-```bash
-git clone https://github.com/ElMolla10/ragbase.git
-cd ragbase
-
-# Create environment file
-cp .env.example .env
-# Add your OPENROUTER_API_KEY to .env
-
-# Start all services
-docker compose up -d --build
-
-# Services:
-# localhost:8000  → FastAPI (API + docs at /docs)
-# localhost:8501  → HTML/Tailwind UI
-# localhost:3000  → Metabase dashboard
-```
-
----
-
-## Deploy to Railway
-
-1. Create an **Empty Project** in [Railway](https://railway.com).
-2. Add a **Postgres service with pgvector installed**, using a pgvector template
-   from Railway's template marketplace. Name it `Postgres`.
-   Railway's standard Postgres image does **not** include pgvector; running SQL
-   alone cannot install a missing extension. Keep the database's persistent volume.
-   Alternatively, use the official `pgvector/pgvector:pg16` image, mount a volume
-   at `/var/lib/postgresql/data`, and set `PGDATA=/var/lib/postgresql/data/pgdata`
-   so initialization does not conflict with the volume's `lost+found` directory.
-   Set `POSTGRES_USER=ragbase`, `POSTGRES_DB=ragbase`, a strong
-   `POSTGRES_PASSWORD`, and the service's private `DATABASE_URL` using those
-   credentials and `${{Postgres.RAILWAY_PRIVATE_DOMAIN}}:5432`.
-3. Connect to that database with a SQL client or `railway connect Postgres`
-   (requires the Railway CLI and `psql`), then run:
-
-   ```sql
-   CREATE EXTENSION IF NOT EXISTS vector;
-   SELECT extversion FROM pg_extension WHERE extname = 'vector';
-   ```
-
-   Backend startup also enables the extension and creates `documents`, `chunks`,
-   and `query_logs` via `init_db()`. The database role must have permission to
-   create the extension. No separate schema setup script is required.
-4. Add a GitHub service from this repository, name it `backend`, and select the
-   branch containing these changes. Keep **Root Directory** at the repository root
-   so Docker can copy `requirements.txt` and `backend/`.
-   Set these service variables:
-
-   | Variable | Value |
-   |----------|-------|
-   | `RAILWAY_DOCKERFILE_PATH` | `docker/Dockerfile.backend` |
-   | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (adjust the service name if different) |
-   | `OPENROUTER_API_KEY` | Your OpenRouter API key |
-
-   Use the private database URL. The app accepts `postgres://`, `postgresql://`,
-   and `postgresql+asyncpg://` URLs and selects the asyncpg driver automatically.
-   Leave the start command unset to use the Dockerfile.
-   Set the deployment healthcheck path to `/health`.
-   Generate a public domain under **Settings → Networking** and verify
-   `https://<backend-domain>/health` returns `"status": "healthy"`.
-5. Add a second GitHub service from the same repository and branch, name it
-   `frontend`, and keep its Root Directory at the repository root.
-   Set these service variables:
-
-   | Variable | Value |
-   |----------|-------|
-   | `RAILWAY_DOCKERFILE_PATH` | `docker/Dockerfile.frontend` |
-   | `BACKEND_URL` | `https://<backend-domain>` (no trailing slash) |
-
-   Leave the start command unset. Both Dockerfiles bind to `0.0.0.0` and use
-   Railway's `PORT` at runtime. Compose exposes the API on 8000 and the UI on
-   8501 (the frontend container defaults to 8080).
-   Set the frontend healthcheck path to `/health`.
-   Generate a public domain for the frontend.
-6. Open the frontend HTTPS URL, upload a PDF, ask a question, and check that
-   citations and query statistics appear. Share that URL with your friend.
-   **Visitors do not need a Groq API key**: only the backend has the deployer's key;
-   The browser sends queries to the backend via the injected `BACKEND_URL`.
-   Groq usage uses the backend key's quota.
-
-The backend runs sentence-transformers and CPU PyTorch locally, using
-`intfloat/multilingual-e5-small`; allocate enough backend memory for model loading and ingestion.
-The model is downloaded during the Docker build. No GPU or embedding API key is
-required. Metabase is optional: deploy it separately and connect it to the same
-Postgres database if you want dashboards.
-
-Service-specific variables select the two Dockerfiles, so no shared
-`railway.toml` is needed. See Railway's
-[Dockerfile configuration](https://docs.railway.com/builds/dockerfiles),
-[Postgres extension guidance](https://docs.railway.com/databases/postgresql), and
-[variable references](https://docs.railway.com/variables).
-
-### Existing data and cutover
-
-A new Railway database starts empty. To keep existing documents, chunks, and
-query logs, back up the source Postgres database and restore it into the
-pgvector-enabled destination using `pg_dump` / `pg_restore` before switching URLs.
-Pause writes during the final copy, verify row counts and a document query, then
-share the new frontend URL. Original PDFs in external storage are not migrated or
-deleted by this app. Keep the source database and deployment until the new
-deployment and data have been verified; switching back to the old URL remains
-possible during that period.
-
----
-
-## CI Pipeline
-
-GitHub Actions runs on every push to master:
-
-- **Lint** — ruff (format + style check)
-- **Test** — pytest with a live Postgres/pgvector service container
-
-```
-✅ lint  (ruff check + format)
-✅ test  (unit tests + Postgres/pgvector integration tests)
-```
-
----
-
-## Known Limitations & Next Steps
-
-- **Embeddings:** the default is `intfloat/multilingual-e5-small` (384 dimensions),
-  with normalized vectors and automatic `query: ` / `passage: ` prefixes for E5.
-  `EMBEDDING_MODEL` remains configurable; non-E5 models receive unprefixed text.
-  Model loading rejects dimensions that do not match `EMBEDDING_DIMENSION`.
-  Changing dimensions requires migrating the existing pgvector column and indexes
-  and updating the schema guard in config.py; other dimensions are rejected.
-  **After upgrading from MiniLM, delete and re-ingest all existing documents**
-  from your original PDFs before querying. Equal dimensions do not mean compatible
-  embeddings. PDFs are not retained, so keep your source copies. Query logs can stay.
-  For Railway, remove an old `EMBEDDING_MODEL` override or set the new model name,
-  then rebuild the backend. Compose passes the setting at build and runtime.
-  Custom Railway models may download on first use unless the build argument matches.
-  Multilingual support improves coverage, but quality varies by language and corpus.
-- **Chunking:** splitting now prefers paragraph/sentence endings, falls back to
-  whitespace or hard cuts for long sentences, and keeps every chunk on its source
-  page. `CHUNK_SIZE` and `CHUNK_OVERLAP` retain the legacy approximate token units
-  (four characters per unit); overlap is bounded and may be smaller to avoid
-  starting inside a word. This is not semantic chunking.
-  Existing chunks stay unchanged; re-ingest documents to use the new splitter.
-- **PDF layout:** PyMuPDF block coordinates improve common two-column reading
-  order and preserve full-width headings. Detected ruled tables keep cells on
-  each row separated by ` | `. Table detection errors fall back to text.
-  Set `PDF_LAYOUT_EXTRACTION=false` for sorted plain-text extraction.
-  Scanned PDFs still need OCR; complex layouts and merged/borderless tables may
-  remain imperfect. Re-ingest existing PDFs to use improved extraction.
-- **No reranking yet:** a cross-encoder reranker remains a possible next step.
-- **Hybrid search is enabled by default:** set `USE_HYBRID_SEARCH=false` for
-  pure cosine search. Hybrid mode combines
-  pgvector and PostgreSQL full-text search using reciprocal rank fusion, with
-  document filters applied to both. Returned scores are fusion scores rather
-  than cosine similarities. It uses the `simple` text-search configuration,
-  without Arabic stemming or language-specific normalization; it does not
-  translate queries. Full-text vectors are computed at query time; a GIN index
-  is a future optimization for larger collections. No schema migration is needed.
-
-## Demo protection and evaluation
-
-Uploads default to a 50 MB file limit (`MAX_UPLOAD_BYTES=50000000`). Oversized files
-return HTTP 413; multipart Content-Length is also checked before parsing with
-64 KiB allowed for form overhead. Requests without Content-Length still receive
-the file check after multipart parsing; use an ingress body limit for strict
-stream-level protection against arbitrary bodies.
-
-`QUERY_RATE_LIMIT=30` and `INGEST_RATE_LIMIT=5` allow that many requests per client
-in `RATE_LIMIT_WINDOW_SECONDS=60`. HTTP 429 includes `Retry-After`; set a limit to
-0 to disable it. Limits are in memory per worker, reset on restart, and are not
-shared across replicas. Client identity uses the ASGI client address; behind a
-proxy, configure Uvicorn's trusted proxy addresses (`FORWARDED_ALLOW_IPS`) for
-accurate per-client limits. Only trust known ingress proxies. Otherwise visitors
-behind the same proxy may share one allowance.
-
-The public demo needs no new variables. Optional `WRITE_API_KEY` protects uploads
-and document deletion via `X-API-Key`, while queries and health remain public.
-Leave it empty to keep browser uploads usable. When enabled, use an API client
-with the header for writes; the frontend does not contain or inject this secret.
-
-After changing these settings, redeploy the backend (or rebuild Compose).
-No re-ingestion is needed for protection changes.
-
-Run `ruff check .`, `ruff format --check .`, and `pytest tests/` against a
-**disposable** pgvector database: test fixtures create and drop application tables.
-The tiny harness `pytest tests/test_eval.py -q` loads two sample texts and checks
-expected keywords in top-1 retrieved chunks for English and Arabic questions,
-using both vector-only and hybrid search. It uses the real embedding model and
-Postgres, without Groq calls. This is a regression smoke test, not a benchmark.
-
-## Observability
-
-Every query is logged to the `query_logs` table:
-
-```sql
-SELECT query, latency_ms, token_count, created_at
-FROM query_logs
-ORDER BY created_at DESC;
-```
-
-Connect Metabase to the same Postgres instance to build dashboards on top of this data.
-
----
-
-## Project Structure
-
-```
-ragbase/
-├── backend/
-│   ├── main.py        # FastAPI app, 6 endpoints
-│   ├── ingest.py      # PDF parsing, chunking, embedding
-│   ├── retrieval.py   # pgvector similarity search
-│   ├── llm.py         # OpenRouter BYOK generation with context injection
-│   ├── logger.py      # Query logging to Postgres
-│   ├── models.py      # SQLAlchemy models (documents, chunks, query_logs)
-│   ├── database.py    # Async Postgres + pgvector setup
-│   └── config.py      # Environment variable config
-├── frontend/
-│   ├── index.html     # HTML/Tailwind UI
-│   └── serve.py       # Static server + BACKEND_URL injection
-├── docker/
-│   ├── Dockerfile.backend
-│   ├── Dockerfile.frontend
-│   └── init.sql       # pgvector extension + table creation
-├── tests/
-│   ├── test_ingest.py
-│   ├── test_retrieval.py
-│   └── test_api.py
-├── .github/workflows/ci.yml
-├── docker-compose.yml
-└── requirements.txt
-```
-
----
-
-## Environment Variables
-
-```bash
-# .env.example
-OPENROUTER_API_KEY=your_key_here
-DATABASE_URL=postgresql://user:password@host:5432/ragbase
-BACKEND_URL=http://localhost:8000
-POSTGRES_USER=ragbase
-POSTGRES_PASSWORD=ragbase
-POSTGRES_DB=ragbase
-```
-
----
-
-## Author
-
-**Mohamed El Molla** — Final Year AI Student @ ESLSCA University (Graduating June 2026) Focus: MLOps, RAG Architecture, and Cloud Deployment - [LinkedIn](https://www.linkedin.com/in/mohamed-el-molla/) | [GitHub](https://github.com/ElMolla10)
+Author: [Mohamed El Molla](https://github.com/ElMolla10) ·
+[LinkedIn](https://www.linkedin.com/in/mohamed-el-molla/)
