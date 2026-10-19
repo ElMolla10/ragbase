@@ -1,6 +1,6 @@
 # RAGBase Local Enterprise Constitution
 
-Version: 6.0.0  
+Version: 6.1.0  
 Date: 18 October 2026  
 Status: CPU-only implementation specification; partial development exists, but production enforcement and model suitability remain unvalidated.  
 Owner: project owner and designated company administrators.
@@ -159,3 +159,5 @@ Implementation sequence: inventory and acceptance fixtures; enterprise/dev-lite 
 - **5.3.0 -- 19 October 2026:** Owner selected Groq GPT-OSS 120B as the default for all enabled generation, with Gemini 3.8 Flash/Google AI Studio as fallback. Update both model and provider order, deployment defaults and verification cases; preserve explicit remote opt-in and existing privacy restrictions. Base generation-disabled deployments remain disabled.
 
 - **6.0.0 -- 19 October 2026:** Owner explicitly prioritizes natural document chat and paper overviews over the extractive-only milestone. Permit cited model explanations with exact supporting quotations and checked source identities; do not claim semantic entailment is mechanically verified. Overview/no-keyword-hit requests use authorized bounded document context with explicit coverage, never a silent complete-summary claim. Hosted development envelope is 16,000 byte-budget charges including a 2,048-token output reservation, not a validated tokenizer capacity. Groq stays primary; privacy, RLS, revocation, immutable lineage and no-calculation controls remain.
+
+- **6.1.0 -- 19 October 2026:** Natural answers cite short application-owned passage aliases. Trusted code resolves them only against authorized supplied passages and attaches the original source text; the model is not required to reproduce PDF whitespace or quotations. Legacy explicit quotations remain strictly validated. Explanation semantics remain model interpretations. This removes formatting-driven rejection without accepting unknown citations or relaxing source access.

@@ -21,7 +21,7 @@ enterprise application. The enterprise entry point is `backend.enterprise:app`.
 - Durable extraction jobs, bounded native PDF/CSV text extraction, page/line/row lineage,
   extraction warnings and versioned lexical search over authorized evidence.
 - Natural document answers and paper overviews through Groq, with generated
-  explanations supported by exact quotations and source identifiers checked in
+  explanations citing passage IDs, with original supporting text attached in
   trusted code. Overview questions do not require keyword overlap. When lexical
   retrieval finds nothing, bounded authorized document context is supplied to
   the model instead of immediately declaring insufficient evidence.
@@ -35,8 +35,8 @@ enterprise application. The enterprise entry point is `backend.enterprise:app`.
   previews remain available during model outages.
 - A terminal query client. A graphical enterprise UI is still pending.
 
-Natural document chat is enabled. Source identities and supporting quotations
-are validated; generated explanations are model interpretations and are not
+Natural document chat is enabled. Source identities are validated and original supporting passages are
+attached by trusted code; generated explanations are model interpretations and are not
 mechanically proven true. Exhaustive summaries and spreadsheet calculations
 remain separate, unfinished capabilities.
 
@@ -76,7 +76,7 @@ See [BYOK implementation and evidence](docs/openrouter-byok.md).
 
 | Check | Recorded result |
 |---|---|
-| Unit and contract suite | 190 passed |
+| Unit and contract suite | 192 passed |
 | Isolated PostgreSQL integration suite | 64 passed |
 | Lint, formatting and policy consistency | Passed |
 | Gemini through Google AI Studio | HTTP 200 with an answer |
@@ -235,3 +235,5 @@ Further detail: [execution plan](docs/execution-plan.md),
 superseded runtime or model, use the current BYOK record for generation behavior.
 
 Document-chat correction: “whats the paper about?” now invokes Groq with document context and returns cited explanations. A synthetic live run passed in 4.53 seconds. Coverage is reported; this is not unrestricted full-document comprehension.
+
+Citation reliability correction (v6.1.0): natural answers cite short passage aliases; the app attaches original text, so PDF whitespace/hyphenation no longer causes quotation-copy rejection. Unknown citations remain rejected. The previously failing local document overview passed through Groq with six citations in 3.93 seconds; its 21/38-passage context was disclosed as partial.

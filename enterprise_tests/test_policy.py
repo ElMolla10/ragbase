@@ -29,7 +29,7 @@ def test_deterministic_core_and_task_policy(task):
     assert first == assemble(task)
     assert "untrusted data" in first.text
     assert "LOC-001" in first.rule_ids
-    assert first.constitution_version == "6.0.0"
+    assert first.constitution_version == "6.1.0"
     assert len(first.sha256) == 64
 
 

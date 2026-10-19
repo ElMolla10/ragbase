@@ -486,6 +486,10 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
                 code="answer_not_released",
                 detail="The BYOK provider rate limit or quota was reached. No outside-provider fallback was used. Try again after the provider limit resets."
                 if failure == "provider_rate_limit"
+                else "The model returned an invalid source citation. No answer was released."
+                if failure == "invalid_source_quote"
+                else "The model returned an unexpected response format. No answer was released."
+                if failure == "invalid_answer_schema"
                 else "The answer was cancelled, unavailable, revoked or failed evidence validation. No generated answer was released.",
             )
         finally:

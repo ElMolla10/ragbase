@@ -26,7 +26,6 @@ async def test_paper_overview_uses_groq_gateway_contract_without_keyword_overlap
                         "claims": [
                             {
                                 "source_id": source["source_id"],
-                                "quote": "Rainfall predictions",
                                 "explanation": "The document concerns predicting rainfall from sensor data.",
                             }
                         ],
@@ -46,6 +45,10 @@ async def test_paper_overview_uses_groq_gateway_contract_without_keyword_overlap
     result = frames(await ask(world, record, "whats the paper about?"))
     answer = next(event for event in result if event["event"] == "answer")
     assert len(calls) == 1 and not answer["insufficient"]
+    assert (
+        answer["claims"][0]["quote"] == "Rainfall predictions use sensor measurements."
+    )
+    assert answer["claims"][0]["support_kind"] == "source_passage"
     assert answer["answer"].startswith("The document concerns")
     assert answer["metadata"]["model_called"]
     assert answer["metadata"]["coverage"]["strategy"] == "document_overview"

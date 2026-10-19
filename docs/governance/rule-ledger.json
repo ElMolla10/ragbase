@@ -1,5 +1,5 @@
 {
-  "constitution_version": "6.0.0",
+  "constitution_version": "6.1.0",
   "rules": [
     {
       "id": "LOC-001",
@@ -154,7 +154,8 @@
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "v6.1 fixes PDF quote-copy rejection: model cites short passage aliases, trusted code attaches authorized original passage text. Unknown IDs and legacy invalid quotes still reject. 192 unit/contract +64 PostgreSQL tests pass; previously failing local overview retest succeeds via Groq, six citations, 3.93s with partial coverage disclosed. No semantic entailment guarantee."
       ]
     },
     {
@@ -749,7 +750,8 @@
       "known_gaps": [
         "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
         "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending.",
-        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified."
+        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified.",
+        "v6.1 fixes PDF quote-copy rejection: model cites short passage aliases, trusted code attaches authorized original passage text. Unknown IDs and legacy invalid quotes still reject. 192 unit/contract +64 PostgreSQL tests pass; previously failing local overview retest succeeds via Groq, six citations, 3.93s with partial coverage disclosed. No semantic entailment guarantee."
       ]
     },
     {
@@ -774,7 +776,8 @@
       "last_validated_release": null,
       "known_gaps": [
         "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
-        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified."
+        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified.",
+        "v6.1 fixes PDF quote-copy rejection: model cites short passage aliases, trusted code attaches authorized original passage text. Unknown IDs and legacy invalid quotes still reject. 192 unit/contract +64 PostgreSQL tests pass; previously failing local overview retest succeeds via Groq, six citations, 3.93s with partial coverage disclosed. No semantic entailment guarantee."
       ]
     },
     {

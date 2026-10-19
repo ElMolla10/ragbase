@@ -62,3 +62,37 @@ def test_explanation_cannot_bypass_quote_or_identity_checks():
         )
         with pytest.raises(GatewayError):
             validate_answer(raw, [source])
+
+
+def test_passage_citation_needs_no_brittle_pdf_quote_reproduction():
+    source = hit("A PDF with hyphen-\nated words and  irregular spacing.")
+    raw = json.dumps(
+        {
+            "insufficient": False,
+            "claims": [
+                {
+                    "source_id": "S1",
+                    "explanation": "The cited passage discusses hyphenated words.",
+                }
+            ],
+        }
+    )
+    result = validate_answer(raw, [source])
+    claim = result["claims"][0]
+    assert claim["source_id"] == source["source_id"]
+    assert claim["quote"] == source["content"]
+    assert claim["support_kind"] == "source_passage"
+    assert result["answer"].startswith("The cited passage")
+
+
+def test_unknown_short_citations_still_fail_closed():
+    with pytest.raises(GatewayError):
+        validate_answer(
+            json.dumps(
+                {
+                    "insufficient": False,
+                    "claims": [{"source_id": "S999", "explanation": "Not authorized."}],
+                }
+            ),
+            [hit()],
+        )
