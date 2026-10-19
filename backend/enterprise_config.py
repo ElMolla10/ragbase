@@ -7,6 +7,8 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from uuid import UUID
 
+from backend.openrouter_client import MODELS
+
 
 @dataclass(frozen=True)
 class EnterpriseSettings:
@@ -16,17 +18,35 @@ class EnterpriseSettings:
     dev_tokens: dict[str, UUID] = field(default_factory=dict, repr=False)
     max_upload_bytes: int = 5_000_000
     generation_mode: str = "disabled"
+    allow_remote_generation: bool = False
+    remote_privacy: str = "zdr"
     model_endpoint: str = "http://model-relay:8001"
     model_name: str = ""
     model_digest: str = ""
 
     def __post_init__(self):
         endpoint = urlsplit(self.model_endpoint)
-        if self.generation_mode not in {"disabled", "fixture", "ollama"}:
+        if self.generation_mode not in {"disabled", "fixture", "openrouter"}:
             raise ValueError("Unknown development generation mode")
+        remote = self.generation_mode == "openrouter"
+        if remote and (
+            not self.allow_remote_generation
+            or self.model_endpoint != "http://openrouter-relay:8002"
+            or self.model_name != MODELS[0]
+            or self.model_digest
+            or self.remote_privacy not in {"zdr", "nonconfidential-development"}
+        ):
+            raise ValueError(
+                "OpenRouter requires explicit remote opt-in, the approved relay and BYOK primary model with approved privacy policy without a checkpoint digest"
+            )
         if (
             endpoint.scheme != "http"
-            or endpoint.hostname not in {"model-relay", "localhost", "127.0.0.1"}
+            or endpoint.hostname
+            not in (
+                {"openrouter-relay"}
+                if remote
+                else {"model-relay", "localhost", "127.0.0.1"}
+            )
             or endpoint.username
             or endpoint.password
             or endpoint.query
@@ -81,6 +101,11 @@ class EnterpriseSettings:
                 generation_mode=os.environ.get(
                     "ENTERPRISE_GENERATION_MODE", "disabled"
                 ),
+                allow_remote_generation=os.environ.get(
+                    "ENTERPRISE_ALLOW_REMOTE_GENERATION"
+                )
+                == "true",
+                remote_privacy=os.environ.get("ENTERPRISE_REMOTE_PRIVACY", "zdr"),
                 model_endpoint=os.environ.get(
                     "ENTERPRISE_MODEL_ENDPOINT", "http://model-relay:8001"
                 ),

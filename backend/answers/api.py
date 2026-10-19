@@ -3,6 +3,7 @@
 import asyncio
 import hashlib
 import json
+import logging
 import time
 from contextlib import asynccontextmanager, suppress
 from uuid import UUID, uuid4
@@ -230,6 +231,7 @@ async def slot(database, actor, workspace, run_id):
 
 async def collect(gateway, model_request):
     parts, usage, first, started, finished = [], None, None, time.monotonic(), False
+    provenance = None
     async for event in gateway.stream(model_request):
         if event.kind == "text":
             first = first if first is not None else time.monotonic() - started
@@ -240,9 +242,10 @@ async def collect(gateway, model_request):
             if event.finish_reason != "stop":
                 raise GatewayError("Incomplete answer")
             usage, finished = event.usage, True
+            provenance = event.provenance
     if not finished:
         raise GatewayError("Incomplete answer")
-    return "".join(parts), usage, first
+    return "".join(parts), usage, first, provenance
 
 
 def frame(kind, **value):
@@ -261,12 +264,22 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
             "Generation is disabled; retrieval and source previews remain available",
         )
     instructions = assemble("retrieval")
+    output_budget = (
+        1024 if request.app.state.settings.generation_mode == "openrouter" else 256
+    )
     selected = []
     for hit in hits:
-        candidate = make_request(instructions, data.question, [*selected, hit])
+        candidate = make_request(
+            instructions,
+            data.question,
+            [*selected, hit],
+            max_output_tokens=output_budget,
+        )
         if input_bound(candidate) + candidate.max_output_tokens <= 4096:
             selected.append(hit)
-    model_request = make_request(instructions, data.question, selected)
+    model_request = make_request(
+        instructions, data.question, selected, max_output_tokens=output_budget
+    )
     if input_bound(model_request) + model_request.max_output_tokens > 4096 or (
         hits and not selected
     ):
@@ -311,12 +324,21 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
 
     async def generate():
         started, task, completed = time.monotonic(), None, False
-        yield frame("queued", run_id=run_id)
+        remote = request.app.state.settings.generation_mode == "openrouter"
+        yield frame(
+            "queued",
+            run_id=run_id,
+            external_processing=remote,
+            privacy_policy=request.app.state.settings.remote_privacy
+            if remote
+            else "local",
+        )
         try:
             async with slot(database, actor, workspace, run_id):
                 queue_seconds = time.monotonic() - started
                 yield frame("stage", stage="generating_and_validating")
                 raw, usage, first = '{"insufficient":true,"claims":[]}', None, None
+                provenance = None
                 if selected:
                     task = asyncio.create_task(collect(gateway, model_request))
                     try:
@@ -325,7 +347,7 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
                                 raise asyncio.CancelledError
                             await run_status(database, actor, workspace, run_id)
                             await asyncio.wait({task}, timeout=0.5)
-                        raw, usage, first = await task
+                        raw, usage, first, provenance = await task
                     finally:
                         # Close the provider transport before releasing admission.
                         if not task.done():
@@ -346,11 +368,24 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
                         **request.app.state.model_record,
                         "runtime_version": getattr(gateway, "runtime_version", None),
                         "details": getattr(gateway, "details", {}),
+                        "resolved_route": provenance,
                     },
-                    "context_limit": 4096,
-                    "input_token_upper_bound": input_bound(model_request),
-                    "output_token_budget": 256,
-                    "token_accounting": "utf8_bytes_plus_512_template_tokens",
+                    "external_processing": remote,
+                    "privacy_policy": request.app.state.settings.remote_privacy
+                    if remote
+                    else "local",
+                    "context_limit": None if remote else 4096,
+                    "request_budget": 4096,
+                    "input_token_upper_bound": None
+                    if remote
+                    else input_bound(model_request),
+                    "input_byte_budget_charge": input_bound(model_request)
+                    if remote
+                    else None,
+                    "output_token_budget": output_budget,
+                    "token_accounting": "development_byte_ceiling_provider_tokenizer_unvalidated"
+                    if remote
+                    else "utf8_bytes_plus_512_template_tokens",
                     "usage": usage,
                     "queue_seconds": queue_seconds,
                     "model_first_token_seconds": first,
@@ -368,7 +403,29 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
                 yield frame("answer", **verified, metadata=metadata)
                 yield frame("done", run_id=run_id)
                 completed = True
-        except (GatewayError, HTTPException, SQLAlchemyError, OSError, TimeoutError):
+        except (
+            GatewayError,
+            HTTPException,
+            SQLAlchemyError,
+            OSError,
+            TimeoutError,
+        ) as exc:
+            # Fixed categories only: never log exception text, prompts, provider
+            # bodies or credentials. These make live adapter failures diagnosable.
+            failure = (
+                {
+                    "Incomplete answer": "generation_incomplete",
+                    "Remote generation rate limit reached": "provider_rate_limit",
+                    "Answer schema validation failed": "invalid_answer_schema",
+                    "Citation or quotation validation failed": "invalid_source_quote",
+                    "Generation endpoint reported an error": "upstream_error",
+                    "Routing metadata changed during generation": "routing_changed",
+                    "Provider usage exceeds development budget": "provider_budget_exceeded",
+                }.get(str(exc), "answer_not_released")
+                if isinstance(exc, GatewayError)
+                else "answer_not_released"
+            )
+            logging.getLogger(__name__).warning("Answer rejected: %s", failure)
             with suppress(Exception):
                 await record(
                     database,
@@ -381,7 +438,9 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
             yield frame(
                 "error",
                 code="answer_not_released",
-                detail="The answer was cancelled, unavailable, revoked or failed evidence validation. No generated answer was released.",
+                detail="The BYOK provider rate limit or quota was reached. No outside-provider fallback was used. Try again after the provider limit resets."
+                if failure == "provider_rate_limit"
+                else "The answer was cancelled, unavailable, revoked or failed evidence validation. No generated answer was released.",
             )
         finally:
             if task is not None and not task.done():

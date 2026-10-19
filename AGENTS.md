@@ -19,6 +19,6 @@ enterprise configuration it exposes authenticated PDF/TXT/Markdown originals,
 durable native extraction jobs, page evidence and downloads backed by PostgreSQL
 RLS. A separate bounded worker uses explicit development actor scopes. Versioned
 lexical retrieval and exact-quote answers/source previews are implemented. Default
-generation is disabled; the optional Ollama bridge is development-only. Company
+generation is disabled; the explicitly opted-in OpenRouter relay is development-only. Read docs/openrouter-byok.md for the current hosted-generation implementation and pending free-access validation; never expose credentials or silently change modes. Company
 SSO, dense retrieval, general analysis and the graphical UI remain pending. Never
 add unprotected routes or label local smoke results production qualification.

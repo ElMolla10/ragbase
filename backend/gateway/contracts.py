@@ -48,6 +48,8 @@ class GatewayEvent:
     finish_reason: str | None = None
     # None means unavailable, never zero or an invented estimate.
     usage: dict[str, int] | None = None
+    # Request-local routing metadata, never shared mutable adapter state.
+    provenance: dict[str, str | None] | None = None
 
 
 class ModelGateway(Protocol):

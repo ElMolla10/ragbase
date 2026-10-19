@@ -4,14 +4,9 @@ Development branch for an access-controlled document question-answering and anal
 system, with Arabic and mixed-language evaluation planned throughout delivery.
 
 **Updated: 19 October 2026.** Phase 3's document Q&A implementation is complete
-in local development. The current working setup uses OpenRouter BYOK, with Gemini
-3.8 Flash as primary and GPT-OSS 120B through Groq as fallback. Company-server
+in local development. The current working setup uses OpenRouter BYOK, with GPT-OSS
+120B through Groq as primary and Gemini 3.8 Flash as fallback. Company-server
 acceptance and production qualification remain open.
-
-> This status records the tested local enterprise checkout. The latest BYOK code
-> and configuration are still uncommitted locally; this README update does not
-> publish that implementation. The setup below requires those implementation
-> changes. Earlier phase records describe the model/runtime used at that time.
 
 The [public app on master](https://github.com/ElMolla10/ragbase/tree/master) has a
 separate deployment and data model. Its UI and Railway deployment are not the
@@ -43,12 +38,12 @@ Exact quotation validation does not establish relevance or extraction accuracy.
 
 | Priority | Model | OpenRouter model ID | Allowed provider |
 |---|---|---|---|
-| Primary | Gemini 3.8 Flash | `google/gemini-3.8-flash` | Google AI Studio |
-| Fallback | GPT-OSS 120B | `openai/gpt-oss-120b` | Groq |
+| Primary | GPT-OSS 120B | `openai/gpt-oss-120b` | Groq |
+| Fallback | Gemini 3.8 Flash | `google/gemini-3.8-flash` | Google AI Studio |
 
 The shared OpenAI Python SDK client includes the ordered model list and explicit
 provider `order`, `only` and `allow_fallbacks` on every upstream completion.
-Only `google-ai-studio` and `groq` are permitted. Mistral is removed. Both models
+Only `groq` and `google-ai-studio` are permitted. Mistral is removed. Both models
 use low reasoning; Gemini requires reasoning enabled. Private reasoning is not
 released as answer text. The selected model is logged without prompts.
 
@@ -75,7 +70,7 @@ See [BYOK implementation and evidence](docs/openrouter-byok.md).
 
 | Check | Recorded result |
 |---|---|
-| Unit and contract suite | 162 passed |
+| Unit and contract suite | 163 passed |
 | Isolated PostgreSQL integration suite | 58 passed |
 | Lint, formatting and policy consistency | Passed |
 | Gemini through Google AI Studio | HTTP 200 with an answer |
@@ -83,9 +78,11 @@ See [BYOK implementation and evidence](docs/openrouter-byok.md).
 | Deployed routing probes | All 3 returned HTTP 200, including forced Google-unavailable fallback |
 | Full document Q&A smoke | Exact `Quarter 1 sales: 120` quotation with correct page-1 citation and source preview |
 
-The full Q&A smoke took **24.37 seconds** for one synthetic PDF question. This
+The latest Groq-first Q&A smoke took **3.31 seconds** for one synthetic PDF
+question; an earlier Gemini-first run took 24.37 seconds. These are individual
+development observations with different serving conditions. This
 is not a server latency or throughput guarantee. All live checks used synthetic,
-nonconfidential data. The forced fallback excludes Google while keeping Gemini
+nonconfidential data. The current forced fallback excludes Groq while keeping GPT-OSS
 as the requested primary; it does not inject a real provider 429.
 
 Arabic reliability, image understanding, representative business accuracy,

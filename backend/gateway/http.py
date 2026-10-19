@@ -46,26 +46,9 @@ class LocalHTTPGateway:
 
     async def stream(self, request: GatewayRequest) -> AsyncIterator[GatewayEvent]:
         request.validate()
-        payload = {
-            "model": "company-assistant",
-            "messages": [
-                {"role": "system", "content": request.instructions.text},
-                {
-                    "role": "user",
-                    "content": json.dumps(
-                        {
-                            "question": request.question,
-                            "untrusted_evidence": request.evidence,
-                        },
-                        ensure_ascii=False,
-                    ),
-                },
-            ],
-            "max_tokens": request.max_output_tokens,
-            "stream": True,
-            "stream_options": {"include_usage": True},
-        }
+        payload = self.payload(request)
         usage = None
+        provenance = {}
         finish = None
         seen_done = False
         try:
@@ -90,9 +73,7 @@ class LocalHTTPGateway:
                 async for line in response.aiter_lines():
                     if len(line) > 65536:
                         raise GatewayError("Generation event exceeds size limit")
-                    if not line or line.startswith(":"):
-                        continue
-                    if not line.startswith("data:"):
+                    if not line or not line.startswith("data:"):
                         continue
                     raw = line[5:].strip()
                     if raw == "[DONE]":
@@ -100,14 +81,13 @@ class LocalHTTPGateway:
                         break
                     data = json.loads(raw)
                     if "error" in data:
+                        if data.get("code") == "remote_rate_limited":
+                            raise GatewayError("Remote generation rate limit reached")
                         raise GatewayError("Generation endpoint reported an error")
+                    self.routing(data, provenance)
                     if data.get("usage") is not None:
                         candidate = data["usage"]
-                        keys = {
-                            "prompt_tokens",
-                            "completion_tokens",
-                            "total_tokens",
-                        }
+                        keys = {"prompt_tokens", "completion_tokens", "total_tokens"}
                         if not isinstance(candidate, dict) or not keys.issubset(
                             candidate
                         ):
@@ -128,7 +108,6 @@ class LocalHTTPGateway:
                             raise UnsupportedCapabilityError(
                                 "Unexpected provider tool request"
                             )
-                        # Reasoning fields intentionally never enter user text.
                         text = delta.get("content")
                         if text is not None and not isinstance(text, str):
                             raise GatewayError("Invalid text delta")
@@ -140,10 +119,43 @@ class LocalHTTPGateway:
                     raise GatewayError("Generation stream ended without completion")
                 if finish not in {"stop", "length", "content_filter"}:
                     raise GatewayError("Unsupported provider completion reason")
-                yield GatewayEvent("done", finish_reason=finish, usage=usage)
+                self.validate_completion(request, usage)
+                yield GatewayEvent(
+                    "done",
+                    finish_reason=finish,
+                    usage=usage,
+                    provenance=provenance or None,
+                )
         except (httpx.TimeoutException, TimeoutError) as exc:
-            raise GatewayError("Local generation timed out") from exc
+            raise GatewayError("Generation timed out") from exc
         except httpx.HTTPError as exc:
-            raise GatewayError("Local generation unavailable") from exc
+            raise GatewayError("Generation unavailable") from exc
         except (json.JSONDecodeError, TypeError, KeyError, AttributeError) as exc:
             raise GatewayError("Malformed generation event") from exc
+
+    def routing(self, data, provenance):
+        """Only specialized adapters retain provider routing metadata."""
+
+    def validate_completion(self, request, usage):
+        """Adapter-specific usage checks after a complete stream."""
+
+    def payload(self, request):
+        return {
+            "model": "company-assistant",
+            "messages": [
+                {"role": "system", "content": request.instructions.text},
+                {
+                    "role": "user",
+                    "content": json.dumps(
+                        {
+                            "question": request.question,
+                            "untrusted_evidence": request.evidence,
+                        },
+                        ensure_ascii=False,
+                    ),
+                },
+            ],
+            "max_tokens": request.max_output_tokens,
+            "stream": True,
+            "stream_options": {"include_usage": True},
+        }

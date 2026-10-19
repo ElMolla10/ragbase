@@ -4,6 +4,10 @@ This profile is a development-only storage foundation. It accepts UTF-8 TXT/Mark
 
 ## Start
 
+For hosted generation without local weights, follow the separate
+[OpenRouter setup](../openrouter.md). It requires an explicit remote override and
+a privately entered key; the base profile below keeps generation disabled.
+
 From the repository root, with Python available for credential generation:
 
 ```powershell

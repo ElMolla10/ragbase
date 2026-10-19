@@ -8,13 +8,13 @@ All active generation adapters use `backend/openrouter_client.py`, the OpenAI
 Python SDK, and the fixed `https://openrouter.ai/api/v1` base URL. Legacy answer
 function signatures and enterprise evidence/schema checks are preserved.
 
-The active candidate order is Gemini 3.8 Flash (`google/gemini-3.8-flash`) followed by GPT-OSS 120B
-(`openai/gpt-oss-120b`). The owner removed Mistral on 19 October 2026; neither Mistral's model
+The active candidate order is GPT-OSS 120B (`openai/gpt-oss-120b`) followed by Gemini 3.8 Flash
+(`google/gemini-3.8-flash`). The owner removed Mistral on 19 October 2026; neither Mistral's model
 nor its provider is permitted by the shared router. No replacement was added.
 
 Every upstream completion includes `models` and provider `order`, `only`, and
 `allow_fallbacks: true`. Production request allowlists are exactly
-`google-ai-studio`, `groq`; verification probes may narrow that list.
+`groq`, `google-ai-studio`; verification probes may narrow that list.
 Unknown models, arbitrary extra-body overrides and expanded provider lists are
 rejected. OpenRouter performs fallback inside one request; the SDK adds no second
 retry loop. This is request-level routing, not continuation of a partially
@@ -38,7 +38,7 @@ Run the synthetic verification with:
 python scripts/test_openrouter_fallbacks.py --output .local/byok-verification.json
 ```
 
-The three probes test the standard Google/Groq chain, Groq only, and a Gemini-primary request restricted to Groq to force model fallback. They report
+The three probes test the standard Groq/Google chain, Google only, and a GPT-OSS-primary request restricted to Google to force model fallback. They report
 status/model and never print answers or keys. HTTP 200 plus an allowed model
 establishes reachability, not zero cost or Arabic/company accuracy. No real
 documents are used.
@@ -56,10 +56,17 @@ References: [OpenRouter BYOK](https://openrouter.ai/docs/guides/overview/auth/by
 
 Deployment evidence: enterprise API, worker and relay rebuilt/recreated with the
 new model configuration, retaining existing database/artifact volumes. Health
-reports Gemini primary and GPT-OSS fallback. All 162 unit/contract and 58 isolated
+reports GPT-OSS primary and Gemini fallback. All 162 unit/contract and 58 isolated
 PostgreSQL integration checks pass, as do lint and policy verification. A live
 synthetic PDF question returned the exact quote `Quarter 1 sales: 120`, with the
 correct page-1 source preview, in 24.37 seconds. This is one development smoke,
 not a production latency or Arabic-quality benchmark. A broad `quarters` query
 returned insufficient evidence because current retrieval is lexical; dense
 retrieval remains pending.
+
+Current default (constitution 5.3.0): Groq GPT-OSS 120B first on both master and
+enterprise; Gemini is fallback. Enterprise services were recreated and health
+confirms that order. The updated synthetic PDF quote/source-preview smoke passed
+in 3.31 seconds. 163 unit/contract and 58 PostgreSQL integration checks pass.
+The earlier fallback probes and timings above describe their original run, not
+a freshly injected outage for the reversed chain.

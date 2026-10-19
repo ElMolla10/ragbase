@@ -17,6 +17,7 @@ FROM runtime-deps AS runtime
 COPY backend/ ./backend/
 COPY policy/ ./policy/
 COPY CONSTITUTION.md .
+COPY scripts/test_openrouter_fallbacks.py ./scripts/
 RUN mkdir /data && chown 10001:10001 /data
 USER 10001:10001
 EXPOSE 8000

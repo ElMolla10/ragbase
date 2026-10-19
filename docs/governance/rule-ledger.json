@@ -1,16 +1,37 @@
 {
-  "constitution_version": "2.0.0",
+  "constitution_version": "5.3.0",
   "rules": [
     {
       "id": "LOC-001",
       "owner": "engineering",
       "work_packages": "P0/P1/P6",
       "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "enforcement_locations": [
+        "backend/gateway/openrouter.py",
+        "backend/gateway/openrouter_relay.py",
+        "compose.enterprise-openrouter.yaml",
+        "backend/openrouter_client.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_openrouter.py",
+        "docs/governance/openrouter-option.md",
+        "docs/governance/gemma-json-mode.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_openrouter_answers.py",
+        "docs/governance/free-fallbacks.md",
+        "enterprise_tests/test_byok_client.py",
+        "docs/openrouter-byok.md"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Full rule verification pending; see foundation progress report.",
+        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models.",
+        "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending.",
+        "v4.1 ordered free-model failover is contract-tested only; upstream live failover remains pending while account-wide quota is exhausted.",
+        "v5 BYOK replacement: 161 unit/contract and 58 PostgreSQL integration checks pass. Three live probes fail before HTTP on TLS certificate verification; provider access, free-only Mistral selection and deployment remain pending. Workspace Never-use-shared-capacity is owner-reported, not independently audited.",
+        "v5.1: owner removed Mistral. Both remaining live probes reached OpenRouter but returned HTTP 401 Unauthorized; authentication and live fallback acceptance remain pending. No deployment switch performed. Updated suite: 162 unit/contract and 58 PostgreSQL integration tests pass; lint and policy verification pass.",
+        "v5.2: Gemini 3.8 Flash/Google AI Studio and GPT-OSS 120B/Groq individually return HTTP 200. Standard and forced-Google-unavailable requests successfully select Groq in the same request; specific 429 recovery not injected. Enterprise API/worker/relay deployed. Synthetic PDF exact-quote/source-preview smoke passes in 24.37s; 162 unit/contract +58 isolated PostgreSQL tests pass, lint/policy checks pass. Shared-capacity settings are owner-reported; zero-cost, Arabic, vision and production qualification remain pending.",
+        "v5.3: Groq GPT-OSS 120B primary, Gemini 3.8 Flash fallback aligned across master and enterprise. Enterprise health confirms order; synthetic PDF exact-quote and page preview passed in 3.31s. 163 unit/contract and 58 isolated PostgreSQL checks pass; lint/format/policy checks pass. Single-run timing is not a capacity guarantee; new reversed-chain 429 injection and production qualification remain pending."
       ]
     },
     {
@@ -18,11 +39,23 @@
       "owner": "engineering",
       "work_packages": "P0/P1/P6",
       "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "enforcement_locations": [
+        "backend/gateway/openrouter.py",
+        "backend/gateway/openrouter_relay.py",
+        "compose.enterprise-openrouter.yaml"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_openrouter.py",
+        "docs/governance/openrouter-option.md",
+        "docs/governance/gemma-json-mode.md",
+        "enterprise_tests/test_quote_answers.py",
+        "enterprise_integration_tests/test_openrouter_answers.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Full rule verification pending; see foundation progress report.",
+        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models.",
+        "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending."
       ]
     },
     {
@@ -30,11 +63,19 @@
       "owner": "engineering",
       "work_packages": "P0/P1/P6",
       "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "enforcement_locations": [
+        "backend/gateway/openrouter.py",
+        "backend/gateway/openrouter_relay.py",
+        "compose.enterprise-openrouter.yaml"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_openrouter.py",
+        "docs/governance/openrouter-option.md"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Full rule verification pending; see foundation progress report.",
+        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models."
       ]
     },
     {
@@ -255,16 +296,25 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/gateway/openrouter.py",
+        "backend/gateway/openrouter_relay.py",
+        "compose.enterprise-openrouter.yaml"
       ],
       "verification_references": [
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_tests/test_openrouter.py",
+        "docs/governance/openrouter-option.md",
+        "docs/governance/gemma-json-mode.md",
+        "enterprise_integration_tests/test_openrouter_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models.",
+        "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending."
       ]
     },
     {
@@ -303,7 +353,11 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/gateway/openrouter.py",
+        "backend/gateway/openrouter_relay.py",
+        "compose.enterprise-openrouter.yaml",
+        "backend/gateway/free_models.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
@@ -311,11 +365,19 @@
         "enterprise_integration_tests/test_access_storage.py",
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_tests/test_openrouter.py",
+        "docs/governance/openrouter-option.md",
+        "docs/governance/gemma-json-mode.md",
+        "enterprise_integration_tests/test_openrouter_answers.py",
+        "docs/governance/free-fallbacks.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models.",
+        "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending.",
+        "v4.1 ordered free-model failover is contract-tested only; upstream live failover remains pending while account-wide quota is exhausted."
       ]
     },
     {
@@ -330,17 +392,29 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/gateway/openrouter.py",
+        "backend/gateway/openrouter_relay.py",
+        "compose.enterprise-openrouter.yaml",
+        "backend/gateway/free_models.py"
       ],
       "verification_references": [
         "enterprise_tests/test_gateway.py",
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_tests/test_openrouter.py",
+        "docs/governance/openrouter-option.md",
+        "docs/governance/gemma-json-mode.md",
+        "enterprise_integration_tests/test_openrouter_answers.py",
+        "docs/governance/free-fallbacks.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models.",
+        "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending.",
+        "v4.1 ordered free-model failover is contract-tested only; upstream live failover remains pending while account-wide quota is exhausted."
       ]
     },
     {
@@ -355,17 +429,29 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/gateway/openrouter.py",
+        "backend/gateway/openrouter_relay.py",
+        "compose.enterprise-openrouter.yaml",
+        "backend/gateway/free_models.py"
       ],
       "verification_references": [
         "enterprise_tests/test_policy.py",
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_tests/test_openrouter.py",
+        "docs/governance/openrouter-option.md",
+        "docs/governance/gemma-json-mode.md",
+        "enterprise_integration_tests/test_openrouter_answers.py",
+        "docs/governance/free-fallbacks.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models.",
+        "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending.",
+        "v4.1 ordered free-model failover is contract-tested only; upstream live failover remains pending while account-wide quota is exhausted."
       ]
     },
     {
@@ -378,16 +464,22 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/gateway/openrouter.py",
+        "backend/gateway/openrouter_relay.py",
+        "compose.enterprise-openrouter.yaml"
       ],
       "verification_references": [
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_tests/test_openrouter.py",
+        "docs/governance/openrouter-option.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models."
       ]
     },
     {
@@ -619,11 +711,14 @@
       "verification_references": [
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "docs/governance/gemma-json-mode.md",
+        "enterprise_integration_tests/test_openrouter_answers.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending."
       ]
     },
     {
@@ -1017,11 +1112,19 @@
       "owner": "engineering",
       "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "enforcement_locations": [
+        "backend/gateway/openrouter.py",
+        "backend/gateway/openrouter_relay.py",
+        "compose.enterprise-openrouter.yaml"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_openrouter.py",
+        "docs/governance/openrouter-option.md"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Full rule verification pending; see foundation progress report.",
+        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models."
       ]
     },
     {
@@ -1029,11 +1132,16 @@
       "owner": "engineering",
       "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "enforcement_locations": [
+        "backend/gateway/free_models.py"
+      ],
+      "verification_references": [
+        "docs/governance/free-fallbacks.md"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Full rule verification pending; see foundation progress report.",
+        "v4.1 ordered free-model failover is contract-tested only; upstream live failover remains pending while account-wide quota is exhausted."
       ]
     }
   ],

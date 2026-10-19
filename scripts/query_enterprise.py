@@ -34,6 +34,16 @@ def main(version, question, preview):
             for line in response:
                 event = json.loads(line)
                 if event["event"] in {"queued", "stage"}:
+                    if event["event"] == "queued" and event.get("external_processing"):
+                        if event.get("privacy_policy") == "nonconfidential-development":
+                            print(
+                                "Nonconfidential development only: standard provider privacy policy; zero retention is not guaranteed.",
+                                flush=True,
+                            )
+                        print(
+                            "Remote generation: questions and retrieved text are sent through OpenRouter to its selected provider.",
+                            flush=True,
+                        )
                     print(event.get("stage", "queued"), flush=True)
                 elif event["event"] == "error":
                     raise SystemExit(event["detail"])

@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
 from backend.enterprise_config import EnterpriseSettings
+from backend.openrouter_client import MODELS
 from backend.policy import assemble
 
 
@@ -23,11 +24,27 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
         app.state.gateway = gateway
         app.state.model_record = {
             "alias": "company-assistant",
-            "checkpoint": settings.model_name,
-            "digest": settings.model_digest,
+            "requested_model": settings.model_name,
+            "checkpoint": None
+            if settings.generation_mode == "openrouter"
+            else settings.model_name,
+            "digest": None
+            if settings.generation_mode == "openrouter"
+            else settings.model_digest,
             "adapter": settings.generation_mode,
             "adapter_version": "phase3-quotes-v1",
             "production_qualified": False,
+            "external_processing": settings.generation_mode == "openrouter",
+            "dynamic_routing": settings.generation_mode == "openrouter",
+            "fallback_models": list(MODELS[1:])
+            if settings.generation_mode == "openrouter"
+            else [],
+            "privacy_policy": settings.remote_privacy
+            if settings.generation_mode == "openrouter"
+            else "local",
+            "byok_only": settings.generation_mode == "openrouter",
+            "schema_enforcement": "application",
+            "provider_json_schema": settings.generation_mode == "ollama",
             "enabled_capabilities": ["text", "structured_quote_output", "streaming"],
             "disabled_capabilities": [
                 "vision",
@@ -45,6 +62,12 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
 
             app.state.gateway = OllamaGateway(
                 settings.model_endpoint, settings.model_name, settings.model_digest
+            )
+        elif gateway is None and settings.generation_mode == "openrouter":
+            from backend.gateway.openrouter import OpenRouterGateway
+
+            app.state.gateway = OpenRouterGateway(
+                settings.model_endpoint, privacy=settings.remote_privacy
             )
         if settings.database_url:
             from backend.enterprise_db import EnterpriseDatabase
@@ -120,6 +143,38 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
     @app.get("/health/generation")
     async def generation_health():
         available = settings.generation_mode == "fixture"
+        if settings.generation_mode == "openrouter":
+            import httpx
+
+            configured = False
+            try:
+                async with httpx.AsyncClient(
+                    timeout=3, trust_env=False, follow_redirects=False
+                ) as client:
+                    response = await client.get(
+                        settings.model_endpoint + "/health/configuration"
+                    )
+                configured = (
+                    response.status_code == 200
+                    and response.json().get("credential_configured") is True
+                )
+            except (httpx.HTTPError, ValueError, AttributeError, TypeError):
+                pass
+            return JSONResponse(
+                {
+                    "mode": "openrouter",
+                    "external_processing": True,
+                    "model": settings.model_name,
+                    "byok_only": True,
+                    "fallback_models": list(MODELS[1:]),
+                    "privacy_policy": settings.remote_privacy,
+                    "credential_configured": configured,
+                    "provider_verified": False,
+                    "billable_probe_performed": False,
+                    "production_qualified": False,
+                },
+                status_code=200 if configured else 503,
+            )
         if settings.generation_mode == "ollama":
             import httpx
 

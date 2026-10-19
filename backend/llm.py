@@ -1,14 +1,11 @@
-"""LLM integration for Groq or a local Ollama server."""
+"""Legacy API signatures backed by the shared OpenRouter BYOK SDK client."""
 
-import json
 import logging
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 
-import httpx
-from groq import AsyncGroq
-
 from backend.config import get_settings
+from backend.openrouter_client import async_client, async_completion, log_model
 from backend.retrieval import RetrievedChunk
 
 logger = logging.getLogger(__name__)
@@ -61,75 +58,25 @@ def _messages(
     return messages
 
 
-def _payload(
-    query: str,
-    chunks: list[RetrievedChunk],
-    history: list[dict] | None,
-    *,
-    stream: bool,
-) -> dict:
-    return {
-        "model": settings.llm_model,
-        "messages": _messages(query, chunks, history),
-        "max_tokens": settings.llm_max_tokens,
-        "temperature": 0.1,
-        "stream": stream,
-    }
-
-
-def _groq() -> AsyncGroq:
-    if not settings.groq_api_key:
-        raise ValueError("GROQ_API_KEY is not configured")
-    return AsyncGroq(api_key=settings.groq_api_key)
-
-
-async def _ollama_create(payload: dict) -> dict:
-    url = settings.llm_base_url.rstrip("/") + "/chat/completions"
-    try:
-        async with httpx.AsyncClient(timeout=180) as client:
-            response = await client.post(url, json=payload)
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPError as exc:
-        raise ValueError(
-            "Local model is not reachable. Start Ollama and pull the model."
-        ) from exc
-
-
 async def generate_answer(
     query: str,
     chunks: list[RetrievedChunk],
     history: list[dict] | None = None,
 ) -> LLMResponse:
-    logger.info(f"Generating answer for query: '{query[:50]}...'")
-
-    if settings.llm_provider == "ollama":
-        data = await _ollama_create(_payload(query, chunks, history, stream=False))
-        answer = data["choices"][0]["message"].get("content") or ""
-        usage = data.get("usage") or {}
-        return LLMResponse(
-            answer=answer,
-            prompt_tokens=usage.get("prompt_tokens", 0),
-            completion_tokens=usage.get("completion_tokens", 0),
-            total_tokens=usage.get("total_tokens", 0),
-            model=settings.llm_model,
+    async with async_client() as client:
+        response = await async_completion(
+            client,
+            messages=_messages(query, chunks, history),
+            max_tokens=settings.llm_max_tokens,
+            temperature=0.1,
         )
-
-    response = await _groq().chat.completions.create(
-        model=settings.llm_model,
-        messages=_messages(query, chunks, history),
-        max_tokens=settings.llm_max_tokens,
-        temperature=0.1,
-    )
-    answer = response.choices[0].message.content or ""
     usage = response.usage
-    logger.info(f"Generated answer with {usage.total_tokens} tokens")
     return LLMResponse(
-        answer=answer,
-        prompt_tokens=usage.prompt_tokens,
-        completion_tokens=usage.completion_tokens,
-        total_tokens=usage.total_tokens,
-        model=settings.llm_model,
+        answer=response.choices[0].message.content or "",
+        prompt_tokens=usage.prompt_tokens if usage else 0,
+        completion_tokens=usage.completion_tokens if usage else 0,
+        total_tokens=usage.total_tokens if usage else 0,
+        model=response.model,
     )
 
 
@@ -138,39 +85,24 @@ async def stream_answer(
     chunks: list[RetrievedChunk],
     history: list[dict] | None = None,
 ) -> AsyncIterator[str]:
-    logger.info(f"Streaming answer for query: '{query[:50]}...'")
-
-    if settings.llm_provider == "ollama":
-        url = settings.llm_base_url.rstrip("/") + "/chat/completions"
-        payload = _payload(query, chunks, history, stream=True)
+    async with async_client() as client:
+        stream = await async_completion(
+            client,
+            messages=_messages(query, chunks, history),
+            max_tokens=settings.llm_max_tokens,
+            temperature=0.1,
+            stream=True,
+            stream_options={"include_usage": True},
+        )
+        first = True
         try:
-            client = httpx.AsyncClient(timeout=180)
-            async with client, client.stream("POST", url, json=payload) as response:
-                response.raise_for_status()
-                async for line in response.aiter_lines():
-                    if not line.startswith("data: "):
-                        continue
-                    raw = line[6:].strip()
-                    if raw == "[DONE]":
-                        break
-                    chunk = json.loads(raw)
-                    delta = chunk["choices"][0].get("delta", {}).get("content") or ""
+            async for chunk in stream:
+                if first:
+                    log_model(chunk)
+                    first = False
+                if chunk.choices:
+                    delta = chunk.choices[0].delta.content or ""
                     if delta:
                         yield delta
-        except httpx.HTTPError as exc:
-            raise ValueError(
-                "Local model is not reachable. Start Ollama and pull the model."
-            ) from exc
-        return
-
-    stream = await _groq().chat.completions.create(
-        model=settings.llm_model,
-        messages=_messages(query, chunks, history),
-        max_tokens=settings.llm_max_tokens,
-        temperature=0.1,
-        stream=True,
-    )
-    async for chunk in stream:
-        delta = chunk.choices[0].delta.content or ""
-        if delta:
-            yield delta
+        finally:
+            await stream.close()

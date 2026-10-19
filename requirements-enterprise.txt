@@ -1,5 +1,7 @@
 # Foundation only. Full transitive release locking is a later packaging gate.
-# No Torch, model weights or hosted inference SDK.
+# No Torch or model weights. SDK is used only by the isolated BYOK relay.
+openai==2.26.0
+python-dotenv==1.2.1
 fastapi==0.143.0
 uvicorn==0.54.0
 httpx==0.28.1

@@ -1,10 +1,12 @@
+> Current generation routing supersedes the earlier free-pool/local runtime choices: see [BYOK integration](openrouter-byok.md). All active generation paths use the shared OpenAI SDK policy; nonconfidential development limits remain.
+
 # RAGBase Local Enterprise — Final Execution Plan
 
-Version: 2.0 — CPU-only revision
+Version: 5.3 — Groq-first OpenRouter BYOK development router
 
 Updated: 18 October 2026
 
-Governing specification: [CONSTITUTION.md](../CONSTITUTION.md), version 2.0.0
+Governing specification: [CONSTITUTION.md](../CONSTITUTION.md), version 5.3.0
 
 Project: [ElMolla10/ragbase](https://github.com/ElMolla10/ragbase)
 
@@ -12,13 +14,15 @@ Status: revised planning baseline. Implementation is paused for this revision. N
 
 > Execution resumed on 18 October 2026 by the project owner. The planning-time status descriptions below are historical; see the [current implementation record](governance/phase3-completion.md) for running features, tests and remaining gates.
 
+> **Historical v4.1 amendment (superseded by current BYOK routing):** Gemma remains first, with five reviewed free fallbacks for endpoint/model failures; this does not bypass the account-wide free quota. The owner selected free Gemma, with JSON mode plus strict application schema/evidence validation and a zero-price routing ceiling. Standard provider privacy is separately authorized only for nonconfidential development/testing; it is not a ZDR/company-confidential approval.  Local generation remains optional and disabled by default in dev-lite. The owner has authorized an alternative OpenRouter mode; [setup](openrouter.md) and [implementation evidence](governance/openrouter-option.md) supersede historical local-only statements for this explicit exception. DeepSeek Harness is a coding-agent application, not the inference gateway used by RAGBase. No harness tools, filesystem or web search are enabled by this option. All seven execution phases remain.
+
 ## 1. The correction and its consequences
 
 **Confirmed by the project owner:** the company server has **64 GB of ordinary system RAM, no dedicated GPU, and no dedicated VRAM**. The development laptop has 16 GB system RAM. Server CPU model, physical cores, memory bandwidth, instruction sets, operating system, virtualization limits, and storage are unknown.
 
 The old single-64-GB-GPU assumption is invalid everywhere in this plan. We will use CPU-compatible quantized artifacts, reserve RAM for the whole application, serialize expensive work, and measure practical response time before selecting a production model. Fitting weights in memory does not establish useful inference speed.
 
-The product remains fully local: document Q&A, complete-document summaries, comparisons, structured extraction, spreadsheet calculations, charts, and analysis with Arabic, Egyptian questions, mixed-language use, precise citations, and reproducible calculations. No external inference API or hosted fallback is allowed.
+The default product runs fully locally: document Q&A, complete-document summaries, comparisons, structured extraction, spreadsheet calculations, charts, and analysis with Arabic, Egyptian questions, mixed-language use, precise citations, and reproducible calculations. An explicitly selected OpenRouter generation mode is now authorized as an alternative to local inference. It uses `google/gemma-4-31b-it:free` through a credential-isolating relay, sends bounded authorized evidence and questions externally, and needs no local generation weights. Other document services remain local. There is no automatic hosted fallback. See [remote setup and boundaries](openrouter.md).
 
 **Provisional decisions:** llama.cpp is the primary server-runtime candidate; Qwen3.5-9B Q4_K_M is the first practical baseline. Compare Qwen3.5-35B-A3B as the main larger challenger and dense Qwen3.5-27B as a quality-first challenger. Keep Qwen3.5-4B for lighter development/fallback. Include the already-downloaded Gemma 4 12B as an additional independent-family comparison through the existing local Ollama installation.
 
@@ -259,7 +263,7 @@ The model explains computed results; it does not invent arithmetic. Combine poli
 
 ## 11. Security, constitution, UX and operations
 
-All 55 constitutional rule IDs remain tracked. Constitution version 2.0.0 replaces the invalid hardware/context obligations. Keep one authoritative source with bounded derived runtime core/task instructions, recorded version/hash, independent tool validation and code/deployment enforcement. Documents, hidden cells, slide notes, quoted history and tool outputs remain untrusted evidence. No model can grant permissions or change policy.
+All 55 constitutional rule IDs remain tracked. Constitution version 5.3.0 replaces the invalid hardware/context obligations. Keep one authoritative source with bounded derived runtime core/task instructions, recorded version/hash, independent tool validation and code/deployment enforcement. Documents, hidden cells, slide notes, quoted history and tool outputs remain untrusted evidence. No model can grant permissions or change policy.
 
 Use internal OIDC/SSO and workspace roles. Apply authorization before candidate retrieval and every later lookup, source preview, original download, dataset operation, history display and export. Use PostgreSQL RLS with non-owner, non-superuser, non-BYPASSRLS serving credentials and transaction-local identity. Separate migration/provisioning credentials, worker identity and tested pool reset. Track source dependencies and recheck revocation; begin without cross-user answer caching. [PostgreSQL row security](https://www.postgresql.org/docs/16/ddl-rowsecurity.html).
 
@@ -424,7 +428,7 @@ Record runtime/build/ISA, all artifact hashes, quantization, tokenizer/template,
 | Access and tools | Cross-workspace IDs, actual serving role, revocation/history/cache/export, injection, sandbox/network attempts | Zero unauthorized content in dedicated tests; no free-form unsafe execution |
 | Operations | Cancel, retries, restart, duplicate delivery, dependency outage, offline cold start and full restore | Recovery and offline release drill pass with all enabled workflows |
 
-Timed-out cases are not excluded to improve averages. Test watchdogs must be recorded as test policy rather than advertised latency. If none of the candidates meets the required Arabic quality and acceptable task time simultaneously, the pilot remains unaccepted. Options are narrower explicitly approved scope, queued asynchronous tasks, better CPU/bandwidth hardware, or a later GPU upgrade—not a cloud fallback or fabricated performance result.
+Timed-out cases are not excluded to improve averages. Test watchdogs must be recorded as test policy rather than advertised latency. If none of the candidates meets the required Arabic quality and acceptable task time simultaneously, the pilot remains unaccepted. Options are narrower explicitly approved scope, queued asynchronous tasks, better CPU/bandwidth hardware, or a later GPU upgrade—not an automatic cloud fallback or fabricated performance result. The separately authorized hosted mode can be evaluated explicitly with the same quality/security gates.
 
 Select models by mandatory gates first, then compare quality, actual wait time, memory and operating complexity. A fast fluent answer with unsupported facts is a failure. No aggregate score compensates for an access leak or a failing required Arabic slice.
 
@@ -457,7 +461,7 @@ Track P0–P6 in the backlog. Retain A0–A8/B0–B3 only as historical referenc
 Planning changes from this revision:
 
 - Replace this existing plan in place; the repository copy mirrors the same version.
-- Amend the existing constitution to version 2.0.0 with stable rule IDs and corrected CPU/context/resource obligations.
+- Amend the existing constitution to version 5.3.0 with stable rule IDs and corrected CPU/context/resource obligations.
 - Refresh only derived policy **metadata** for the amended constitution, update the rule ledger/backlog, and mark previous deployment-candidate records superseded. New candidate records are planning-only and production-disabled.
 - Keep source-code WIP and current containers unchanged. Do not run migrations, restart services, perform inference or download model weights during this planning task.
 

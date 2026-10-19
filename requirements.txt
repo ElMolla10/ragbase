@@ -18,7 +18,8 @@ sentence-transformers>=2.3.0
 # torch installed separately with CPU-only in Dockerfile
 
 # LLM
-groq>=0.4.0
+openai==2.26.0
+python-dotenv==1.2.1
 
 # Frontend
 streamlit>=1.30.0

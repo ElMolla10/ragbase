@@ -1,0 +1,36 @@
+# Explicit alternative to compose.enterprise-ollama.yaml; do not combine them.
+# The API remains on the internal network. Only the relay receives the key.
+services:
+  api:
+    environment:
+      ENTERPRISE_GENERATION_MODE: openrouter
+      ENTERPRISE_ALLOW_REMOTE_GENERATION: "true"
+      ENTERPRISE_MODEL_ENDPOINT: http://openrouter-relay:8002
+      ENTERPRISE_MODEL_NAME: openai/gpt-oss-120b
+      ENTERPRISE_REMOTE_PRIVACY: nonconfidential-development
+      ENTERPRISE_MODEL_DIGEST: ""
+    depends_on:
+      openrouter-relay:
+        condition: service_started
+  openrouter-relay:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enterprise
+      target: runtime
+    command: [uvicorn, backend.gateway.openrouter_relay:app, --host, "0.0.0.0", --port, "8002", --no-access-log]
+    environment:
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_API_KEY_FILE: /run/secrets/openrouter_api_key
+      OPENROUTER_PRIVACY: nonconfidential-development
+    secrets: [openrouter_api_key]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 128m
+    cpus: 0.25
+    pids_limit: 32
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    networks: [edge, enterprise]
+secrets:
+  openrouter_api_key:
+    file: ./.local/openrouter-api-key

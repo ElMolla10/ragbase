@@ -63,6 +63,13 @@ def test_quote_must_match_a_supplied_source_exactly():
         "broken",
         '{"insufficient":false,"claims":[]}',
         '{"insufficient":true,"claims":[],"secret":"x"}',
+        '{"insufficient":true,"insufficient":false,"claims":[]}',
+        '{"insufficient":"true","claims":[]}',
+        '{"insufficient":1,"claims":[]}',
+        '```json\n{"insufficient":true,"claims":[]}\n```',
+        'Answer: {"insufficient":true,"claims":[]}',
+        '{"insufficient":false,"claims":[{"source_id":"a","source_id":"b","quote":"120"}]}',
+        '{"insufficient":true,"claims":[',
     ],
 )
 def test_invalid_or_extra_model_fields_are_rejected(raw):
