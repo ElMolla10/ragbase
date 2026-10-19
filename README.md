@@ -6,8 +6,8 @@ PostgreSQL/pgvector retrieval and hosted generation through OpenRouter BYOK.
 Language support is a capability to evaluate on your documents, not a guarantee
 of business accuracy.
 
-**Public demo:** [ragbase.up.railway.app](https://ragbase.up.railway.app)  
-**Branch:** `master` — public application  
+**Public demo:** [ragbase.up.railway.app](https://ragbase.up.railway.app)
+**Branch:** `master` — public application
 **Updated:** 19 October 2026
 
 For the separate access-controlled implementation and its roadmap, see the
