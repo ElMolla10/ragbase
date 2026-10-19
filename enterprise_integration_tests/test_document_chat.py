@@ -23,12 +23,9 @@ async def test_paper_overview_uses_groq_gateway_contract_without_keyword_overlap
                 json.dumps(
                     {
                         "insufficient": False,
-                        "claims": [
-                            {
-                                "source_id": source["source_id"],
-                                "explanation": "The document concerns predicting rainfall from sensor data.",
-                            }
-                        ],
+                        "answer": "The document concerns predicting rainfall from sensor data. ["
+                        + source["source_id"]
+                        + "]",
                     }
                 ),
             )

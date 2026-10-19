@@ -11,7 +11,7 @@ from uuid import UUID, uuid4
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def main(version, question, preview):
+def main(version, question, preview, *, verbose=True):
     access = json.loads((ROOT / ".local/dev-access.json").read_text("utf-8"))
     opener = build_opener(ProxyHandler({}))
     base = "http://127.0.0.1:8800"
@@ -34,6 +34,8 @@ def main(version, question, preview):
             for line in response:
                 event = json.loads(line)
                 if event["event"] in {"queued", "stage"}:
+                    if not verbose:
+                        continue
                     if event["event"] == "queued" and event.get("external_processing"):
                         if event.get("privacy_policy") == "nonconfidential-development":
                             print(
@@ -49,7 +51,7 @@ def main(version, question, preview):
                     raise SystemExit(event["detail"])
                 elif event["event"] == "answer":
                     metadata = event["metadata"]
-                    if metadata.get("model_called"):
+                    if verbose and metadata.get("model_called"):
                         route = metadata.get("model", {}).get("resolved_route") or {}
                         print(
                             "Model used:",
@@ -58,26 +60,30 @@ def main(version, question, preview):
                             route.get("provider") or "not reported",
                             flush=True,
                         )
-                    else:
+                    elif verbose:
                         print(
                             "No model call: no usable extracted document context was available."
                         )
-                    if event["insufficient"]:
+                    if event["insufficient"] and not event.get("answer"):
                         print(
                             "The supplied document context did not establish an answer."
                         )
                     sources = {}
+                    conversational = event.get("mode") == "grounded_document_chat"
+                    if conversational:
+                        print("\n" + event["answer"])
                     for claim in event["claims"]:
                         key = claim["source_id"]
                         if key not in sources:
                             sources[key] = (len(sources) + 1, claim)
                         number = sources[key][0]
-                        print(
-                            f"\n{claim.get('explanation') or claim['quote']} [{number}]"
-                        )
-                    if sources:
+                        if not conversational:
+                            print(
+                                f"\n{claim.get('explanation') or claim['quote']} [{number}]"
+                            )
+                    if sources and preview:
                         print("\nSources:")
-                    for number, claim in sources.values():
+                    for number, claim in sources.values() if preview else ():
                         location = claim["location"]
                         label = (
                             f"page {location['page']}"
@@ -94,10 +100,20 @@ def main(version, question, preview):
                                 timeout=10,
                             ) as source:
                                 print(source.read().decode())
-                    print(event["scope_notice"])
-                    print(
-                        f"Validated answer released after {event['metadata']['answer_release_seconds']:.2f}s; fixture={event['metadata']['fixture']}"
-                    )
+                    coverage = metadata.get("coverage", {})
+                    if verbose:
+                        print(event["scope_notice"])
+                        print(
+                            f"Answer released after {metadata['answer_release_seconds']:.2f}s; fixture={metadata['fixture']}"
+                        )
+                    elif coverage.get("total_document_chunks") and not coverage.get(
+                        "all_extracted_chunks_included"
+                    ):
+                        print(
+                            f"\nContext: {coverage['included_chunks']} of {coverage['total_document_chunks']} passages supplied; partial overview."
+                        )
+                    if not verbose and metadata.get("fixture"):
+                        print("Development fixture output; no real model was called.")
     except HTTPError as error:
         raise SystemExit(
             f"Request failed (HTTP {error.code}); verify permissions, indexing and generation availability."

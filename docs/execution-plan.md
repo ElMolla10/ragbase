@@ -4,11 +4,11 @@
 
 # RAGBase Local Enterprise — Final Execution Plan
 
-Version: 6.0 — Groq-first grounded document chat
+Version: 6.2 — Groq-first public-style document chat
 
 Updated: 18 October 2026
 
-Governing specification: [CONSTITUTION.md](../CONSTITUTION.md), version 6.1.0
+Governing specification: [CONSTITUTION.md](../CONSTITUTION.md), version 6.2.0
 
 Project: [ElMolla10/ragbase](https://github.com/ElMolla10/ragbase)
 
@@ -265,7 +265,7 @@ The model explains computed results; it does not invent arithmetic. Combine poli
 
 ## 11. Security, constitution, UX and operations
 
-All 55 constitutional rule IDs remain tracked. Constitution version 6.1.0 replaces the invalid hardware/context obligations. Keep one authoritative source with bounded derived runtime core/task instructions, recorded version/hash, independent tool validation and code/deployment enforcement. Documents, hidden cells, slide notes, quoted history and tool outputs remain untrusted evidence. No model can grant permissions or change policy.
+All 55 constitutional rule IDs remain tracked. Constitution version 6.2.0 replaces the invalid hardware/context obligations. Keep one authoritative source with bounded derived runtime core/task instructions, recorded version/hash, independent tool validation and code/deployment enforcement. Documents, hidden cells, slide notes, quoted history and tool outputs remain untrusted evidence. No model can grant permissions or change policy.
 
 Use internal OIDC/SSO and workspace roles. Apply authorization before candidate retrieval and every later lookup, source preview, original download, dataset operation, history display and export. Use PostgreSQL RLS with non-owner, non-superuser, non-BYPASSRLS serving credentials and transaction-local identity. Separate migration/provisioning credentials, worker identity and tested pool reset. Track source dependencies and recheck revocation; begin without cross-user answer caching. [PostgreSQL row security](https://www.postgresql.org/docs/16/ddl-rowsecurity.html).
 
@@ -463,7 +463,7 @@ Track P0–P6 in the backlog. Retain A0–A8/B0–B3 only as historical referenc
 Planning changes from this revision:
 
 - Replace this existing plan in place; the repository copy mirrors the same version.
-- Amend the existing constitution to version 6.1.0 with stable rule IDs and corrected CPU/context/resource obligations.
+- Amend the existing constitution to version 6.2.0 with stable rule IDs and corrected CPU/context/resource obligations.
 - Refresh only derived policy **metadata** for the amended constitution, update the rule ledger/backlog, and mark previous deployment-candidate records superseded. New candidate records are planning-only and production-disabled.
 - Keep source-code WIP and current containers unchanged. Do not run migrations, restart services, perform inference or download model weights during this planning task.
 

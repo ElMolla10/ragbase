@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "constitution_version": "6.1.0",
-  "constitution_sha256": "49539c5fba6f2092fd4ddb84b968235b11cd03962c60a80b6fc11aa361ecbacb",
+  "constitution_version": "6.2.0",
+  "constitution_sha256": "660e18e0e092868a55b366a1c6a38e6526215cd05beee978a8ef77232e40f696",
   "sections": {
     "core": {
       "rule_ids": [

@@ -79,6 +79,9 @@ def main():
     selection.add_argument("--version", type=UUID)
     parser.add_argument("--question")
     parser.add_argument(
+        "--verbose", action="store_true", help="Show processing/model diagnostics"
+    )
+    parser.add_argument(
         "--preview", action="store_true", help="Show full citation previews"
     )
     args = parser.parse_args()
@@ -91,13 +94,13 @@ def main():
             path = args.file or Path(input("File path: ").strip().strip('"'))
             version = upload_and_wait(path)
         if args.question:
-            query(version, args.question, args.preview)
+            query(version, args.question, args.preview, verbose=args.verbose)
             return
         print(
             "Ask a question or an overview such as 'What is this paper about?'. Leave blank to exit."
         )
         while question := input("Question: ").strip():
-            query(version, question, args.preview)
+            query(version, question, args.preview, verbose=args.verbose)
     except HTTPError as exc:
         raise SystemExit(
             f"Request failed (HTTP {exc.code}). Check readiness, permissions and supported input."

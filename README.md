@@ -76,7 +76,7 @@ See [BYOK implementation and evidence](docs/openrouter-byok.md).
 
 | Check | Recorded result |
 |---|---|
-| Unit and contract suite | 192 passed |
+| Unit and contract suite | 198 passed |
 | Isolated PostgreSQL integration suite | 64 passed |
 | Lint, formatting and policy consistency | Passed |
 | Gemini through Google AI Studio | HTTP 200 with an answer |
@@ -157,8 +157,9 @@ python scripts/try_enterprise.py
 ```
 
 Paste a file path when prompted, then type questions. The client uploads the
-original, waits for extraction/indexing, and displays explained answers with
-citations. Add `--preview` to show full source previews. It uses the local synthetic Alice development identity without
+original, waits for extraction/indexing, and displays connected prose with inline
+page/row/line citations, like the public app. Add `--preview` for source previews
+or `--verbose` for processing/model diagnostics. It uses the local synthetic Alice development identity without
 printing its token. Use nonconfidential test files: retrieved evidence is sent
 through the enabled OpenRouter route. Supported inputs are native PDF, UTF-8
 TXT/Markdown and comma-separated UTF-8 CSV, up to 5 MB. Leave a question blank to
@@ -237,3 +238,5 @@ superseded runtime or model, use the current BYOK record for generation behavior
 Document-chat correction: “whats the paper about?” now invokes Groq with document context and returns cited explanations. A synthetic live run passed in 4.53 seconds. Coverage is reported; this is not unrestricted full-document comprehension.
 
 Citation reliability correction (v6.1.0): natural answers cite short passage aliases; the app attaches original text, so PDF whitespace/hyphenation no longer causes quotation-copy rejection. Unknown citations remain rejected. The previously failing local document overview passed through Groq with six citations in 3.93 seconds; its 21/38-passage context was disclosed as partial.
+
+V6.2 answer presentation matches the public app: cohesive concise prose and inline (Page N) citations instead of six forced claims or a source footer. Groq still generates the answer; trusted code resolves citation aliases to actual authorized locations. Terminal processing diagnostics are hidden by default; partial coverage remains visible.
