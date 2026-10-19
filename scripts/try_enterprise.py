@@ -78,6 +78,9 @@ def main():
     selection.add_argument("--file", type=Path)
     selection.add_argument("--version", type=UUID)
     parser.add_argument("--question")
+    parser.add_argument(
+        "--preview", action="store_true", help="Show full citation previews"
+    )
     args = parser.parse_args()
     print("Enterprise development test — local API at " + BASE)
     print("Use nonconfidential test documents only. Questions and retrieved text")
@@ -88,13 +91,13 @@ def main():
             path = args.file or Path(input("File path: ").strip().strip('"'))
             version = upload_and_wait(path)
         if args.question:
-            query(version, args.question, True)
+            query(version, args.question, args.preview)
             return
         print(
-            "Enter a question, or leave it blank to exit. No calculations or full summaries yet."
+            "Ask a question or an overview such as 'What is this paper about?'. Leave blank to exit."
         )
         while question := input("Question: ").strip():
-            query(version, question, True)
+            query(version, question, args.preview)
     except HTTPError as exc:
         raise SystemExit(
             f"Request failed (HTTP {exc.code}). Check readiness, permissions and supported input."

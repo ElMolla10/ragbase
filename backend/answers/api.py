@@ -15,12 +15,18 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
-from backend.answers.grounding import input_bound, make_request, validate_answer
+from backend.answers.grounding import (
+    REMOTE_BUDGET,
+    input_bound,
+    make_request,
+    overview_question,
+    validate_answer,
+)
 from backend.gateway.contracts import GatewayError
 from backend.library import bounded_body, identity
 from backend.policy import assemble
 from backend.search.index import INDEX_VERSION
-from backend.search.retrieve import retrieve
+from backend.search.retrieve import document_context, retrieve
 from backend.storage.local import StoredArtifact
 
 router = APIRouter(prefix="/api/workspaces")
@@ -56,11 +62,25 @@ async def parse_input(request):
         ) from exc
 
 
-async def evidence(request, actor, workspace, data):
+async def evidence(request, actor, workspace, data, *, answer_mode=False):
     database = request.app.state.database
     async with database.scope(actor, workspace) as conn:
         await database.authorize(conn, workspace)
-        hits = await retrieve(conn, workspace, data.version_ids, data.question)
+        overview = answer_mode and overview_question(data.question)
+        hits = (
+            []
+            if overview
+            else await retrieve(conn, workspace, data.version_ids, data.question)
+        )
+        coverage = {"strategy": "lexical", "total_document_chunks": None}
+        if answer_mode and (overview or not hits):
+            hits, total = await document_context(conn, workspace, data.version_ids)
+            coverage = {
+                "strategy": "document_overview"
+                if overview
+                else "document_context_fallback",
+                "total_document_chunks": total,
+            }
         if hits:
             versions = list({str(hit["version_id"]) for hit in hits})
             originals = (
@@ -85,7 +105,7 @@ async def evidence(request, actor, workspace, data):
                         original["byte_size"],
                     ),
                 )
-        return hits
+        return (hits, coverage) if answer_mode else hits
 
 
 @router.post("/{workspace}/search")
@@ -236,7 +256,7 @@ async def collect(gateway, model_request):
         if event.kind == "text":
             first = first if first is not None else time.monotonic() - started
             parts.append(event.text)
-            if sum(len(part.encode()) for part in parts) > 8192:
+            if sum(len(part.encode()) for part in parts) > 16384:
                 raise GatewayError("Answer exceeds size limit")
         elif event.kind == "done":
             if event.finish_reason != "stop":
@@ -256,7 +276,7 @@ def frame(kind, **value):
 async def answer(workspace: UUID, request: Request, principal=Depends(identity)):
     data = await parse_input(request)
     actor, database = principal.user_id, request.app.state.database
-    hits = await evidence(request, actor, workspace, data)
+    hits, coverage = await evidence(request, actor, workspace, data, answer_mode=True)
     gateway = request.app.state.gateway
     if gateway is None:
         raise HTTPException(
@@ -265,7 +285,12 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
         )
     instructions = assemble("retrieval")
     output_budget = (
-        1024 if request.app.state.settings.generation_mode == "openrouter" else 256
+        2048 if request.app.state.settings.generation_mode == "openrouter" else 256
+    )
+    budget = (
+        REMOTE_BUDGET
+        if request.app.state.settings.generation_mode == "openrouter"
+        else 4096
     )
     selected = []
     for hit in hits:
@@ -275,12 +300,12 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
             [*selected, hit],
             max_output_tokens=output_budget,
         )
-        if input_bound(candidate) + candidate.max_output_tokens <= 4096:
+        if input_bound(candidate) + candidate.max_output_tokens <= budget:
             selected.append(hit)
     model_request = make_request(
         instructions, data.question, selected, max_output_tokens=output_budget
     )
-    if input_bound(model_request) + model_request.max_output_tokens > 4096 or (
+    if input_bound(model_request) + model_request.max_output_tokens > budget or (
         hits and not selected
     ):
         raise HTTPException(
@@ -375,7 +400,7 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
                     if remote
                     else "local",
                     "context_limit": None if remote else 4096,
-                    "request_budget": 4096,
+                    "request_budget": budget,
                     "input_token_upper_bound": None
                     if remote
                     else input_bound(model_request),
@@ -393,6 +418,16 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
                     "retrieved_count": len(hits),
                     "included_count": len(selected),
                     "model_called": bool(selected),
+                    "coverage": {
+                        **coverage,
+                        "included_chunks": len(selected),
+                        "all_extracted_chunks_included": coverage[
+                            "total_document_chunks"
+                        ]
+                        == len(selected)
+                        if coverage["total_document_chunks"] is not None
+                        else False,
+                    },
                     "fixture": request.app.state.settings.generation_mode == "fixture",
                 }
                 await record(
@@ -400,6 +435,17 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
                 )
                 # Validate everything first. No raw model tokens or private
                 # reasoning enter the application stream.
+                if coverage["total_document_chunks"] is not None:
+                    total = coverage["total_document_chunks"]
+                    verified["scope_notice"] = (
+                        f"Document context: {len(selected)} of {total} extracted passages supplied. "
+                        + (
+                            "All extracted text passages included; extraction gaps may remain. "
+                            if len(selected) == total
+                            else "Bounded overview context; some document text was not supplied. "
+                        )
+                        + "Not a calculation or a guaranteed exhaustive review."
+                    )
                 yield frame("answer", **verified, metadata=metadata)
                 yield frame("done", run_id=run_id)
                 completed = True

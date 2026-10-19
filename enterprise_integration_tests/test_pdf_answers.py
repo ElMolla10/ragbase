@@ -73,12 +73,23 @@ async def test_lookup_streams_verified_quotes_with_private_run_metadata(world):
         assert row["status"] == "completed" and "Quarter" not in str(dict(row))
 
 
-async def test_missing_evidence_returns_insufficient_without_calling_model(world):
+async def test_missing_keyword_hits_use_document_context_and_can_return_insufficient(
+    world,
+):
     record = await ready(world)
+
+    class Insufficient:
+        async def stream(self, request):
+            assert request.evidence
+            yield GatewayEvent("text", '{"insufficient":true,"claims":[]}')
+            yield GatewayEvent("done", finish_reason="stop")
+
+    world["app"].state.gateway = Insufficient()
     events = frames(await ask(world, record, "Neptune telemetry?"))
     answer = next(event for event in events if event["event"] == "answer")
     assert answer["insufficient"] and answer["claims"] == []
-    assert answer["metadata"]["model_called"] is False
+    assert answer["metadata"]["model_called"] is True
+    assert answer["metadata"]["coverage"]["strategy"] == "document_context_fallback"
 
 
 async def test_arabic_search_preserves_source_and_citation(world):

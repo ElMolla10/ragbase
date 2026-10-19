@@ -1,6 +1,6 @@
 # RAGBase Local Enterprise Constitution
 
-Version: 5.3.0  
+Version: 6.0.0  
 Date: 18 October 2026  
 Status: CPU-only implementation specification; partial development exists, but production enforcement and model suitability remain unvalidated.  
 Owner: project owner and designated company administrators.
@@ -157,3 +157,5 @@ Implementation sequence: inventory and acceptance fixtures; enterprise/dev-lite 
 - **5.2.0 -- 19 October 2026:** Owner approved proceeding with live-tested Gemini 3.8 Flash and GPT-OSS 120B through Google AI Studio and Groq. Low reasoning is required; bounded 60-second upstream generation replaces the former 30-second timeout. Provider allowlist and nonconfidential-only scope remain. Individual live successes do not establish quality, zero cost or automatic outage recovery.
 
 - **5.3.0 -- 19 October 2026:** Owner selected Groq GPT-OSS 120B as the default for all enabled generation, with Gemini 3.8 Flash/Google AI Studio as fallback. Update both model and provider order, deployment defaults and verification cases; preserve explicit remote opt-in and existing privacy restrictions. Base generation-disabled deployments remain disabled.
+
+- **6.0.0 -- 19 October 2026:** Owner explicitly prioritizes natural document chat and paper overviews over the extractive-only milestone. Permit cited model explanations with exact supporting quotations and checked source identities; do not claim semantic entailment is mechanically verified. Overview/no-keyword-hit requests use authorized bounded document context with explicit coverage, never a silent complete-summary claim. Hosted development envelope is 16,000 byte-budget charges including a 2,048-token output reservation, not a validated tokenizer capacity. Groq stays primary; privacy, RLS, revocation, immutable lineage and no-calculation controls remain.

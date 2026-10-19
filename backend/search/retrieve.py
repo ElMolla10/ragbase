@@ -6,7 +6,7 @@ from sqlalchemy import text
 from backend.search.index import INDEX_VERSION, query_terms
 
 
-async def retrieve(conn, workspace, versions, question, *, limit=10):
+async def check_versions(conn, workspace, versions):
     scope = [str(value) for value in versions]
     rows = (
         (
@@ -29,6 +29,11 @@ async def retrieve(conn, workspace, versions, question, *, limit=10):
         raise HTTPException(
             409, "Selected sources need extraction, indexing or review before questions"
         )
+    return scope
+
+
+async def retrieve(conn, workspace, versions, question, *, limit=10):
+    scope = await check_versions(conn, workspace, versions)
     terms = query_terms(question)
     if not terms:
         return []
@@ -73,3 +78,53 @@ async def retrieve(conn, workspace, versions, question, *, limit=10):
             )
             seen.add(key)
     return result
+
+
+async def document_context(conn, workspace, versions):
+    """Bounded overview candidates across beginning/end and intervening pages.
+
+    All queries stay inside the authorized immutable-version scope. Coverage
+    totals accompany the selection; sampling is never a complete-review claim.
+    """
+    scope = await check_versions(conn, workspace, versions)
+    rows = (
+        (
+            await conn.execute(
+                text("""
+            WITH scoped AS (
+                SELECT c.id,c.version_id,c.ordinal,c.part,c.char_start,c.char_end,
+                       c.content,c.index_version,v.sha256,d.id AS document_id,
+                       d.filename,p.location,j.warnings,
+                       max(c.ordinal) OVER(PARTITION BY c.version_id) AS last_ordinal,
+                       count(*) OVER() AS total_chunks
+                FROM enterprise.document_chunks c
+                JOIN enterprise.document_versions v ON v.id=c.version_id
+                JOIN enterprise.documents d ON d.id=v.document_id
+                JOIN enterprise.extracted_pages p ON p.version_id=c.version_id AND p.ordinal=c.ordinal
+                JOIN enterprise.ingestion_jobs j ON j.version_id=c.version_id
+                WHERE c.workspace_id=:w AND c.version_id=ANY(CAST(:versions AS uuid[]))
+                  AND c.index_version=:i AND j.status='extracted'
+            )
+            SELECT * FROM scoped
+            ORDER BY CASE WHEN ordinal<=2 THEN 0 WHEN ordinal>=last_ordinal-1 THEN 1 ELSE 2 END,
+                     part,ordinal,version_id LIMIT 128
+            """),
+                {"w": workspace, "versions": scope, "i": INDEX_VERSION},
+            )
+        )
+        .mappings()
+        .all()
+    )
+    total = rows[0]["total_chunks"] if rows else 0
+    return [
+        {
+            **{
+                k: v
+                for k, v in dict(row).items()
+                if k not in {"total_chunks", "last_ordinal"}
+            },
+            "source_id": str(row["id"]),
+            "preview_url": f"/api/workspaces/{workspace}/sources/{row['id']}",
+        }
+        for row in rows
+    ], total

@@ -20,19 +20,25 @@ enterprise application. The enterprise entry point is `backend.enterprise:app`.
   cross-workspace isolation, permission revocation and integrity checks.
 - Durable extraction jobs, bounded native PDF/CSV text extraction, page/line/row lineage,
   extraction warnings and versioned lexical search over authorized evidence.
-- Extractive answers: the model selects source quotations; trusted application
-  code validates the schema, source identifiers and exact quoted text before
-  releasing an answer. Users receive progress events followed by validated
-  quotations and citations, with authenticated source previews and downloads.
+- Natural document answers and paper overviews through Groq, with generated
+  explanations supported by exact quotations and source identifiers checked in
+  trusted code. Overview questions do not require keyword overlap. When lexical
+  retrieval finds nothing, bounded authorized document context is supplied to
+  the model instead of immediately declaring insufficient evidence.
+- Source citations and authenticated previews. The client displays actual
+  response-reported model/provider and how much context was included. Long
+  documents receive explicitly bounded overview context, not a complete-review
+  claim. Interpretation accuracy remains a model-quality evaluation requirement.
 - Bounded generation admission and queueing, cancellation, job recovery,
   idempotency and coordination between extraction and interactive answers.
 - Separate core-service readiness and generation health. Search and source
   previews remain available during model outages.
 - A terminal query client. A graphical enterprise UI is still pending.
 
-This is currently **evidence lookup with verified quotations**. It does not yet
-provide unrestricted analysis, exhaustive summaries or spreadsheet calculations.
-Exact quotation validation does not establish relevance or extraction accuracy.
+Natural document chat is enabled. Source identities and supporting quotations
+are validated; generated explanations are model interpretations and are not
+mechanically proven true. Exhaustive summaries and spreadsheet calculations
+remain separate, unfinished capabilities.
 
 ## Current model routing
 
@@ -70,8 +76,8 @@ See [BYOK implementation and evidence](docs/openrouter-byok.md).
 
 | Check | Recorded result |
 |---|---|
-| Unit and contract suite | 181 passed |
-| Isolated PostgreSQL integration suite | 62 passed |
+| Unit and contract suite | 190 passed |
+| Isolated PostgreSQL integration suite | 64 passed |
 | Lint, formatting and policy consistency | Passed |
 | Gemini through Google AI Studio | HTTP 200 with an answer |
 | GPT-OSS 120B through Groq | HTTP 200 with an answer |
@@ -151,8 +157,8 @@ python scripts/try_enterprise.py
 ```
 
 Paste a file path when prompted, then type questions. The client uploads the
-original, waits for extraction/indexing, and displays validated quotations with
-source previews. It uses the local synthetic Alice development identity without
+original, waits for extraction/indexing, and displays explained answers with
+citations. Add `--preview` to show full source previews. It uses the local synthetic Alice development identity without
 printing its token. Use nonconfidential test files: retrieved evidence is sent
 through the enabled OpenRouter route. Supported inputs are native PDF, UTF-8
 TXT/Markdown and comma-separated UTF-8 CSV, up to 5 MB. Leave a question blank to
@@ -227,3 +233,5 @@ Further detail: [execution plan](docs/execution-plan.md),
 [historical Phase 3 evidence](docs/governance/phase3-completion.md), and
 [current BYOK evidence](docs/openrouter-byok.md). When older records describe a
 superseded runtime or model, use the current BYOK record for generation behavior.
+
+Document-chat correction: “whats the paper about?” now invokes Groq with document context and returns cited explanations. A synthetic live run passed in 4.53 seconds. Coverage is reported; this is not unrestricted full-document comprehension.

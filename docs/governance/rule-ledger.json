@@ -1,5 +1,5 @@
 {
-  "constitution_version": "5.3.0",
+  "constitution_version": "6.0.0",
   "rules": [
     {
       "id": "LOC-001",
@@ -20,7 +20,9 @@
         "enterprise_integration_tests/test_openrouter_answers.py",
         "docs/governance/free-fallbacks.md",
         "enterprise_tests/test_byok_client.py",
-        "docs/openrouter-byok.md"
+        "docs/openrouter-byok.md",
+        "enterprise_tests/test_document_chat.py",
+        "enterprise_integration_tests/test_document_chat.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
@@ -31,7 +33,8 @@
         "v5 BYOK replacement: 161 unit/contract and 58 PostgreSQL integration checks pass. Three live probes fail before HTTP on TLS certificate verification; provider access, free-only Mistral selection and deployment remain pending. Workspace Never-use-shared-capacity is owner-reported, not independently audited.",
         "v5.1: owner removed Mistral. Both remaining live probes reached OpenRouter but returned HTTP 401 Unauthorized; authentication and live fallback acceptance remain pending. No deployment switch performed. Updated suite: 162 unit/contract and 58 PostgreSQL integration tests pass; lint and policy verification pass.",
         "v5.2: Gemini 3.8 Flash/Google AI Studio and GPT-OSS 120B/Groq individually return HTTP 200. Standard and forced-Google-unavailable requests successfully select Groq in the same request; specific 429 recovery not injected. Enterprise API/worker/relay deployed. Synthetic PDF exact-quote/source-preview smoke passes in 24.37s; 162 unit/contract +58 isolated PostgreSQL tests pass, lint/policy checks pass. Shared-capacity settings are owner-reported; zero-cost, Arabic, vision and production qualification remain pending.",
-        "v5.3: Groq GPT-OSS 120B primary, Gemini 3.8 Flash fallback aligned across master and enterprise. Enterprise health confirms order; synthetic PDF exact-quote and page preview passed in 3.31s. 163 unit/contract and 58 isolated PostgreSQL checks pass; lint/format/policy checks pass. Single-run timing is not a capacity guarantee; new reversed-chain 429 injection and production qualification remain pending."
+        "v5.3: Groq GPT-OSS 120B primary, Gemini 3.8 Flash fallback aligned across master and enterprise. Enterprise health confirms order; synthetic PDF exact-quote and page preview passed in 3.31s. 163 unit/contract and 58 isolated PostgreSQL checks pass; lint/format/policy checks pass. Single-run timing is not a capacity guarantee; new reversed-chain 429 injection and production qualification remain pending.",
+        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified."
       ]
     },
     {
@@ -474,12 +477,15 @@
         "enterprise_tests/test_quote_answers.py",
         "enterprise_integration_tests/test_pdf_answers.py",
         "enterprise_tests/test_openrouter.py",
-        "docs/governance/openrouter-option.md"
+        "docs/governance/openrouter-option.md",
+        "enterprise_tests/test_document_chat.py",
+        "enterprise_integration_tests/test_document_chat.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
         "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
-        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models."
+        "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models.",
+        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified."
       ]
     },
     {
@@ -735,12 +741,15 @@
         "enterprise_tests/test_quote_answers.py",
         "enterprise_integration_tests/test_pdf_answers.py",
         "docs/governance/gemma-json-mode.md",
-        "enterprise_integration_tests/test_openrouter_answers.py"
+        "enterprise_integration_tests/test_openrouter_answers.py",
+        "enterprise_tests/test_document_chat.py",
+        "enterprise_integration_tests/test_document_chat.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
         "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
-        "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending."
+        "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending.",
+        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified."
       ]
     },
     {
@@ -758,11 +767,14 @@
       "verification_references": [
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_tests/test_document_chat.py",
+        "enterprise_integration_tests/test_document_chat.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified."
       ]
     },
     {
@@ -771,10 +783,14 @@
       "work_packages": "P2/P3/P5",
       "state": "specified_not_verified",
       "enforcement_locations": [],
-      "verification_references": [],
+      "verification_references": [
+        "enterprise_tests/test_document_chat.py",
+        "enterprise_integration_tests/test_document_chat.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Full rule verification pending; see foundation progress report.",
+        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified."
       ]
     },
     {

@@ -43,7 +43,7 @@ def create_relay(*, transport=None):
         data = bytearray()
         async for piece in request.stream():
             data.extend(piece)
-            if len(data) > 24000:
+            if len(data) > 48000:
                 raise HTTPException(413, "Model request too large")
         try:
             payload = json.loads(data)
@@ -56,7 +56,7 @@ def create_relay(*, transport=None):
                     for m in messages
                 )
                 or type(payload["max_tokens"]) is not int
-                or not 1 <= payload["max_tokens"] <= 1024
+                or not 1 <= payload["max_tokens"] <= 2048
             ):
                 raise ValueError
             body = json.loads(messages[1]["content"])

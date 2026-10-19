@@ -70,3 +70,5 @@ confirms that order. The updated synthetic PDF quote/source-preview smoke passed
 in 3.31 seconds. 163 unit/contract and 58 PostgreSQL integration checks pass.
 The earlier fallback probes and timings above describe their original run, not
 a freshly injected outage for the reversed chain.
+
+Constitution v6.0.0 enables natural document chat with checked supporting citations. Overview requests and no-keyword-hit questions use authorized document context. Hosted requests have a 16,000-charge development byte envelope including 2,048 reserved output tokens; this is not a validated tokenizer capacity. Temperature is zero. Coverage reports included versus total passages; long documents may receive a partial overview, never a silent complete-review claim. Explanation semantics remain model-generated. Live synthetic overview through Groq passed in 4.53s; 190 unit/contract and 64 PostgreSQL tests pass.

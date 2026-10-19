@@ -209,9 +209,9 @@ async def test_free_quota_error_is_normalized_without_provider_details():
         event(
             {
                 "usage": {
-                    "prompt_tokens": 4096,
+                    "prompt_tokens": 16000,
                     "completion_tokens": 1,
-                    "total_tokens": 4097,
+                    "total_tokens": 16001,
                 }
             }
         )
@@ -274,7 +274,7 @@ def test_relay_alone_receives_key_and_fixed_upstream(credential):
         {"models": list(reversed(FREE_MODELS))},
         {"models": []},
         {"provider": {}},
-        {"max_tokens": 1025},
+        {"max_tokens": 2049},
         {"max_tokens": True},
         {"response_format": {}},
         {"plugins": [{"id": "web"}]},

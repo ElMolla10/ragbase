@@ -48,14 +48,47 @@ def main(version, question, preview):
                 elif event["event"] == "error":
                     raise SystemExit(event["detail"])
                 elif event["event"] == "answer":
-                    if event["insufficient"]:
-                        print("Insufficient evidence in the selected versions.")
-                    for claim in event["claims"]:
-                        print(claim["quote"])
+                    metadata = event["metadata"]
+                    if metadata.get("model_called"):
+                        route = metadata.get("model", {}).get("resolved_route") or {}
                         print(
-                            f"Source: {claim['filename']} / {claim['location']} / {claim['preview_url']}"
+                            "Model used:",
+                            route.get("model") or "not reported",
+                            "/ provider:",
+                            route.get("provider") or "not reported",
+                            flush=True,
                         )
+                    else:
+                        print(
+                            "No model call: no usable extracted document context was available."
+                        )
+                    if event["insufficient"]:
+                        print(
+                            "The supplied document context did not establish an answer."
+                        )
+                    sources = {}
+                    for claim in event["claims"]:
+                        key = claim["source_id"]
+                        if key not in sources:
+                            sources[key] = (len(sources) + 1, claim)
+                        number = sources[key][0]
+                        print(
+                            f"\n{claim.get('explanation') or claim['quote']} [{number}]"
+                        )
+                    if sources:
+                        print("\nSources:")
+                    for number, claim in sources.values():
+                        location = claim["location"]
+                        label = (
+                            f"page {location['page']}"
+                            if "page" in location
+                            else f"row {location['row']}"
+                            if "row" in location
+                            else f"lines {location.get('line_start', '?')}–{location.get('line_end', '?')}"
+                        )
+                        print(f"[{number}] {claim['filename']} — {label}")
                         if preview:
+                            print("Supporting quote:", claim["quote"])
                             with opener.open(
                                 Request(base + claim["preview_url"], headers=headers),
                                 timeout=10,

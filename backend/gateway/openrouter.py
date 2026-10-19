@@ -1,6 +1,6 @@
 """Explicit hosted generation through a fixed, credential-isolating relay."""
 
-from backend.answers.grounding import input_bound
+from backend.answers.grounding import REMOTE_BUDGET, input_bound
 from backend.gateway.contracts import GatewayError
 from backend.gateway.http import LocalHTTPGateway
 from backend.openrouter_client import MODELS, routing_body
@@ -23,6 +23,7 @@ class OpenRouterGateway(LocalHTTPGateway):
         payload = super().payload(request)
         payload.update(
             model=MODEL,
+            temperature=0,
             # OpenRouter tries these in order when the selected model fails
             # before a response starts. All retain identical request controls.
             models=list(MODELS),
@@ -34,7 +35,7 @@ class OpenRouterGateway(LocalHTTPGateway):
         )
         if self.privacy == "zdr":
             payload["provider"].update(zdr=True, data_collection="deny")
-        if input_bound(request) + request.max_output_tokens > 4096:
+        if input_bound(request) + request.max_output_tokens > REMOTE_BUDGET:
             raise GatewayError("Remote request exceeds development byte budget")
         return payload
 
@@ -53,6 +54,6 @@ class OpenRouterGateway(LocalHTTPGateway):
             usage["completion_tokens"] > request.max_output_tokens
             or usage["total_tokens"]
             != usage["prompt_tokens"] + usage["completion_tokens"]
-            or usage["total_tokens"] > 4096
+            or usage["total_tokens"] > REMOTE_BUDGET
         ):
             raise GatewayError("Provider usage exceeds development budget")
