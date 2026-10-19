@@ -1,3 +1,5 @@
+> Generation now uses Gemini 3.8 Flash with GPT-OSS 120B fallback through OpenRouter BYOK. See [setup and provider restrictions](docs/openrouter-byok.md).
+
 # RAGBase
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python)
@@ -25,7 +27,7 @@ cd ragbase
 ```
 
 The script creates `.env` from `.env.example` only when it is missing, preserves
-existing configuration, and builds/starts the services. Set `GROQ_API_KEY` in
+existing configuration, and builds/starts the services. Set `OPENROUTER_API_KEY` in
 `.env` and run `./start.sh` again to enable answers. The UI is at
 http://localhost:8501, API docs at http://localhost:8000/docs, and optional
 Metabase at http://localhost:3000. The first build downloads the embedding model.
@@ -142,7 +144,7 @@ Response:
 ### Prerequisites
 
 - Docker + Docker Compose
-- Groq API key (free at [console.groq.com](https://console.groq.com))
+- OpenRouter API key with Google AI Studio and Groq BYOK configured
 
 ### Run locally
 
@@ -152,7 +154,7 @@ cd ragbase
 
 # Create environment file
 cp .env.example .env
-# Add your GROQ_API_KEY to .env
+# Add your OPENROUTER_API_KEY to .env
 
 # Start all services
 docker compose up -d --build
@@ -198,7 +200,7 @@ docker compose up -d --build
    |----------|-------|
    | `RAILWAY_DOCKERFILE_PATH` | `docker/Dockerfile.backend` |
    | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (adjust the service name if different) |
-   | `GROQ_API_KEY` | Your real Groq API key |
+   | `OPENROUTER_API_KEY` | Your OpenRouter API key |
 
    Use the private database URL. The app accepts `postgres://`, `postgresql://`,
    and `postgresql+asyncpg://` URLs and selects the asyncpg driver automatically.
@@ -355,7 +357,7 @@ ragbase/
 │   ├── main.py        # FastAPI app, 6 endpoints
 │   ├── ingest.py      # PDF parsing, chunking, embedding
 │   ├── retrieval.py   # pgvector similarity search
-│   ├── llm.py         # Groq API call with context injection
+│   ├── llm.py         # OpenRouter BYOK generation with context injection
 │   ├── logger.py      # Query logging to Postgres
 │   ├── models.py      # SQLAlchemy models (documents, chunks, query_logs)
 │   ├── database.py    # Async Postgres + pgvector setup
@@ -382,7 +384,7 @@ ragbase/
 
 ```bash
 # .env.example
-GROQ_API_KEY=your_key_here
+OPENROUTER_API_KEY=your_key_here
 DATABASE_URL=postgresql://user:password@host:5432/ragbase
 BACKEND_URL=http://localhost:8000
 POSTGRES_USER=ragbase

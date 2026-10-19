@@ -37,3 +37,6 @@ docker-compose*.yml
 *.md
 *.log
 .DS_Store
+
+.local/
+.env.*

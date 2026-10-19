@@ -28,8 +28,9 @@ class Settings(BaseSettings):
                 return "postgresql+asyncpg://" + value[len(prefix) :]
         return value
 
-    # Groq API
+    # Legacy Groq field retained for configuration compatibility; generation uses BYOK.
     groq_api_key: str = ""
+    openrouter_api_key: str = Field(default="", repr=False)
 
     # Embedding model
     embedding_model: str = "intfloat/multilingual-e5-small"
@@ -51,11 +52,11 @@ class Settings(BaseSettings):
     top_k: int = 5
     use_hybrid_search: bool = True
 
-    # LLM settings. groq is the online default; ollama is fully local.
-    llm_provider: Literal["groq", "ollama"] = "groq"
+    # Legacy provider/base/model fields remain parseable; the shared BYOK policy
+    # fixes active generation routing independently of these historical values.
+    llm_provider: Literal["openrouter", "groq", "ollama"] = "openrouter"
     llm_base_url: str = "http://localhost:11434/v1"
-    # llama-3.3-70b-versatile was retired for free/dev tiers on 2026-08-16.
-    llm_model: str = "openai/gpt-oss-120b"
+    llm_model: str = "google/gemini-3.8-flash"
     llm_max_tokens: int = 512
 
 

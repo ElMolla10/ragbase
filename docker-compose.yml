@@ -26,7 +26,8 @@ services:
     container_name: ragbase-backend
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-ragbase}:${POSTGRES_PASSWORD:-ragbase}@postgres:5432/${POSTGRES_DB:-ragbase}
-      GROQ_API_KEY: ${GROQ_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_API_KEY_FILE: /run/secrets/openrouter_api_key
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
       USE_HYBRID_SEARCH: ${USE_HYBRID_SEARCH:-true}
       MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-50000000}
@@ -42,6 +43,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    secrets: [openrouter_api_key]
     volumes:
       - model_cache:/root/.cache
 
@@ -76,3 +78,7 @@ services:
 volumes:
   postgres_data:
   model_cache:
+
+secrets:
+  openrouter_api_key:
+    file: ./.local/openrouter-api-key
