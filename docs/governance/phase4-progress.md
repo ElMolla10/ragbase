@@ -17,7 +17,9 @@ physical line range and column count. Cell order, leading zeros, decimal/date
 text, empty cells, Unicode, quoted commas and quoted multiline content remain
 intact. There is no numeric/date/header inference or formula evaluation. Formula-
 like strings are marked in record warnings and stay literal. This is extraction
-and exact-quote lookup, not a calculation feature or spreadsheet export.
+and exact-quote lookup. Calculations are a separate authenticated slice over one
+ready CSV version (`backend/analysis/`, migration `0007_calculations`). Ingestion
+still does not infer headers or types and does not execute formulas.
 
 Malformed CSV fails without partial published rows. Inconsistent record widths
 retain their cells but produce `needs_review`; existing retrieval checks block
@@ -56,6 +58,11 @@ and retrieved evidence externally: only nonconfidential testing is approved.
 Exhaustive document coverage is not part of this OCR/Office slice. It is tracked
 in [coverage progress](coverage-progress.md). This file does not claim OCR or
 Office support.
+
+CSV calculations are not this OCR/Office slice. A 27 October 2026 local run
+passed 218 unit/contract tests and 80 PostgreSQL integration tests. Docker Compose
+was unavailable, so the integration suite used local PostgreSQL 16.15 rather than
+the read-only test container. That run is not production qualification.
 
 ## Remaining Phase 4 work
 

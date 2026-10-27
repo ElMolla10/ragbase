@@ -847,84 +847,139 @@
       "id": "ANA-001",
       "owner": "engineering",
       "work_packages": "P3/P4/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/analysis/engine.py",
+        "backend/analysis/plan.py",
+        "backend/analysis/planner.py",
+        "backend/analysis/service.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_calculations.py",
+        "enterprise_integration_tests/test_calculations.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "27 October 2026 local development check: an allowlisted plan (filter, group, aggregate, sort, project, limit) is validated and calculated by trusted code over one authorized CSV version. The model may propose the plan; it does not supply the displayed number. Exact decimal sums such as 30.60 are covered. Joins, charts, comparisons across versions, and general expressions are not implemented. The fixture planner is not model-quality evidence. 218 unit/contract and 80 PostgreSQL checks passed. Not production qualification."
       ]
     },
     {
       "id": "ANA-002",
       "owner": "engineering",
       "work_packages": "P3/P4/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/analysis/profile.py",
+        "backend/analysis/engine.py",
+        "backend/analysis/plan.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_calculations.py",
+        "enterprise_integration_tests/test_calculations.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "CSV calculation typing preserves leading-zero identifiers, uses decimal arithmetic, excludes exact subtotal labels (total, subtotal, grand total, المجموع, الإجمالي, مجموع), and refuses a sum or average when a unit/currency column has more than one value. A single currency value is disclosed. Period columns are disclosed and do not block a sum. Thousands separators are not parsed. No foreign-exchange conversion. Units are not inferred from names such as amount_usd. Duplicate identifier columns are disclosed, not dropped. Joins are out of scope. Not production qualification."
       ]
     },
     {
       "id": "ANA-003",
       "owner": "engineering",
       "work_packages": "P3/P4/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/ingestion/parser_process.py",
+        "backend/analysis/export.py",
+        "backend/analysis/engine.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_csv_extraction.py",
+        "enterprise_tests/test_calculations.py",
+        "enterprise_integration_tests/test_calculations.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "CSV formula-like text stays literal and is not executed. Calculation exports escape formula prefixes. Uploaded originals are not overwritten. XLSX formula text, cached values, and workbook recalculation are not implemented."
       ]
     },
     {
       "id": "ANA-004",
       "owner": "engineering",
       "work_packages": "P3/P4/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/analysis/engine.py",
+        "backend/analysis/messages.py",
+        "backend/analysis/api.py",
+        "backend/analysis/service.py",
+        "backend/migrations/versions/0007_calculations.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_calculations.py",
+        "enterprise_integration_tests/test_calculations.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "A completed CSV calculation record states dataset/version, columns, filters, operation, units, included and excluded counts, and the result, with a downloadable table and record. Margin, mixed currency, and forecast/cause questions stop for clarification instead of guessing. One CSV version per calculation; there is no sheet range or cross-file join. Not production qualification."
       ]
     },
     {
       "id": "ANA-005",
       "owner": "engineering",
       "work_packages": "P3/P4/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/analysis/engine.py",
+        "backend/analysis/limits.py",
+        "backend/analysis/service.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_calculations.py",
+        "enterprise_integration_tests/test_calculations.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "DuckDB 1.4.1 runs on a job-local CSV snapshot with external access, extension autoload, and autoinstall disabled, then settings locked. Analytical SQL is application-compiled with bound parameters and is never sent to PostgreSQL. Development bounds: 12 steps, 1000 source rows, 100 columns, 100 output rows, 200000 output bytes, 2 second query timeout, DuckDB memory_limit 128MB, temp 16MB. memory_limit is not a process cgroup; sandbox.os_cgroup_enforced is false. This slice does not use the execution-plan 4 GiB/6 GiB/20 GiB planning allowance. The 27 October 2026 PostgreSQL suite ran on local PostgreSQL 16.15 because Docker was unavailable; the compose read-only 384MB container was not re-executed. Not production qualification."
       ]
     },
     {
       "id": "ANA-006",
       "owner": "engineering",
       "work_packages": "P3/P4/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/analysis/plan.py",
+        "backend/analysis/engine.py",
+        "backend/analysis/api.py",
+        "backend/enterprise.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_calculations.py",
+        "enterprise_integration_tests/test_calculations.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Model-generated SQL and arbitrary Python stay disabled. Extra SQL keys are rejected, and compiled statements cannot contain read_csv, postgres, http, copy, attach, load, install, or pragma. No AST SQL validator is shipped because free SQL is not enabled. The API and model do not receive the Docker socket, secrets, or unrestricted filesystem/network access through this path."
       ]
     },
     {
       "id": "ANA-007",
       "owner": "engineering",
       "work_packages": "P3/P4/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/analysis/plan.py",
+        "backend/analysis/messages.py",
+        "backend/analysis/export.py",
+        "backend/analysis/service.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_calculations.py",
+        "enterprise_integration_tests/test_calculations.py"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Forecast and causal wording is refused before a number is calculated; this slice does not produce forecasts with stated assumptions. CSV exports escape formula-injection prefixes. Originals are not overwritten. Correlation and anomaly detection are not implemented."
       ]
     },
     {

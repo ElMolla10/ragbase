@@ -70,6 +70,7 @@ async def world(tmp_path):
     finally:
         async with owner.begin() as conn:
             for table in (
+                "calculations",
                 "coverage_sections",
                 "coverage_runs",
                 "answer_sources",
