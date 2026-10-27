@@ -78,6 +78,7 @@ def main(version, question, preview, *, verbose=True, coverage=False):
                     conversational = event.get("mode") in {
                         "grounded_document_chat",
                         "exhaustive_coverage",
+                        "spreadsheet_calculation",
                     }
                     if conversational:
                         print("\n" + event["answer"])
