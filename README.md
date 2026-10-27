@@ -3,8 +3,10 @@
 Development branch for an access-controlled document question-answering and analysis
 system, with Arabic and mixed-language evaluation planned throughout delivery.
 
-**Updated: 19 October 2026.** Phase 3's document Q&A implementation is complete
-in local development; Phase 4 has started with bounded CSV ingestion. The current working setup uses OpenRouter BYOK, with GPT-OSS
+**Updated: 27 October 2026.** Phase 3's document Q&A implementation is complete
+in local development; Phase 4 has started with bounded CSV ingestion. Explicit
+exhaustive coverage of selected authorized versions is now a separate development
+workflow. The current working setup uses OpenRouter BYOK, with GPT-OSS
 120B through Groq as primary and Gemini 3.8 Flash as fallback. Company-server
 acceptance and production qualification remain open.
 
@@ -24,7 +26,14 @@ enterprise application. The enterprise entry point is `backend.enterprise:app`.
   explanations citing passage IDs, with original supporting text attached in
   trusted code. Overview questions do not require keyword overlap. When lexical
   retrieval finds nothing, bounded authorized document context is supplied to
-  the model instead of immediately declaring insufficient evidence.
+  the model instead of immediately declaring insufficient evidence. Those
+  overviews stay bounded and are not labeled complete.
+- Explicit exhaustive coverage at `POST /api/workspaces/{id}/coverage`. It walks
+  every indexed section of the selected authorized PDF, TXT, Markdown or CSV
+  versions, cites the original passages, records covered sections and gaps, and
+  uses the label complete only when every required section was processed and the
+  reduction finished. Blank or unreadable pages stay gaps. This is a development
+  check, not OCR, Office, vision or production qualification.
 - Source citations and authenticated previews. The client displays actual
   response-reported model/provider and how much context was included. Long
   documents receive explicitly bounded overview context, not a complete-review
@@ -37,8 +46,8 @@ enterprise application. The enterprise entry point is `backend.enterprise:app`.
 
 Natural document chat is enabled. Source identities are validated and original supporting passages are
 attached by trusted code; generated explanations are model interpretations and are not
-mechanically proven true. Exhaustive summaries and spreadsheet calculations
-remain separate, unfinished capabilities.
+mechanically proven true. Exhaustive coverage is a separate authenticated route
+and records its own coverage map. Spreadsheet calculations remain unfinished.
 
 ## Current model routing
 
@@ -165,6 +174,11 @@ through the enabled OpenRouter route. Supported inputs are native PDF, UTF-8
 TXT/Markdown and comma-separated UTF-8 CSV, up to 5 MB. Leave a question blank to
 exit. Uploads remain in the development workspace after exiting.
 
+Prefix a question with `/coverage`, or pass `--coverage`, to run the exhaustive
+section workflow instead of a bounded answer. The client always prints the
+coverage scope notice and any gaps. A complete label is the application's
+coverage record, not the model's wording.
+
 You can also supply a path and question directly:
 
 ```powershell
@@ -207,7 +221,7 @@ public CI. See [development operations](docs/operations/development.md).
 | 3 / P2 | Native PDF ingestion, retrieval and cited answers | Local implementation complete; BYOK routing added and live-tested; server/company acceptance pending |
 | 4 / P3 | Arabic/English OCR and Office formats | In progress: bounded CSV ingestion tested; OCR and DOCX/PPTX/XLSX pending |
 | 5 / P4 | Trusted numerical analysis, charts and exports | Pending |
-| 6 / P5 | Complete-document coverage, RTL UX and model qualification | Pending |
+| 6 / P5 | Complete-document coverage, RTL UX and model qualification | Coverage workflow tested locally on synthetic documents; RTL UX, OCR/vision and model qualification pending |
 | 7 / P6 | Hardening, SSO, backup/restore and company pilot | Pending |
 
 The company server has **64 GB system RAM and no GPU**. Its CPU, memory bandwidth
@@ -226,8 +240,15 @@ that source; [the rule ledger](docs/governance/rule-ledger.json) records gaps.
 Phase 4 is in progress: bounded CSV ingestion is implemented; next are OCR and Office fidelity. Company
 hardware discovery and representative Arabic/mixed-language acceptance cases
 remain parallel requirements. Dense retrieval, deterministic calculations,
-complete-document workflows, graphical/RTL UX, company SSO, production networking,
-restore drills and pilot approval are still open.
+graphical/RTL UX, company SSO, production networking,
+restore drills and pilot approval are still open. Exhaustive coverage of extracted
+native text is implemented as a development workflow and was checked locally
+(208 unit/contract tests and 74 PostgreSQL integration tests). That run did not
+call a live provider, measure Arabic answer quality, or qualify production.
+
+V6.2 answer presentation is unchanged for ordinary answers. Exhaustive coverage
+uses the same Groq-first route when generation mode is OpenRouter, and the same
+fixture gateway in tests. See [coverage progress](docs/governance/coverage-progress.md).
 
 Further detail: [execution plan](docs/execution-plan.md),
 [seven-phase roadmap](docs/governance/phase-roadmap.md),

@@ -139,7 +139,9 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/coverage/",
+        "backend/migrations/versions/0006_coverage_runs.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
@@ -150,12 +152,14 @@
         "enterprise_integration_tests/test_ingestion_jobs.py",
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_integration_tests/test_coverage.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
         "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
-        "v6.1 fixes PDF quote-copy rejection: model cites short passage aliases, trusted code attaches authorized original passage text. Unknown IDs and legacy invalid quotes still reject. 192 unit/contract +64 PostgreSQL tests pass; previously failing local overview retest succeeds via Groq, six citations, 3.93s with partial coverage disclosed. No semantic entailment guarantee."
+        "v6.1 fixes PDF quote-copy rejection: model cites short passage aliases, trusted code attaches authorized original passage text. Unknown IDs and legacy invalid quotes still reject. 192 unit/contract +64 PostgreSQL tests pass; previously failing local overview retest succeeds via Groq, six citations, 3.93s with partial coverage disclosed. No semantic entailment guarantee.",
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification. Coverage routes require identity and membership; denied callers receive no document text."
       ]
     },
     {
@@ -175,7 +179,9 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/coverage/workflow.py",
+        "backend/migrations/versions/0006_coverage_runs.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
@@ -186,11 +192,13 @@
         "enterprise_integration_tests/test_ingestion_jobs.py",
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_integration_tests/test_coverage.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification. Stored coverage records keep a question hash and section map, not passage text or summary prose."
       ]
     },
     {
@@ -471,7 +479,8 @@
         "backend/migrations/versions/0005_heavy_lease_guard.py",
         "backend/gateway/openrouter.py",
         "backend/gateway/openrouter_relay.py",
-        "compose.enterprise-openrouter.yaml"
+        "compose.enterprise-openrouter.yaml",
+        "backend/coverage/"
       ],
       "verification_references": [
         "docs/governance/phase3-completion.md",
@@ -480,13 +489,15 @@
         "enterprise_tests/test_openrouter.py",
         "docs/governance/openrouter-option.md",
         "enterprise_tests/test_document_chat.py",
-        "enterprise_integration_tests/test_document_chat.py"
+        "enterprise_integration_tests/test_document_chat.py",
+        "enterprise_tests/test_coverage.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
         "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
         "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models.",
-        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified."
+        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified.",
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification. Oversized text is split to the byte budget or reported as a gap. It is not silently truncated. The budget is not a tokenizer."
       ]
     },
     {
@@ -658,7 +669,8 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/coverage/"
       ],
       "verification_references": [
         "docs/governance/cpu-ingestion-progress.md",
@@ -669,12 +681,14 @@
         "enterprise_integration_tests/test_pdf_answers.py",
         "enterprise_tests/test_csv_extraction.py",
         "enterprise_integration_tests/test_csv_ingestion.py",
-        "docs/governance/phase4-progress.md"
+        "docs/governance/phase4-progress.md",
+        "enterprise_integration_tests/test_coverage.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
         "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
-        "Phase 4 CSV slice: bounded UTF-8 string extraction and physical-row lineage, ragged-row review blocking and authorization pass; no calculations/type inference. OCR and DOCX/PPTX/XLSX remain pending. Whole suite: 181 unit/contract +62 PostgreSQL checks; live synthetic CSV row quotation/preview smoke passes."
+        "Phase 4 CSV slice: bounded UTF-8 string extraction and physical-row lineage, ragged-row review blocking and authorization pass; no calculations/type inference. OCR and DOCX/PPTX/XLSX remain pending. Whole suite: 181 unit/contract +62 PostgreSQL checks; live synthetic CSV row quotation/preview smoke passes.",
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification. Blank or OCR-required PDF pages remain gaps. CSV formula-like text stays literal."
       ]
     },
     {
@@ -735,7 +749,8 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/coverage/"
       ],
       "verification_references": [
         "docs/governance/phase3-completion.md",
@@ -745,7 +760,10 @@
         "enterprise_integration_tests/test_openrouter_answers.py",
         "enterprise_tests/test_document_chat.py",
         "enterprise_integration_tests/test_document_chat.py",
-        "enterprise_tests/test_conversational_answers.py"
+        "enterprise_tests/test_conversational_answers.py",
+        "enterprise_tests/test_coverage.py",
+        "enterprise_integration_tests/test_coverage.py",
+        "docs/governance/coverage-progress.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
@@ -753,7 +771,8 @@
         "v4 free Gemma JSON-mode and nonconfidential-development privacy are explicitly authorized; live provider validation blocked by daily free quota, company/vision acceptance pending.",
         "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified.",
         "v6.1 fixes PDF quote-copy rejection: model cites short passage aliases, trusted code attaches authorized original passage text. Unknown IDs and legacy invalid quotes still reject. 192 unit/contract +64 PostgreSQL tests pass; previously failing local overview retest succeeds via Groq, six citations, 3.93s with partial coverage disclosed. No semantic entailment guarantee.",
-        "v6.2: cohesive prose with validated inline page/line/row citations; unknown aliases and model-invented page citations reject. No forced claim footer in normal chat, verbose/preview remain available, partial coverage disclosed. 198 unit/contract +64 PostgreSQL checks pass. This changes answer style, not semantic accuracy or conversation-history qualification."
+        "v6.2: cohesive prose with validated inline page/line/row citations; unknown aliases and model-invented page citations reject. No forced claim footer in normal chat, verbose/preview remain available, partial coverage disclosed. 198 unit/contract +64 PostgreSQL checks pass. This changes answer style, not semantic accuracy or conversation-history qualification.",
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification. Citations are application-resolved aliases, not model-invented page numbers."
       ]
     },
     {
@@ -766,36 +785,50 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/coverage/"
       ],
       "verification_references": [
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
         "enterprise_integration_tests/test_pdf_answers.py",
         "enterprise_tests/test_document_chat.py",
-        "enterprise_integration_tests/test_document_chat.py"
+        "enterprise_integration_tests/test_document_chat.py",
+        "enterprise_tests/test_coverage.py",
+        "enterprise_integration_tests/test_coverage.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
         "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
         "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified.",
-        "v6.1 fixes PDF quote-copy rejection: model cites short passage aliases, trusted code attaches authorized original passage text. Unknown IDs and legacy invalid quotes still reject. 192 unit/contract +64 PostgreSQL tests pass; previously failing local overview retest succeeds via Groq, six citations, 3.93s with partial coverage disclosed. No semantic entailment guarantee."
+        "v6.1 fixes PDF quote-copy rejection: model cites short passage aliases, trusted code attaches authorized original passage text. Unknown IDs and legacy invalid quotes still reject. 192 unit/contract +64 PostgreSQL tests pass; previously failing local overview retest succeeds via Groq, six citations, 3.93s with partial coverage disclosed. No semantic entailment guarantee.",
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification. Missing or failed sections are gaps, not proof of corpus absence."
       ]
     },
     {
       "id": "EVD-004",
       "owner": "engineering",
       "work_packages": "P2/P3/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "backend/coverage/",
+        "backend/migrations/versions/0006_coverage_runs.py",
+        "backend/answers/fixtures.py",
+        "scripts/query_enterprise.py",
+        "scripts/try_enterprise.py"
+      ],
       "verification_references": [
         "enterprise_tests/test_document_chat.py",
-        "enterprise_integration_tests/test_document_chat.py"
+        "enterprise_integration_tests/test_document_chat.py",
+        "enterprise_tests/test_coverage.py",
+        "enterprise_integration_tests/test_coverage.py",
+        "docs/governance/coverage-progress.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
         "Full rule verification pending; see foundation progress report.",
-        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified."
+        "v6.0: user prioritized natural document chat. Overview and no-hit questions use bounded authorized context; generated explanations require valid source IDs and exact support quotes. Coverage disclosure prevents partial context being labeled complete. 190 unit/contract +64 PostgreSQL checks; synthetic Groq overview live smoke 4.53s. Semantic entailment, full coverage workflows and company accuracy remain unqualified.",
+        "27 October 2026 local development check: explicit exhaustive coverage over authorized PDF/TXT/MD/CSV sections. Complete only when every required section is cited and reduction finishes; gaps are recorded and ordinary overviews stay bounded. 208 unit/contract and 74 PostgreSQL checks passed with the fixture gateway. No live provider, Arabic-quality measurement, OCR/vision/Office coverage, tokenizer validation, or production qualification."
       ]
     },
     {
@@ -918,16 +951,22 @@
         "backend/ingestion/",
         "backend/library.py",
         "backend/migrations/versions/0002_ingestion_jobs.py",
-        "backend/migrations/versions/0003_revoked_jobs.py"
+        "backend/migrations/versions/0003_revoked_jobs.py",
+        "backend/coverage/",
+        "scripts/query_enterprise.py",
+        "scripts/try_enterprise.py"
       ],
       "verification_references": [
         "docs/governance/cpu-ingestion-progress.md",
         "enterprise_tests/test_native_extraction.py",
-        "enterprise_integration_tests/test_ingestion_jobs.py"
+        "enterprise_integration_tests/test_ingestion_jobs.py",
+        "enterprise_tests/test_coverage.py",
+        "docs/governance/coverage-progress.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending."
+        "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending.",
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification. The scope notice and gap list show whether coverage is complete."
       ]
     },
     {
@@ -1017,7 +1056,9 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/coverage/",
+        "backend/migrations/versions/0006_coverage_runs.py"
       ],
       "verification_references": [
         "docs/governance/cpu-ingestion-progress.md",
@@ -1025,11 +1066,13 @@
         "enterprise_integration_tests/test_ingestion_jobs.py",
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_integration_tests/test_coverage.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification. Coverage yields between batches to queued answers and extracting jobs; cancellation does not double-release prose."
       ]
     },
     {
@@ -1140,7 +1183,8 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "backend/coverage/"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
@@ -1148,11 +1192,15 @@
         "enterprise_integration_tests/test_access_storage.py",
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_tests/test_coverage.py",
+        "enterprise_integration_tests/test_coverage.py",
+        "docs/governance/coverage-progress.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification."
       ]
     },
     {
