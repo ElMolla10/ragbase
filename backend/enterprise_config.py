@@ -10,11 +10,23 @@ from uuid import UUID
 from backend.openrouter_client import MODELS
 
 
+def configured_ui_root() -> Path | None:
+    """Built shell directory. Missing builds stay API-only; nothing is fetched."""
+    raw = os.environ.get("ENTERPRISE_UI_ROOT")
+    if raw is not None:
+        return Path(raw) if raw else None
+    candidate = Path(__file__).resolve().parents[1] / "enterprise_ui" / "dist"
+    if (candidate / "index.html").is_file():
+        return candidate
+    return None
+
+
 @dataclass(frozen=True)
 class EnterpriseSettings:
     profile: str = "dev-lite"
     database_url: str | None = field(default=None, repr=False)
     storage_root: Path | None = None
+    ui_root: Path | None = None
     dev_tokens: dict[str, UUID] = field(default_factory=dict, repr=False)
     max_upload_bytes: int = 5_000_000
     generation_mode: str = "disabled"
@@ -94,6 +106,7 @@ class EnterpriseSettings:
                 storage_root=Path(os.environ["ENTERPRISE_STORAGE_ROOT"])
                 if os.environ.get("ENTERPRISE_STORAGE_ROOT")
                 else None,
+                ui_root=configured_ui_root(),
                 dev_tokens={token: UUID(actor) for token, actor in tokens.items()},
                 max_upload_bytes=int(
                     os.environ.get("ENTERPRISE_MAX_UPLOAD_BYTES", "5000000")

@@ -48,6 +48,7 @@ services:
     restart: "no"
     mem_limit: 256m
   api:
+    # Runtime image includes the built enterprise_ui shell. No separate UI server.
     build:
       context: .
       dockerfile: docker/Dockerfile.enterprise

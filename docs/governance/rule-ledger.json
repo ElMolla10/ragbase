@@ -283,7 +283,10 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "enterprise_ui/src/",
+        "backend/ui.py",
+        "backend/dev_proxy.py"
       ],
       "verification_references": [
         "docs/governance/cpu-storage-progress.md",
@@ -291,11 +294,16 @@
         "enterprise_integration_tests/test_access_storage.py",
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
-        "enterprise_integration_tests/test_pdf_answers.py"
+        "enterprise_integration_tests/test_pdf_answers.py",
+        "enterprise_ui/src/test/ui.test.tsx",
+        "enterprise_tests/test_browser_shell.py",
+        "enterprise_tests/test_proxy.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending."
+        "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
+        "27 October 2026 development browser shell: React/Vite assets are built into the enterprise image and served by backend.enterprise:app. Arabic/English toggle, RTL layout, and isolated mixed-direction text have 7 local component tests. A backend test checks the static mount does not serve storage or unauthenticated API payloads. The shell page is reachable so a person can sign in; document, upload, answer, preview, and coverage routes still require the development bearer token. This is not the Arabic quality gate, an export feature, a live-provider run, or production qualification. Local unit/contract count for this change: 216 passed. PostgreSQL integration was not rerun.",
+        "27 October 2026 development browser: the shell starts /calculate on the answer stream or POST /calculations for one ready CSV. It renders the server result table, dataset/version, columns, filters, operation, units, included and excluded rows, clarification text, and authenticated CSV/JSON downloads. It does not evaluate formulas. Local checks after the merge: 227 unit/contract, 11 component tests, and 80 PostgreSQL integration tests on local PostgreSQL 16.15. Docker Compose was not used. Not production qualification and not the Arabic answer-quality gate."
       ]
     },
     {
@@ -912,15 +920,21 @@
         "backend/analysis/messages.py",
         "backend/analysis/api.py",
         "backend/analysis/service.py",
-        "backend/migrations/versions/0007_calculations.py"
+        "backend/migrations/versions/0007_calculations.py",
+        "enterprise_ui/src/calculations/",
+        "enterprise_ui/src/App.tsx",
+        "backend/dev_proxy.py"
       ],
       "verification_references": [
         "enterprise_tests/test_calculations.py",
-        "enterprise_integration_tests/test_calculations.py"
+        "enterprise_integration_tests/test_calculations.py",
+        "enterprise_ui/src/test/ui.test.tsx",
+        "enterprise_tests/test_proxy.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "A completed CSV calculation record states dataset/version, columns, filters, operation, units, included and excluded counts, and the result, with a downloadable table and record. Margin, mixed currency, and forecast/cause questions stop for clarification instead of guessing. One CSV version per calculation; there is no sheet range or cross-file join. Not production qualification."
+        "A completed CSV calculation record states dataset/version, columns, filters, operation, units, included and excluded counts, and the result, with a downloadable table and record. Margin, mixed currency, and forecast/cause questions stop for clarification instead of guessing. One CSV version per calculation; there is no sheet range or cross-file join. Not production qualification.",
+        "27 October 2026 development browser: the shell starts /calculate on the answer stream or POST /calculations for one ready CSV. It renders the server result table, dataset/version, columns, filters, operation, units, included and excluded rows, clarification text, and authenticated CSV/JSON downloads. It does not evaluate formulas. Local checks after the merge: 227 unit/contract, 11 component tests, and 80 PostgreSQL integration tests on local PostgreSQL 16.15. Docker Compose was not used. Not production qualification and not the Arabic answer-quality gate."
       ]
     },
     {
@@ -986,15 +1000,24 @@
       "id": "UX-001",
       "owner": "engineering",
       "work_packages": "P2/P3/P4/P5",
-      "state": "specified_not_verified",
-      "enforcement_locations": [],
+      "state": "partially_implemented_development_checks_passed",
+      "enforcement_locations": [
+        "enterprise_ui/src/",
+        "backend/ui.py",
+        "backend/dev_proxy.py"
+      ],
       "verification_references": [
-        "enterprise_tests/test_conversational_answers.py"
+        "enterprise_tests/test_conversational_answers.py",
+        "enterprise_ui/src/test/ui.test.tsx",
+        "enterprise_tests/test_browser_shell.py",
+        "enterprise_tests/test_proxy.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
         "Full rule verification pending; see foundation progress report.",
-        "v6.2: cohesive prose with validated inline page/line/row citations; unknown aliases and model-invented page citations reject. No forced claim footer in normal chat, verbose/preview remain available, partial coverage disclosed. 198 unit/contract +64 PostgreSQL checks pass. This changes answer style, not semantic accuracy or conversation-history qualification."
+        "v6.2: cohesive prose with validated inline page/line/row citations; unknown aliases and model-invented page citations reject. No forced claim footer in normal chat, verbose/preview remain available, partial coverage disclosed. 198 unit/contract +64 PostgreSQL checks pass. This changes answer style, not semantic accuracy or conversation-history qualification.",
+        "27 October 2026 development browser shell: React/Vite assets are built into the enterprise image and served by backend.enterprise:app. Arabic/English toggle, RTL layout, and isolated mixed-direction text have 7 local component tests. A backend test checks the static mount does not serve storage or unauthenticated API payloads. The shell page is reachable so a person can sign in; document, upload, answer, preview, and coverage routes still require the development bearer token. This is not the Arabic quality gate, an export feature, a live-provider run, or production qualification. Local unit/contract count for this change: 216 passed. PostgreSQL integration was not rerun.",
+        "27 October 2026 development browser: the shell starts /calculate on the answer stream or POST /calculations for one ready CSV. It renders the server result table, dataset/version, columns, filters, operation, units, included and excluded rows, clarification text, and authenticated CSV/JSON downloads. It does not evaluate formulas. Local checks after the merge: 227 unit/contract, 11 component tests, and 80 PostgreSQL integration tests on local PostgreSQL 16.15. Docker Compose was not used. Not production qualification and not the Arabic answer-quality gate."
       ]
     },
     {
@@ -1009,19 +1032,26 @@
         "backend/migrations/versions/0003_revoked_jobs.py",
         "backend/coverage/",
         "scripts/query_enterprise.py",
-        "scripts/try_enterprise.py"
+        "scripts/try_enterprise.py",
+        "enterprise_ui/src/",
+        "backend/ui.py",
+        "backend/dev_proxy.py"
       ],
       "verification_references": [
         "docs/governance/cpu-ingestion-progress.md",
         "enterprise_tests/test_native_extraction.py",
         "enterprise_integration_tests/test_ingestion_jobs.py",
         "enterprise_tests/test_coverage.py",
-        "docs/governance/coverage-progress.md"
+        "docs/governance/coverage-progress.md",
+        "enterprise_ui/src/test/ui.test.tsx",
+        "enterprise_tests/test_browser_shell.py",
+        "enterprise_tests/test_proxy.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
         "Native extraction and its development access/recovery controls only; full formats, retrieval/model behavior and production qualification remain pending.",
-        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification. The scope notice and gap list show whether coverage is complete."
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification. The scope notice and gap list show whether coverage is complete.",
+        "27 October 2026 development browser shell: React/Vite assets are built into the enterprise image and served by backend.enterprise:app. Arabic/English toggle, RTL layout, and isolated mixed-direction text have 7 local component tests. A backend test checks the static mount does not serve storage or unauthenticated API payloads. The shell page is reachable so a person can sign in; document, upload, answer, preview, and coverage routes still require the development bearer token. This is not the Arabic quality gate, an export feature, a live-provider run, or production qualification. Local unit/contract count for this change: 216 passed. PostgreSQL integration was not rerun."
       ]
     },
     {
@@ -1034,18 +1064,25 @@
         "backend/answers/",
         "backend/gateway/ollama.py",
         "backend/migrations/versions/0004_retrieval_answers.py",
-        "backend/migrations/versions/0005_heavy_lease_guard.py"
+        "backend/migrations/versions/0005_heavy_lease_guard.py",
+        "enterprise_ui/src/",
+        "backend/ui.py",
+        "backend/dev_proxy.py"
       ],
       "verification_references": [
         "docs/governance/phase3-completion.md",
         "enterprise_tests/test_quote_answers.py",
         "enterprise_integration_tests/test_pdf_answers.py",
-        "enterprise_tests/test_conversational_answers.py"
+        "enterprise_tests/test_conversational_answers.py",
+        "enterprise_ui/src/test/ui.test.tsx",
+        "enterprise_tests/test_browser_shell.py",
+        "enterprise_tests/test_proxy.py"
       ],
       "last_validated_release": null,
       "known_gaps": [
         "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
-        "v6.2: cohesive prose with validated inline page/line/row citations; unknown aliases and model-invented page citations reject. No forced claim footer in normal chat, verbose/preview remain available, partial coverage disclosed. 198 unit/contract +64 PostgreSQL checks pass. This changes answer style, not semantic accuracy or conversation-history qualification."
+        "v6.2: cohesive prose with validated inline page/line/row citations; unknown aliases and model-invented page citations reject. No forced claim footer in normal chat, verbose/preview remain available, partial coverage disclosed. 198 unit/contract +64 PostgreSQL checks pass. This changes answer style, not semantic accuracy or conversation-history qualification.",
+        "27 October 2026 development browser shell: React/Vite assets are built into the enterprise image and served by backend.enterprise:app. Arabic/English toggle, RTL layout, and isolated mixed-direction text have 7 local component tests. A backend test checks the static mount does not serve storage or unauthenticated API payloads. The shell page is reachable so a person can sign in; document, upload, answer, preview, and coverage routes still require the development bearer token. This is not the Arabic quality gate, an export feature, a live-provider run, or production qualification. Local unit/contract count for this change: 216 passed. PostgreSQL integration was not rerun."
       ]
     },
     {

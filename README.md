@@ -6,7 +6,8 @@ system, with Arabic and mixed-language evaluation planned throughout delivery.
 **Updated: 27 October 2026.** Phase 3's document Q&A implementation is complete
 in local development; Phase 4 has started with bounded CSV ingestion. Explicit
 exhaustive coverage of selected authorized versions is now a separate development
-workflow. The current working setup uses OpenRouter BYOK, with GPT-OSS
+workflow. A development browser shell is served by the same enterprise app, with
+an Arabic/English toggle. The current working setup uses OpenRouter BYOK, with GPT-OSS
 120B through Groq as primary and Gemini 3.8 Flash as fallback. Company-server
 acceptance and production qualification remain open.
 
@@ -42,7 +43,18 @@ enterprise application. The enterprise entry point is `backend.enterprise:app`.
   idempotency and coordination between extraction and interactive answers.
 - Separate core-service readiness and generation health. Search and source
   previews remain available during model outages.
-- A terminal query client. A graphical enterprise UI is still pending.
+- A development browser at the enterprise origin: sign in with a synthetic
+  bearer token, list workspaces and documents, upload PDF/TXT/Markdown/CSV and
+  watch extraction status, ask with the streamed answer events, open authenticated
+  plain-text source previews, and start or cancel exhaustive coverage. The shell
+  shows the response-reported model and provider and the context or section
+  coverage disclosure. For one ready CSV it can send `/calculate` or use Calculate.
+  It shows the server result table and calculation record: dataset and version,
+  columns, filters, operation, units, and included and excluded rows. Clarification
+  requests stay visible and do not invent a number. CSV and JSON downloads use the
+  authenticated export routes. Arabic and English UI copy, RTL layout, and isolated
+  mixed-direction text are included. The browser does not evaluate formulas.
+- The terminal query client remains available.
 
 Natural document chat is enabled. Source identities are validated and original supporting passages are
 attached by trusted code; generated explanations are model interpretations and are not
@@ -89,8 +101,9 @@ See [BYOK implementation and evidence](docs/openrouter-byok.md).
 
 | Check | Recorded result |
 |---|---|
-| Unit and contract suite | 218 passed (27 October 2026 local run, including CSV calculations) |
-| Isolated PostgreSQL integration suite | 80 passed (same run, local PostgreSQL 16.15; Docker Compose was not available) |
+| Unit and contract suite, 27 October 2026 browser plus calculation merge | 227 passed |
+| Enterprise browser component tests | 11 passed |
+| Isolated PostgreSQL integration suite | 80 passed on local PostgreSQL 16.15. Docker Compose was not available, so this was not the read-only test container |
 | Lint, formatting and policy consistency | Passed |
 | Gemini through Google AI Studio | HTTP 200 with an answer |
 | GPT-OSS 120B through Groq | HTTP 200 with an answer |
@@ -142,7 +155,12 @@ in the relay. Never commit it or paste it into chat. Use one generation override
 at a time. The previous Ollama configuration and phase-3 CPU smoke are historical;
 the active generation configuration is the BYOK route described above.
 
-The enterprise API is available at `http://127.0.0.1:8800`:
+The enterprise API and browser shell are available at `http://127.0.0.1:8800`.
+Open that origin in a browser and paste the Alice, Bob, or Viewer token from
+`.local/dev-access.json`. The page does not contain those tokens. Document,
+upload, answer, preview, and coverage calls use the same bearer authentication
+as the API. The shell is built into the enterprise image; there is no separate
+UI server.
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8800/health/ready
@@ -162,8 +180,8 @@ a missing top-k result does not prove a fact is absent from the entire corpus.
 
 ## Try the enterprise version now
 
-The local API is running at `http://127.0.0.1:8800`. There is no graphical
-enterprise UI yet. From this repository folder, launch the interactive client:
+The local API and development browser are at `http://127.0.0.1:8800`. From this
+repository folder, the terminal client is still available:
 
 ```powershell
 python scripts/try_enterprise.py
@@ -214,6 +232,14 @@ docker compose -f compose.enterprise-tests.yaml run --rm tests python -m pytest 
 docker compose -f compose.enterprise-tests.yaml down
 ```
 
+Browser component tests use the `enterprise_ui` package and do not call a provider:
+
+```powershell
+cd enterprise_ui
+npm ci
+npm test
+```
+
 For synthetic live provider and fallback checks after enabling the relay:
 
 ```powershell
@@ -232,7 +258,7 @@ public CI. See [development operations](docs/operations/development.md).
 | 3 / P2 | Native PDF ingestion, retrieval and cited answers | Local implementation complete; BYOK routing added and live-tested; server/company acceptance pending |
 | 4 / P3 | Arabic/English OCR and Office formats | In progress: bounded CSV ingestion tested; OCR and DOCX/PPTX/XLSX pending |
 | 5 / P4 | Trusted numerical analysis, charts and exports | In progress: allowlisted CSV calculations checked locally; charts, joins, XLSX, generated SQL, and an OS cgroup remain pending |
-| 6 / P5 | Complete-document coverage, RTL UX and model qualification | Coverage workflow tested locally on synthetic documents; RTL UX, OCR/vision and model qualification pending |
+| 6 / P5 | Complete-document coverage, RTL UX and model qualification | Coverage workflow tested locally on synthetic documents. A development RTL browser shell is served by the enterprise app and displays server CSV calculation records. Arabic qualification, OCR/vision and model qualification remain pending |
 | 7 / P6 | Hardening, SSO, backup/restore and company pilot | Pending |
 
 The company server has **64 GB system RAM and no GPU**. Its CPU, memory bandwidth
@@ -251,16 +277,19 @@ that source; [the rule ledger](docs/governance/rule-ledger.json) records gaps.
 Phase 4 is in progress: bounded CSV ingestion is implemented; next are OCR and Office fidelity. Company
 hardware discovery and representative Arabic/mixed-language acceptance cases
 remain parallel requirements. Dense retrieval, charts, cross-version joins,
-graphical/RTL UX, company SSO, production networking,
-restore drills and pilot approval are still open. Authorized CSV calculations
-are a development slice, not that remaining work. Exhaustive coverage of extracted
-native text remains a separate development workflow. The 27 October 2026 local
-run passed 218 unit/contract tests and 80 PostgreSQL integration tests, including
-Arabic and mixed-language calculation cases, exact numeric results, injection
-attempts, limits, and denied access. It used the fixture gateway, did not call a
-live provider, did not measure Arabic answer quality, and is not production
-qualification. The PostgreSQL suite ran on local PostgreSQL 16.15 because Docker
-was not available in that environment.
+company SSO, production networking,
+restore drills and pilot approval are still open. The development browser shell
+covers RTL layout, mixed-direction display, and the server calculation record.
+It does not close the Arabic quality gate and it does not calculate. Authorized CSV
+calculations are a development slice, not the remaining charts, joins, or XLSX work.
+Exhaustive coverage of extracted native text remains a separate development workflow.
+The 27 October 2026 local run after merging both slices passed 227 unit/contract
+tests, 11 browser component tests, and 80 PostgreSQL integration tests. The
+integration suite includes the Arabic and mixed-language calculation cases, exact
+numeric results, injection attempts, limits, and denied access. It used the fixture
+gateway, did not call a live provider, did not measure Arabic answer quality, and
+is not production qualification. PostgreSQL 16.15 was local because the Docker CLI
+was not available; the read-only Compose test container was not used.
 
 V6.2 answer presentation is unchanged for ordinary answers. Exhaustive coverage
 and CSV calculation planning use the same Groq-first route when generation mode

@@ -36,9 +36,10 @@ query client. It supports an existing `--version`, optional `--file` and a singl
 development configuration and never displayed. Uploaded originals/jobs persist
 when the client exits or times out.
 
-The current enterprise app has no graphical chat interface. The client is a
+The terminal client is a
 development convenience using synthetic Alice/workspace A, not company SSO or a
-production authentication flow. The active Groq-first BYOK route sends questions
+production authentication flow. A later change serves a development browser from
+the same enterprise app; this note does not describe that shell. The active Groq-first BYOK route sends questions
 and retrieved evidence externally: only nonconfidential testing is approved.
 
 ## Evidence

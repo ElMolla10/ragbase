@@ -4,11 +4,12 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 
 from backend.enterprise_config import EnterpriseSettings
 from backend.openrouter_client import MODELS
 from backend.policy import assemble
+from backend.ui import install_browser
 
 
 def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
@@ -123,6 +124,19 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
 
         for error in (SQLAlchemyError, ArtifactError, OSError, TimeoutError):
             app.add_exception_handler(error, unavailable)
+
+    if not install_browser(app, settings.ui_root, storage_root=settings.storage_root):
+
+        @app.get("/", include_in_schema=False)
+        async def browser_shell_unavailable():
+            return PlainTextResponse(
+                "Enterprise browser shell is not available.\n",
+                status_code=503,
+                headers={
+                    "Cache-Control": "no-store",
+                    "X-Content-Type-Options": "nosniff",
+                },
+            )
 
     @app.get("/health/live")
     async def live():
