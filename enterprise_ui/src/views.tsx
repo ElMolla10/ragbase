@@ -1,5 +1,6 @@
 import type { FormEvent, ReactNode } from "react";
-import { ResultTables, readCalculationTables } from "./calculations/ResultTables";
+import { CalculationView } from "./calculations/CalculationView";
+import type { CalculationDownloads, CalculationRecordView } from "./calculations/record";
 import {
   coverageIsComplete,
   locationParts,
@@ -27,11 +28,13 @@ export type DocItem = {
 export type ChatEntry = {
   id: string;
   role: "user" | "assistant";
-  kind: "answer" | "coverage";
+  kind: "answer" | "coverage" | "calculate";
   text?: string;
   events?: StreamEvent[];
   error?: string | null;
   running?: boolean;
+  calculation?: CalculationRecordView | null;
+  downloads?: CalculationDownloads | null;
 };
 
 function locationLabel(location: unknown, t: (key: MessageKey) => string): string {
@@ -249,6 +252,7 @@ function stageCopy(events: StreamEvent[], t: (key: MessageKey) => string): strin
   if (stage.stage === "generating_and_validating") return t("stageGenerating");
   if (stage.stage === "covering_sections") return t("stageCovering");
   if (stage.stage === "reducing_sections") return t("stageReducing");
+  if (stage.stage === "calculating") return t("stageCalculating");
   return stage.stage ?? t("stageQueued");
 }
 
@@ -305,9 +309,11 @@ export function CoverageMap({ payload }: { payload: AnswerPayload | CoveragePayl
 export function AnswerCard({
   entry,
   onPreview,
+  onDownload,
 }: {
   entry: ChatEntry;
   onPreview: (path: string, title: string) => void;
+  onDownload?: (path: string) => void;
 }) {
   const { t } = useLocale();
   const events = entry.events ?? [];
@@ -316,7 +322,6 @@ export function AnswerCard({
   const disclosure = payload ? readDisclosure(payload) : null;
   const queued = events.find((event) => event.event === "queued");
   const external = queued && queued.event === "queued" && queued.external_processing === true;
-  const tables = readCalculationTables(payload?.calculations);
   const coverage = mapPayload(events);
   return (
     <article className="bubble assistant">
@@ -349,6 +354,7 @@ export function AnswerCard({
               </dd>
             </div>
           ) : null}
+          {payload?.mode === "spreadsheet_calculation" ? null : (
           <div>
             <dt>{t("contextCoverage")}</dt>
             <dd>
@@ -365,7 +371,13 @@ export function AnswerCard({
               {disclosure.allIncluded === false ? <span> {t("partialOverview")}</span> : null}
             </dd>
           </div>
-          {disclosure.modelCalled === false ? (
+          )}
+          {payload?.mode === "spreadsheet_calculation" ? (
+            <div>
+              <dt>{t("model")}</dt>
+              <dd>{disclosure.modelCalled ? t("plannerCalled") : t("explicitPlan")}</dd>
+            </div>
+          ) : disclosure.modelCalled === false ? (
             <div>
               <dt>{t("model")}</dt>
               <dd>{t("noModelCall")}</dd>
@@ -417,8 +429,15 @@ export function AnswerCard({
         </div>
       ) : null}
       {coverage ? <CoverageMap payload={coverage} /> : null}
-      <p className="note">{t("notCalculation")}</p>
-      <ResultTables tables={tables} />
+      {entry.calculation ? (
+        <CalculationView
+          record={entry.calculation}
+          downloads={entry.downloads}
+          onDownload={onDownload ?? (() => undefined)}
+        />
+      ) : (
+        <p className="note">{t("notCalculation")}</p>
+      )}
       {entry.error ? <p role="alert">{entry.error}</p> : null}
     </article>
   );
@@ -429,32 +448,39 @@ export function ChatPanel({
   busy,
   error,
   canAsk,
+  canCalculate,
   onAsk,
   onCancel,
   onPreview,
+  onDownload,
 }: {
   entries: ChatEntry[];
   busy: boolean;
   error: string | null;
   canAsk: boolean;
-  onAsk: (question: string, kind: "answer" | "coverage") => void;
+  canCalculate: boolean;
+  onAsk: (question: string, kind: "answer" | "coverage" | "calculate") => void;
   onCancel: () => void;
   onPreview: (path: string, title: string) => void;
+  onDownload: (path: string) => void;
 }) {
   const { t } = useLocale();
   return (
     <section className="chat" aria-label={t("questionLabel")}>
       <p className="note">{t("chatHint")}</p>
+      <p className="note">{t("calculationHint")}</p>
       <div className="transcript" role="log" aria-live="polite">
         {entries.length === 0 ? <p className="empty">{t("emptyChat")}</p> : null}
         {entries.map((entry) =>
           entry.role === "user" ? (
             <article key={entry.id} className="bubble user">
-              <p className="kind">{entry.kind === "coverage" ? t("coverage") : t("ask")}</p>
+              <p className="kind">
+                {entry.kind === "coverage" ? t("coverage") : entry.kind === "calculate" ? t("calculate") : t("ask")}
+              </p>
               <BidiText as="div" className="prose" text={entry.text ?? ""} />
             </article>
           ) : (
-            <AnswerCard key={entry.id} entry={entry} onPreview={onPreview} />
+            <AnswerCard key={entry.id} entry={entry} onPreview={onPreview} onDownload={onDownload} />
           ),
         )}
       </div>
@@ -492,6 +518,18 @@ export function ChatPanel({
             }}
           >
             {t("coverage")}
+          </button>
+          <button
+            type="button"
+            className="secondary"
+            disabled={!canCalculate || busy}
+            onClick={(event) => {
+              const form = event.currentTarget.form;
+              const question = String(new FormData(form ?? undefined).get("question") ?? "");
+              onAsk(question, "calculate");
+            }}
+          >
+            {t("calculate")}
           </button>
           {busy ? (
             <button type="button" className="ghost" onClick={onCancel}>

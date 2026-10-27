@@ -1,8 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { ApiError, createClient, readNdjson, uploadProblem } from "./api";
+import {
+  calculationDownloadPath,
+  calculationId,
+  isCsvFilename,
+  readCalculationRecord,
+  readDownloads,
+  stripCalculate,
+} from "./calculations/record";
 import { previewPath } from "./disclosure";
 import { useLocale } from "./i18n";
-import type { ExtractionRecord, HealthGeneration, HealthReady, StreamEvent, Workspace } from "./types";
+import type {
+  AnswerPayload,
+  CalculationResponse,
+  ExtractionRecord,
+  HealthGeneration,
+  HealthReady,
+  StreamEvent,
+  Workspace,
+} from "./types";
 import {
   ChatPanel,
   DocumentPanel,
@@ -74,9 +90,11 @@ export function App() {
   const [preview, setPreview] = useState<{ title: string; body: string; error: string | null } | null>(
     null,
   );
-  const runRef = useRef<{ id: string | null; kind: "answers" | "coverage"; abort: AbortController } | null>(
-    null,
-  );
+  const runRef = useRef<{
+    id: string | null;
+    kind: "answers" | "coverage" | "calculate";
+    abort: AbortController;
+  } | null>(null);
   const generationRef = useRef(0);
   const polls = useRef<number[]>([]);
 
@@ -258,35 +276,121 @@ export function App() {
     setEntries((current) => current.map((entry) => (entry.id === id ? update(entry) : entry)));
   }
 
-  async function ask(question: string, kind: "answer" | "coverage") {
+  function readyCsv() {
+    const chosen = documents.filter((doc) => selected.includes(doc.versionId) && doc.retrievalReady);
+    const csv = chosen.filter((doc) => isCsvFilename(doc.filename));
+    return { chosen, csv };
+  }
+
+  function calculationEntry(payload: CalculationResponse, downloads = readDownloads(payload.downloads)) {
+    const record = readCalculationRecord(payload.record, payload.status);
+    const answer: AnswerPayload = {
+      event: "answer",
+      mode: "spreadsheet_calculation",
+      answer: typeof payload.answer === "string" ? payload.answer : record?.answer,
+      limitation: record?.limitation ?? undefined,
+      metadata: {
+        production_qualified: payload.production_qualified === true,
+        model_called: payload.model_called === true,
+        calculation_id: payload.calculation_id,
+        calculation_status: payload.status,
+      },
+    };
+    return { record, downloads, events: [answer] };
+  }
+
+  async function ask(question: string, kind: "answer" | "coverage" | "calculate") {
     const text = question.trim();
     if (!token || !workspaceId) return;
     if (!text) {
       setChatError(t("questionRequired"));
       return;
     }
-    if (selected.length < 1 || selected.length > 8) {
+    const requested =
+      kind === "calculate" ||
+      (kind === "answer" && (text === "/calculate" || text.startsWith("/calculate ")));
+    const ready = readyCsv();
+    if (requested) {
+      if (ready.chosen.length !== 1 || ready.csv.length !== 1) {
+        setChatError(ready.chosen.length === 1 ? t("csvOnly") : t("oneCsv"));
+        return;
+      }
+    } else if (selected.length < 1 || selected.length > 8) {
       setChatError(t("selectHint"));
+      return;
+    }
+    const direct = kind === "calculate";
+    const questionText = direct ? stripCalculate(text) : text;
+    if (direct && !questionText) {
+      setChatError(t("questionRequired"));
       return;
     }
     setChatError(null);
     setBusy(true);
     const assistantId = crypto.randomUUID();
     const abort = new AbortController();
-    const route = kind === "coverage" ? "coverage" : "answers";
-    runRef.current = { id: null, kind: route, abort };
+    const streamKind = kind === "coverage" ? "coverage" : "answers";
+    const entryKind = requested ? "calculate" : kind;
+    runRef.current = { id: null, kind: requested ? "calculate" : streamKind, abort };
     setEntries((current) => [
       ...current,
-      { id: crypto.randomUUID(), role: "user", kind, text },
-      { id: assistantId, role: "assistant", kind, events: [], running: true, error: null },
+      { id: crypto.randomUUID(), role: "user", kind: entryKind, text: questionText },
+      { id: assistantId, role: "assistant", kind: entryKind, events: [], running: true, error: null },
     ]);
     const client = createClient(token);
+    if (direct) {
+      const versionId = ready.csv[0]?.versionId;
+      if (!versionId) {
+        patchEntry(assistantId, (entry) => ({ ...entry, running: false, error: t("oneCsv") }));
+        setBusy(false);
+        runRef.current = null;
+        return;
+      }
+      try {
+        const payload = await client.createCalculation(
+          workspaceId,
+          {
+            version_id: versionId,
+            question: questionText,
+            client_request_id: crypto.randomUUID(),
+          },
+          abort.signal,
+        );
+        const attached = calculationEntry(payload);
+        patchEntry(assistantId, (entry) => ({
+          ...entry,
+          running: false,
+          events: attached.events,
+          calculation: attached.record,
+          downloads: attached.downloads,
+          error: attached.record ? null : t("apiUnavailable"),
+        }));
+      } catch (error) {
+        patchEntry(assistantId, (entry) => ({
+          ...entry,
+          running: false,
+          error: abort.signal.aborted
+            ? t("cancelled")
+            : error instanceof ApiError && error.message
+              ? error.message
+              : t("apiUnavailable"),
+        }));
+      } finally {
+        setBusy(false);
+        runRef.current = null;
+      }
+      return;
+    }
     const events: StreamEvent[] = [];
     try {
       const response = await client.openStream(
         workspaceId,
-        route,
-        { question: text, version_ids: selected, client_request_id: crypto.randomUUID() },
+        streamKind,
+        {
+          question: text,
+          version_ids: requested && ready.csv[0] ? [ready.csv[0].versionId] : selected,
+          client_request_id: crypto.randomUUID(),
+        },
         abort.signal,
       );
       await readNdjson(response, (event) => {
@@ -317,6 +421,31 @@ export function App() {
       } else if (!events.some((event) => event.event === "answer" || event.event === "error")) {
         patchEntry(assistantId, (entry) => ({ ...entry, error: t("streamInterrupted") }));
       }
+      const released = [...events].reverse().find((event) => event.event === "answer");
+      if (released && released.event === "answer" && released.mode === "spreadsheet_calculation") {
+        const id = calculationId(released.metadata);
+        if (id) {
+          const body = await client.calculation(workspaceId, id);
+          const supplied = readDownloads(released.downloads);
+          const downloads = {
+            record:
+              supplied.record ??
+              calculationDownloadPath(
+                `/api/workspaces/${workspaceId}/calculations/${id}/record.json`,
+              ),
+            table:
+              supplied.table ??
+              (body.status === "completed"
+                ? calculationDownloadPath(`/api/workspaces/${workspaceId}/calculations/${id}/table.csv`)
+                : null),
+          };
+          patchEntry(assistantId, (entry) => ({
+            ...entry,
+            calculation: readCalculationRecord(body.record, body.status),
+            downloads,
+          }));
+        }
+      }
     } catch (error) {
       if (abort.signal.aborted) {
         patchEntry(assistantId, (entry) => ({ ...entry, error: entry.error ?? t("cancelled") }));
@@ -336,12 +465,36 @@ export function App() {
   async function cancel() {
     const active = runRef.current;
     active?.abort.abort();
-    if (token && workspaceId && active?.id) {
+    if (token && workspaceId && active?.id && active.kind !== "calculate") {
       try {
         await createClient(token).cancelRun(workspaceId, active.kind, active.id);
       } catch {
         /* the aborted stream already stops the local view */
       }
+    }
+  }
+
+  async function download(path: string) {
+    const safe = calculationDownloadPath(path);
+    if (!safe || !token) {
+      setChatError(t("downloadRejected"));
+      return;
+    }
+    try {
+      const response = await createClient(token).download(safe);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = safe.endsWith("/table.csv") ? "calculation.csv" : "calculation-record.json";
+      anchor.target = "_blank";
+      anchor.rel = "noopener";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setChatError(error instanceof ApiError && error.message ? error.message : t("downloadRejected"));
     }
   }
 
@@ -418,9 +571,16 @@ export function App() {
               busy={busy}
               error={chatError}
               canAsk={indexedSelection.length > 0}
+              canCalculate={
+                indexedSelection.length === 1 &&
+                documents.some(
+                  (doc) => doc.versionId === indexedSelection[0] && isCsvFilename(doc.filename),
+                )
+              }
               onAsk={(question, kind) => void ask(question, kind)}
               onCancel={() => void cancel()}
               onPreview={(path, title) => void openPreview(path, title)}
+              onDownload={(path) => void download(path)}
             />
           </div>
         ) : null}

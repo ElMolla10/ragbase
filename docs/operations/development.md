@@ -1,6 +1,6 @@
 # Enterprise development storage
 
-This profile is a development-only storage foundation. It accepts UTF-8 TXT/Markdown and PDF originals, retains immutable files and metadata, and checks workspace access on uploads, status/evidence and downloads. A separate worker performs bounded native extraction. Versioned lexical retrieval and exact-quote answers/source previews are implemented. Generation is disabled by default. Company SSO, OCR, general analysis and a graphical enterprise interface remain pending. The legacy docker-compose.yml remains a separate public-demo application.
+This profile is a development-only storage foundation. It accepts UTF-8 TXT/Markdown, PDF, and CSV originals, retains immutable files and metadata, and checks workspace access on uploads, status/evidence and downloads. A separate worker performs bounded native extraction. Versioned lexical retrieval, cited answers, exhaustive coverage, and allowlisted CSV calculations are implemented. Generation is disabled by default. The same origin serves a development browser with an Arabic/English toggle. Company SSO, OCR, charts, joins, and XLSX formulas remain pending. The legacy docker-compose.yml remains a separate public-demo application.
 
 ## Start
 
@@ -123,5 +123,6 @@ Alice development identity, waits up to 120 seconds for durable processing, then
 accepts questions and shows citation previews. A timed-out client does not cancel
 its durable job. `--version UUID` reuses a ready version without uploading again;
 `--file PATH --question TEXT` runs one question. No credentials are displayed.
-Use nonconfidential files only with hosted generation enabled. There is no
-enterprise browser UI yet; opening port 8800 is not a chat interface.
+Use nonconfidential files only with hosted generation enabled. The same origin
+also serves the development browser. Prefix a question with `/calculate` for one
+ready CSV version. The browser displays the server record and does not calculate.

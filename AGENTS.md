@@ -31,6 +31,8 @@ Python stay disabled, and generated analytical SQL is never sent to PostgreSQL.
 are authenticated and creator-scoped. Margin, mixed currency, and forecast/cause
 requests ask for clarification. DuckDB `memory_limit` is not an OS cgroup.
 The development graphical UI is served by this app with an Arabic/English toggle.
-SSO, dense retrieval, charts, joins, XLSX formulas, Arabic qualification and
-production acceptance remain pending. Never
+It can start `/calculate` for one ready CSV and displays the server record,
+result table, clarification, and authenticated CSV/JSON downloads. It does not
+calculate. SSO, dense retrieval, charts, joins, XLSX formulas, Arabic
+qualification and production acceptance remain pending. Never
 add unprotected routes or label local smoke results production qualification.

@@ -49,6 +49,7 @@ export type AnswerPayload = {
   claims?: Claim[];
   scope_notice?: string;
   limitation?: string;
+  downloads?: { table?: string; record?: string };
   coverage_complete?: boolean;
   label?: string;
   sections?: SectionRow[];
@@ -85,6 +86,17 @@ export type HealthReady = {
   status?: string;
   generation?: string;
   documents?: string;
+};
+
+export type CalculationResponse = {
+  calculation_id?: string;
+  status?: string;
+  answer?: string;
+  record?: unknown;
+  citations?: unknown[];
+  downloads?: { table?: string; record?: string };
+  model_called?: boolean;
+  production_qualified?: boolean;
 };
 
 export type HealthGeneration = {

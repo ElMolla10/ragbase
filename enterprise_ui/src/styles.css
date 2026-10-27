@@ -147,6 +147,8 @@ blockquote {
 table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
 th, td { text-align: start; padding: 0.4rem 0.45rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 
+.column-chip { display: inline-block; margin-inline-end: 0.6rem; }
+.calculation { display: grid; gap: 0.45rem; margin-top: 0.8rem; }
 .badge { display: inline-block; border-radius: 999px; padding: 0.15rem 0.6rem; }
 .badge.ok { background: var(--ok-bg); color: var(--accent); }
 .badge.warn, .warn { background: var(--warn-bg); color: var(--warn); }

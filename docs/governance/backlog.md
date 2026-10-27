@@ -9,7 +9,7 @@ Updated: 18 October 2026. Canonical plan: execution-plan.md v2.0; constitution: 
 | P2 / Phase 3: PDF Q&A | Local implementation complete; 156 tests and live CPU smoke pass | Actual-server baseline and reviewed company-case acceptance remain pending |
 | P3 / Phase 4: OCR/Office | Pending | Arabic/English OCR and fidelity-preserving DOCX/PPTX/XLSX/CSV adapters |
 | P4 / Phase 5: Analysis | Pending | Typed calculations, data validation, sandbox, lineage and exports |
-| P5 / Phase 6: Coverage/model qualification | Coverage workflow and a development RTL browser shell exist locally | Arabic qualification, hybrid retrieval, optional vision, model swaps, and production acceptance |
+| P5 / Phase 6: Coverage/model qualification | Coverage workflow and a development RTL browser shell exist locally. The shell displays server CSV calculation records | Arabic qualification, hybrid retrieval, optional vision, model swaps, and production acceptance |
 | P6 / Phase 7: Hardening/pilot | Pending | Company SSO, offline bundle, network denial, load envelope, backup restoration and acceptance |
 
 Current evidence: [Phase 3 completion record](phase3-completion.md). Earlier storage/native-extraction reports are historical checkpoints. Local completion does not qualify company-server capacity or production use. No model weights were downloaded. The installed Qwen3 1.7B was used only as a development integration model; Gemma is absent from the current inventory and all production candidates remain unqualified.

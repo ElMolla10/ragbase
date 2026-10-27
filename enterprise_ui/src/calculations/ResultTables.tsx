@@ -1,6 +1,6 @@
 /**
- * Extension point for the in-flight spreadsheet branch.
- * This component displays server-supplied cells. It does not calculate them.
+ * Renders string cells supplied by the server.
+ * This component does not evaluate formulas or aggregates.
  */
 export type CalculationTable = {
   id: string;

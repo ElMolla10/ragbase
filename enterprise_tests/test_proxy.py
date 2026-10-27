@@ -83,6 +83,54 @@ def test_browser_and_coverage_stay_on_the_fixed_upstream(monkeypatch):
     assert not dev_proxy.browser_path_allowed("http://example.com/")
 
 
+def test_calculation_routes_stay_on_the_fixed_upstream(monkeypatch):
+    original = httpx.AsyncClient
+    requests = []
+
+    def respond(request):
+        requests.append(request)
+        return httpx.Response(
+            200,
+            content=b"result\n30.60\n",
+            headers={
+                "content-type": "text/csv; charset=utf-8",
+                "content-disposition": 'attachment; filename="calculation.csv"',
+            },
+        )
+
+    monkeypatch.setattr(
+        dev_proxy.httpx,
+        "AsyncClient",
+        lambda **kwargs: original(**kwargs, transport=httpx.MockTransport(respond)),
+    )
+    workspace = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+    calculation = "cccccccc-cccc-4ccc-8ccc-cccccccccccc"
+    table = f"/api/workspaces/{workspace}/calculations/{calculation}/table.csv"
+    record = f"/api/workspaces/{workspace}/calculations/{calculation}/record.json"
+    with TestClient(dev_proxy.app) as client:
+        response = client.get(table)
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/csv")
+        assert "attachment" in response.headers["content-disposition"]
+        assert (
+            client.post(
+                f"/api/workspaces/{workspace}/calculations/not-a-uuid"
+            ).status_code
+            == 404
+        )
+    assert [str(request.url) for request in requests] == ["http://api:8000" + table]
+    assert dev_proxy.api_path_allowed(f"/api/workspaces/{workspace}/calculations")
+    assert dev_proxy.api_path_allowed(
+        f"/api/workspaces/{workspace}/calculations/{calculation}"
+    )
+    assert dev_proxy.api_path_allowed(table)
+    assert dev_proxy.api_path_allowed(record)
+    assert not dev_proxy.api_path_allowed(f"{table}/../record.json")
+    assert not dev_proxy.api_path_allowed(
+        f"/api/workspaces/{workspace}/calculations/not-a-uuid"
+    )
+
+
 def test_upstream_redirect_does_not_leave_network(monkeypatch):
     original = httpx.AsyncClient
     requests = []

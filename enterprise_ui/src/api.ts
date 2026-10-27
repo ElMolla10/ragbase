@@ -1,4 +1,5 @@
 import type {
+  CalculationResponse,
   DocumentRecord,
   ExtractionRecord,
   StreamEvent,
@@ -151,6 +152,32 @@ export function createClient(token: string, fetchImpl: typeof fetch = fetch) {
       return json(
         `/api/workspaces/${requireUuid(workspaceId)}/coverage/${requireUuid(runId)}`,
       );
+    },
+    async calculation(workspaceId: string, calculationId: string): Promise<CalculationResponse> {
+      return json(
+        `/api/workspaces/${requireUuid(workspaceId)}/calculations/${requireUuid(calculationId)}`,
+      );
+    },
+    async createCalculation(
+      workspaceId: string,
+      body: { version_id: string; question: string; client_request_id: string },
+      signal?: AbortSignal,
+    ): Promise<CalculationResponse> {
+      return json(`/api/workspaces/${requireUuid(workspaceId)}/calculations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          version_id: requireUuid(body.version_id),
+          question: body.question,
+          client_request_id: requireUuid(body.client_request_id),
+        }),
+        signal,
+      });
+    },
+    async download(path: string): Promise<Response> {
+      const response = await send(path);
+      if (!response.ok) throw new ApiError(response.status, await detail(response));
+      return response;
     },
     async preview(path: string): Promise<string> {
       const response = await send(path);

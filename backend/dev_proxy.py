@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
-# Fixed paths only. Coverage is an existing authenticated API, not a new data source.
+# Fixed paths only. Coverage and calculations are existing authenticated APIs.
 _API_PATH = re.compile(
     r"/api/workspaces(?:/"
     r"[0-9a-f-]{36}"
@@ -19,6 +19,7 @@ _API_PATH = re.compile(
     r"|/search"
     r"|/answers(?:/[0-9a-f-]{36}/cancel)?"
     r"|/coverage(?:/[0-9a-f-]{36}(?:/cancel)?)?"
+    r"|/calculations(?:/[0-9a-f-]{36}(?:/(?:table\.csv|record\.json))?)?"
     r"))?"
 )
 _ASSET_NAME = re.compile(r"[A-Za-z0-9._-]{1,200}")

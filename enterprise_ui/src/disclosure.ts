@@ -37,7 +37,10 @@ export function readDisclosure(answer: AnswerPayload): Disclosure {
     metadata.coverage && typeof metadata.coverage === "object"
       ? (metadata.coverage as Record<string, unknown>)
       : {};
-  const qualified = model.production_qualified;
+  const qualified =
+    typeof model.production_qualified === "boolean"
+      ? model.production_qualified
+      : metadata.production_qualified;
   return {
     model: textOrNull(route.model),
     provider: textOrNull(route.provider),

@@ -48,9 +48,12 @@ enterprise application. The enterprise entry point is `backend.enterprise:app`.
   watch extraction status, ask with the streamed answer events, open authenticated
   plain-text source previews, and start or cancel exhaustive coverage. The shell
   shows the response-reported model and provider and the context or section
-  coverage disclosure. Arabic and English UI copy, RTL layout, and isolated
-  mixed-direction text are included. Spreadsheet calculations are not implemented;
-  the shell only renders result tables if a later API supplies them.
+  coverage disclosure. For one ready CSV it can send `/calculate` or use Calculate.
+  It shows the server result table and calculation record: dataset and version,
+  columns, filters, operation, units, and included and excluded rows. Clarification
+  requests stay visible and do not invent a number. CSV and JSON downloads use the
+  authenticated export routes. Arabic and English UI copy, RTL layout, and isolated
+  mixed-direction text are included. The browser does not evaluate formulas.
 - The terminal query client remains available.
 
 Natural document chat is enabled. Source identities are validated and original supporting passages are
@@ -98,11 +101,10 @@ See [BYOK implementation and evidence](docs/openrouter-byok.md).
 
 | Check | Recorded result |
 |---|---|
-| Unit and contract suite, CSV calculations, 27 October 2026 | 218 passed |
-| Isolated PostgreSQL integration suite, same calculation run | 80 passed on local PostgreSQL 16.15; Docker Compose was not available |
-| Unit and contract suite, browser shell check before the calculation merge | 216 passed locally |
-| Enterprise browser component tests | 7 passed locally |
-| Lint, formatting and policy consistency | Passed on both of those local runs |
+| Unit and contract suite, 27 October 2026 browser plus calculation merge | 227 passed |
+| Enterprise browser component tests | 11 passed |
+| Isolated PostgreSQL integration suite | 80 passed on local PostgreSQL 16.15. Docker Compose was not available, so this was not the read-only test container |
+| Lint, formatting and policy consistency | Passed |
 | Gemini through Google AI Studio | HTTP 200 with an answer |
 | GPT-OSS 120B through Groq | HTTP 200 with an answer |
 | Deployed routing probes | All 3 returned HTTP 200, including forced Google-unavailable fallback |
@@ -256,7 +258,7 @@ public CI. See [development operations](docs/operations/development.md).
 | 3 / P2 | Native PDF ingestion, retrieval and cited answers | Local implementation complete; BYOK routing added and live-tested; server/company acceptance pending |
 | 4 / P3 | Arabic/English OCR and Office formats | In progress: bounded CSV ingestion tested; OCR and DOCX/PPTX/XLSX pending |
 | 5 / P4 | Trusted numerical analysis, charts and exports | In progress: allowlisted CSV calculations checked locally; charts, joins, XLSX, generated SQL, and an OS cgroup remain pending |
-| 6 / P5 | Complete-document coverage, RTL UX and model qualification | Coverage workflow tested locally on synthetic documents. A development RTL browser shell is served by the enterprise app; Arabic qualification, OCR/vision and model qualification remain pending |
+| 6 / P5 | Complete-document coverage, RTL UX and model qualification | Coverage workflow tested locally on synthetic documents. A development RTL browser shell is served by the enterprise app and displays server CSV calculation records. Arabic qualification, OCR/vision and model qualification remain pending |
 | 7 / P6 | Hardening, SSO, backup/restore and company pilot | Pending |
 
 The company server has **64 GB system RAM and no GPU**. Its CPU, memory bandwidth
@@ -277,17 +279,17 @@ hardware discovery and representative Arabic/mixed-language acceptance cases
 remain parallel requirements. Dense retrieval, charts, cross-version joins,
 company SSO, production networking,
 restore drills and pilot approval are still open. The development browser shell
-covers RTL layout and mixed-direction display; it does not close the Arabic
-quality gate. Authorized CSV calculations
-are a development slice, not that remaining work. Exhaustive coverage of extracted
-native text remains a separate development workflow. The 27 October 2026 calculation
-run passed 218 unit/contract tests and 80 PostgreSQL integration tests, including
-Arabic and mixed-language calculation cases, exact numeric results, injection
-attempts, limits, and denied access. It used the fixture gateway, did not call a
-live provider, did not measure Arabic answer quality, and is not production
-qualification. The PostgreSQL suite ran on local PostgreSQL 16.15 because Docker
-was not available in that environment. The browser shell check, before this merge,
-passed 216 unit/contract tests and 7 component tests and did not rerun PostgreSQL.
+covers RTL layout, mixed-direction display, and the server calculation record.
+It does not close the Arabic quality gate and it does not calculate. Authorized CSV
+calculations are a development slice, not the remaining charts, joins, or XLSX work.
+Exhaustive coverage of extracted native text remains a separate development workflow.
+The 27 October 2026 local run after merging both slices passed 227 unit/contract
+tests, 11 browser component tests, and 80 PostgreSQL integration tests. The
+integration suite includes the Arabic and mixed-language calculation cases, exact
+numeric results, injection attempts, limits, and denied access. It used the fixture
+gateway, did not call a live provider, did not measure Arabic answer quality, and
+is not production qualification. PostgreSQL 16.15 was local because the Docker CLI
+was not available; the read-only Compose test container was not used.
 
 V6.2 answer presentation is unchanged for ordinary answers. Exhaustive coverage
 and CSV calculation planning use the same Groq-first route when generation mode
