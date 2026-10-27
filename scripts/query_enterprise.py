@@ -11,7 +11,7 @@ from uuid import UUID, uuid4
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def main(version, question, preview, *, verbose=True):
+def main(version, question, preview, *, verbose=True, coverage=False):
     access = json.loads((ROOT / ".local/dev-access.json").read_text("utf-8"))
     opener = build_opener(ProxyHandler({}))
     base = "http://127.0.0.1:8800"
@@ -24,8 +24,9 @@ def main(version, question, preview, *, verbose=True):
         "question": question,
         "client_request_id": str(uuid4()),
     }
+    route = "coverage" if coverage else "answers"
     request = Request(
-        base + f"/api/workspaces/{access['workspace_a']}/answers",
+        base + f"/api/workspaces/{access['workspace_a']}/{route}",
         data=json.dumps(payload).encode(),
         headers=headers,
     )
@@ -49,6 +50,11 @@ def main(version, question, preview, *, verbose=True):
                     print(event.get("stage", "queued"), flush=True)
                 elif event["event"] == "error":
                     raise SystemExit(event["detail"])
+                elif event["event"] == "coverage":
+                    print(event.get("scope_notice", "Coverage stopped."))
+                    for gap in event.get("gaps") or []:
+                        if gap.get("gap_code"):
+                            print("Gap:", gap["gap_code"], gap.get("location"))
                 elif event["event"] == "answer":
                     metadata = event["metadata"]
                     if verbose and metadata.get("model_called"):
@@ -69,9 +75,19 @@ def main(version, question, preview, *, verbose=True):
                             "The supplied document context did not establish an answer."
                         )
                     sources = {}
-                    conversational = event.get("mode") == "grounded_document_chat"
+                    conversational = event.get("mode") in {
+                        "grounded_document_chat",
+                        "exhaustive_coverage",
+                    }
                     if conversational:
                         print("\n" + event["answer"])
+                    if event.get("mode") == "exhaustive_coverage":
+                        print("\n" + event["scope_notice"])
+                        if not event["coverage_complete"]:
+                            print("Not complete.")
+                        for gap in event.get("gaps") or []:
+                            if gap.get("gap_code"):
+                                print("Gap:", gap["gap_code"], gap.get("location"))
                     for claim in event["claims"]:
                         key = claim["source_id"]
                         if key not in sources:
@@ -129,5 +145,15 @@ if __name__ == "__main__":
         "--question", help="If omitted, read the question interactively"
     )
     parser.add_argument("--preview", action="store_true")
+    parser.add_argument(
+        "--coverage",
+        action="store_true",
+        help="Run exhaustive section coverage instead of a bounded answer",
+    )
     args = parser.parse_args()
-    main(args.version, args.question or input("Question: "), args.preview)
+    main(
+        args.version,
+        args.question or input("Question: "),
+        args.preview,
+        coverage=args.coverage,
+    )

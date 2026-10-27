@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "constitution_version": "6.2.0",
-  "constitution_sha256": "660e18e0e092868a55b366a1c6a38e6526215cd05beee978a8ef77232e40f696",
+  "constitution_sha256": "52ddf3ca788a882032c13f0530d930471f176f495abe9f9c444f2b2c14e28780",
   "sections": {
     "core": {
       "rule_ids": [
@@ -17,7 +17,7 @@
         "MOD-004",
         "UX-001"
       ],
-      "sha256": "ecd06ca92f7b3a8eb574ab90de931214b2c4ce83021bf56324d75910128d2354"
+      "sha256": "2d090828e9fc56051675f5f66965fdd50a29e1850975af9ff719164781b98ca5"
     },
     "retrieval": {
       "rule_ids": [

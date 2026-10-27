@@ -8,6 +8,29 @@ from backend.gateway.contracts import GatewayEvent
 class FixtureQuoteGateway:
     async def stream(self, request):
         request.validate()
+        # Only the coverage workflow's trusted instructions select this shape.
+        # Document text that happens to contain the marker stays on the quote path.
+        if "COVERAGE_WORKFLOW" in request.instructions.text:
+            aliases = []
+            for item in request.evidence:
+                payload = json.loads(item)
+                alias = payload.get("source_id")
+                if isinstance(alias, str):
+                    aliases.append(alias)
+            if not aliases:
+                result = {
+                    "insufficient": True,
+                    "answer": "No supplied sections established an answer.",
+                }
+            else:
+                result = {
+                    "insufficient": False,
+                    "answer": "Reviewed only the supplied sections. "
+                    + " ".join(f"[{alias}]" for alias in aliases),
+                }
+            yield GatewayEvent("text", json.dumps(result))
+            yield GatewayEvent("done", finish_reason="stop")
+            return
         if not request.evidence:
             result = {"insufficient": True, "claims": []}
         else:

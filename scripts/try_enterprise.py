@@ -84,6 +84,11 @@ def main():
     parser.add_argument(
         "--preview", action="store_true", help="Show full citation previews"
     )
+    parser.add_argument(
+        "--coverage",
+        action="store_true",
+        help="Ask for an exhaustive section-by-section summary",
+    )
     args = parser.parse_args()
     print("Enterprise development test — local API at " + BASE)
     print("Use nonconfidential test documents only. Questions and retrieved text")
@@ -94,13 +99,30 @@ def main():
             path = args.file or Path(input("File path: ").strip().strip('"'))
             version = upload_and_wait(path)
         if args.question:
-            query(version, args.question, args.preview, verbose=args.verbose)
+            query(
+                version,
+                args.question,
+                args.preview,
+                verbose=args.verbose,
+                coverage=args.coverage,
+            )
             return
         print(
-            "Ask a question or an overview such as 'What is this paper about?'. Leave blank to exit."
+            "Ask a question or an overview such as 'What is this paper about?'. "
+            "Start a question with /coverage for an exhaustive summary. Leave blank to exit."
         )
         while question := input("Question: ").strip():
-            query(version, question, args.preview, verbose=args.verbose)
+            exhaustive = args.coverage or question.startswith("/coverage")
+            if question.startswith("/coverage"):
+                question = question.removeprefix("/coverage").strip()
+                question = question or "Summarize the selected documents completely."
+            query(
+                version,
+                question,
+                args.preview,
+                verbose=args.verbose,
+                coverage=exhaustive,
+            )
     except HTTPError as exc:
         raise SystemExit(
             f"Request failed (HTTP {exc.code}). Check readiness, permissions and supported input."

@@ -32,7 +32,7 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
             if settings.generation_mode == "openrouter"
             else settings.model_digest,
             "adapter": settings.generation_mode,
-            "adapter_version": "phase3-quotes-v1",
+            "adapter_version": "exhaustive-coverage-v1",
             "production_qualified": False,
             "external_processing": settings.generation_mode == "openrouter",
             "dynamic_routing": settings.generation_mode == "openrouter",
@@ -45,13 +45,14 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
             "byok_only": settings.generation_mode == "openrouter",
             "schema_enforcement": "application",
             "provider_json_schema": settings.generation_mode == "ollama",
-            "enabled_capabilities": ["text", "structured_quote_output", "streaming"],
-            "disabled_capabilities": [
-                "vision",
-                "tools",
-                "analysis",
-                "whole_document_coverage",
+            "enabled_capabilities": [
+                "text",
+                "structured_quote_output",
+                "streaming",
+                "exhaustive_text_coverage",
             ],
+            "disabled_capabilities": ["vision", "tools", "analysis"],
+            "exhaustive_coverage": "development_only_not_production_qualified",
         }
         if gateway is None and settings.generation_mode == "fixture":
             from backend.answers.fixtures import FixtureQuoteGateway
@@ -104,11 +105,13 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
         from sqlalchemy.exc import SQLAlchemyError
 
         from backend.answers.api import router as answers_router
+        from backend.coverage.api import router as coverage_router
         from backend.library import router
         from backend.storage.local import ArtifactError
 
         app.include_router(router)
         app.include_router(answers_router)
+        app.include_router(coverage_router)
 
         async def unavailable(request, exc):
             return JSONResponse(

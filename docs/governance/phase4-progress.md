@@ -53,6 +53,10 @@ and retrieved evidence externally: only nonconfidential testing is approved.
   validated against CSV row 2 with the correct source preview. The answer stage
   took 1.00 seconds in that run; this is not a performance acceptance benchmark.
 
+Exhaustive document coverage is not part of this OCR/Office slice. It is tracked
+in [coverage progress](coverage-progress.md). This file does not claim OCR or
+Office support.
+
 ## Remaining Phase 4 work
 
 Bounded native-first Arabic/English OCR, DOCX revisions/notes and table handling,

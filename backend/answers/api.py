@@ -433,6 +433,9 @@ async def answer(workspace: UUID, request: Request, principal=Depends(identity))
                 await record(
                     database, actor, workspace, run_id, "completed", metadata=metadata
                 )
+                # Ordinary overviews stay bounded. Exhaustive coverage is a
+                # separate authenticated workflow and is the only path that may
+                # be labeled complete.
                 # Validate everything first. No raw model tokens or private
                 # reasoning enter the application stream.
                 if coverage["total_document_chunks"] is not None:
