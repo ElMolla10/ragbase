@@ -6,7 +6,8 @@ system, with Arabic and mixed-language evaluation planned throughout delivery.
 **Updated: 27 October 2026.** Phase 3's document Q&A implementation is complete
 in local development; Phase 4 has started with bounded CSV ingestion. Explicit
 exhaustive coverage of selected authorized versions is now a separate development
-workflow. The current working setup uses OpenRouter BYOK, with GPT-OSS
+workflow. A development browser shell is served by the same enterprise app, with
+an Arabic/English toggle. The current working setup uses OpenRouter BYOK, with GPT-OSS
 120B through Groq as primary and Gemini 3.8 Flash as fallback. Company-server
 acceptance and production qualification remain open.
 
@@ -42,7 +43,15 @@ enterprise application. The enterprise entry point is `backend.enterprise:app`.
   idempotency and coordination between extraction and interactive answers.
 - Separate core-service readiness and generation health. Search and source
   previews remain available during model outages.
-- A terminal query client. A graphical enterprise UI is still pending.
+- A development browser at the enterprise origin: sign in with a synthetic
+  bearer token, list workspaces and documents, upload PDF/TXT/Markdown/CSV and
+  watch extraction status, ask with the streamed answer events, open authenticated
+  plain-text source previews, and start or cancel exhaustive coverage. The shell
+  shows the response-reported model and provider and the context or section
+  coverage disclosure. Arabic and English UI copy, RTL layout, and isolated
+  mixed-direction text are included. Spreadsheet calculations are not implemented;
+  the shell only renders result tables if a later API supplies them.
+- The terminal query client remains available.
 
 Natural document chat is enabled. Source identities are validated and original supporting passages are
 attached by trusted code; generated explanations are model interpretations and are not
@@ -85,9 +94,10 @@ See [BYOK implementation and evidence](docs/openrouter-byok.md).
 
 | Check | Recorded result |
 |---|---|
-| Unit and contract suite | 198 passed |
-| Isolated PostgreSQL integration suite | 64 passed |
-| Lint, formatting and policy consistency | Passed |
+| Unit and contract suite, 27 October 2026 UI check | 216 passed locally |
+| Enterprise browser component tests | 7 passed locally |
+| Isolated PostgreSQL integration suite | Not rerun for the browser shell. The previous local coverage run recorded 74 passed |
+| Lint, formatting and policy consistency | Passed locally on this UI change |
 | Gemini through Google AI Studio | HTTP 200 with an answer |
 | GPT-OSS 120B through Groq | HTTP 200 with an answer |
 | Deployed routing probes | All 3 returned HTTP 200, including forced Google-unavailable fallback |
@@ -138,7 +148,12 @@ in the relay. Never commit it or paste it into chat. Use one generation override
 at a time. The previous Ollama configuration and phase-3 CPU smoke are historical;
 the active generation configuration is the BYOK route described above.
 
-The enterprise API is available at `http://127.0.0.1:8800`:
+The enterprise API and browser shell are available at `http://127.0.0.1:8800`.
+Open that origin in a browser and paste the Alice, Bob, or Viewer token from
+`.local/dev-access.json`. The page does not contain those tokens. Document,
+upload, answer, preview, and coverage calls use the same bearer authentication
+as the API. The shell is built into the enterprise image; there is no separate
+UI server.
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8800/health/ready
@@ -158,8 +173,8 @@ a missing top-k result does not prove a fact is absent from the entire corpus.
 
 ## Try the enterprise version now
 
-The local API is running at `http://127.0.0.1:8800`. There is no graphical
-enterprise UI yet. From this repository folder, launch the interactive client:
+The local API and development browser are at `http://127.0.0.1:8800`. From this
+repository folder, the terminal client is still available:
 
 ```powershell
 python scripts/try_enterprise.py
@@ -203,6 +218,14 @@ docker compose -f compose.enterprise-tests.yaml run --rm tests python -m pytest 
 docker compose -f compose.enterprise-tests.yaml down
 ```
 
+Browser component tests use the `enterprise_ui` package and do not call a provider:
+
+```powershell
+cd enterprise_ui
+npm ci
+npm test
+```
+
 For synthetic live provider and fallback checks after enabling the relay:
 
 ```powershell
@@ -221,7 +244,7 @@ public CI. See [development operations](docs/operations/development.md).
 | 3 / P2 | Native PDF ingestion, retrieval and cited answers | Local implementation complete; BYOK routing added and live-tested; server/company acceptance pending |
 | 4 / P3 | Arabic/English OCR and Office formats | In progress: bounded CSV ingestion tested; OCR and DOCX/PPTX/XLSX pending |
 | 5 / P4 | Trusted numerical analysis, charts and exports | Pending |
-| 6 / P5 | Complete-document coverage, RTL UX and model qualification | Coverage workflow tested locally on synthetic documents; RTL UX, OCR/vision and model qualification pending |
+| 6 / P5 | Complete-document coverage, RTL UX and model qualification | Coverage workflow tested locally on synthetic documents. A development RTL browser shell is served by the enterprise app; Arabic qualification, OCR/vision and model qualification remain pending |
 | 7 / P6 | Hardening, SSO, backup/restore and company pilot | Pending |
 
 The company server has **64 GB system RAM and no GPU**. Its CPU, memory bandwidth
@@ -240,11 +263,16 @@ that source; [the rule ledger](docs/governance/rule-ledger.json) records gaps.
 Phase 4 is in progress: bounded CSV ingestion is implemented; next are OCR and Office fidelity. Company
 hardware discovery and representative Arabic/mixed-language acceptance cases
 remain parallel requirements. Dense retrieval, deterministic calculations,
-graphical/RTL UX, company SSO, production networking,
-restore drills and pilot approval are still open. Exhaustive coverage of extracted
+company SSO, production networking,
+restore drills and pilot approval are still open. The development browser shell
+covers RTL layout and mixed-direction display; it does not close the Arabic
+quality gate. Exhaustive coverage of extracted
 native text is implemented as a development workflow and was checked locally
-(208 unit/contract tests and 74 PostgreSQL integration tests). That run did not
-call a live provider, measure Arabic answer quality, or qualify production.
+before this UI change (208 unit/contract tests and 74 PostgreSQL integration tests).
+The UI change itself passed 216 unit/contract tests and 7 browser component tests
+locally, with lint and policy checks. That run did not
+call a live provider, measure Arabic answer quality, rerun the PostgreSQL suite,
+or qualify production.
 
 V6.2 answer presentation is unchanged for ordinary answers. Exhaustive coverage
 uses the same Groq-first route when generation mode is OpenRouter, and the same

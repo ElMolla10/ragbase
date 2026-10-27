@@ -9,6 +9,14 @@ from backend.auth.development import authenticate
 from backend.enterprise_config import EnterpriseSettings
 
 
+def test_ui_root_comes_only_from_enterprise_configuration(monkeypatch, tmp_path):
+    missing = tmp_path / "absent-shell"
+    monkeypatch.setenv("ENTERPRISE_UI_ROOT", str(missing))
+    assert EnterpriseSettings.from_env().ui_root == missing
+    monkeypatch.setenv("ENTERPRISE_UI_ROOT", "")
+    assert EnterpriseSettings.from_env().ui_root is None
+
+
 def test_legacy_database_url_is_not_inherited(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgresql://sensitive-legacy")
     monkeypatch.delenv("ENTERPRISE_DATABASE_URL", raising=False)

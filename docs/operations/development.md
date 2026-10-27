@@ -16,6 +16,10 @@ docker compose --env-file .env.enterprise -f compose.enterprise.yaml up -d --bui
 Invoke-RestMethod http://127.0.0.1:8800/health/ready
 ```
 
+The same origin serves the development browser. Open `http://127.0.0.1:8800`
+and paste a synthetic bearer token from `.local/dev-access.json`. The shell is
+built into the enterprise API image. Document routes stay authenticated.
+
 Run initialization only once. If configuration already exists it stops without replacing secrets. The ignored .env.enterprise contains database credentials and development tokens; .local/dev-access.json contains tokens for synthetic Alice, Bob and Viewer accounts. Never commit, publish, print or reuse these secrets in production. They are development identities, not company SSO. No real company documents belong in this environment.
 
 Startup orders database health, migration, synthetic provisioning, API and proxy. Four services remain running: database, API, proxy and native-extraction worker; migration/seed services exit successfully. Only the proxy publishes a host port, bound to loopback 8800. The API uses a non-owner, non-BYPASSRLS PostgreSQL role. The generation model is not loaded. The initial build requires package access and is not an offline release bundle.

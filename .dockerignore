@@ -18,6 +18,8 @@ env/
 .eggs/
 dist/
 build/
+enterprise_ui/node_modules
+enterprise_ui/dist
 
 # IDE
 .idea/
