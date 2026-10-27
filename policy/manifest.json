@@ -40,9 +40,11 @@
         "ANA-002",
         "ANA-003",
         "ANA-004",
+        "ANA-005",
+        "ANA-006",
         "ANA-007"
       ],
-      "sha256": "70fb54fc3f822398f8c72194c00d3d0ba426aabdef3b42714f42f01f592a49cf"
+      "sha256": "2b7078648d30981313549b4de6b7dc8eb524b1c090031ddde538fbd836db3a61"
     },
     "vision": {
       "rule_ids": [

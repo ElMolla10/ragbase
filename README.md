@@ -56,7 +56,11 @@ enterprise application. The enterprise entry point is `backend.enterprise:app`.
 Natural document chat is enabled. Source identities are validated and original supporting passages are
 attached by trusted code; generated explanations are model interpretations and are not
 mechanically proven true. Exhaustive coverage is a separate authenticated route
-and records its own coverage map. Spreadsheet calculations remain unfinished.
+and records its own coverage map. Authorized CSV calculations are a separate
+development route: an allowlisted plan is calculated in locked DuckDB over one
+ready version, with a downloadable table, a calculation record, and row citations.
+The model does not invent the number. Margin, mixed currency, and forecast or
+cause questions stop for clarification.
 
 ## Current model routing
 
@@ -94,10 +98,11 @@ See [BYOK implementation and evidence](docs/openrouter-byok.md).
 
 | Check | Recorded result |
 |---|---|
-| Unit and contract suite, 27 October 2026 UI check | 216 passed locally |
+| Unit and contract suite, CSV calculations, 27 October 2026 | 218 passed |
+| Isolated PostgreSQL integration suite, same calculation run | 80 passed on local PostgreSQL 16.15; Docker Compose was not available |
+| Unit and contract suite, browser shell check before the calculation merge | 216 passed locally |
 | Enterprise browser component tests | 7 passed locally |
-| Isolated PostgreSQL integration suite | Not rerun for the browser shell. The previous local coverage run recorded 74 passed |
-| Lint, formatting and policy consistency | Passed locally on this UI change |
+| Lint, formatting and policy consistency | Passed on both of those local runs |
 | Gemini through Google AI Studio | HTTP 200 with an answer |
 | GPT-OSS 120B through Groq | HTTP 200 with an answer |
 | Deployed routing probes | All 3 returned HTTP 200, including forced Google-unavailable fallback |
@@ -200,12 +205,19 @@ You can also supply a path and question directly:
 python scripts/try_enterprise.py --file "C:\path\test.pdf" --question "What are the main terms?"
 ```
 
-CSV is the first Phase 4 slice: up to 1,000 records and 100 columns, with original
-strings, row/physical-line locations and quoted multiline cells preserved. No
-header/type/date inference, formula execution or calculations are performed.
-Inconsistent row widths require review and are blocked from Q&A. CSV answers
-currently quote JSON arrays of source cells. OCR, DOCX, PPTX and XLSX remain
-unsupported. See [Phase 4 progress](docs/governance/phase4-progress.md).
+CSV ingestion remains a string extraction: up to 1,000 records and 100 columns,
+with original strings, row/physical-line locations and quoted multiline cells
+preserved. Ingestion does not infer headers, types, or dates and does not execute
+formulas. Inconsistent row widths require review and are blocked from Q&A and
+from calculation. A separate authenticated calculation can then classify one
+ready CSV version: a deterministic header rule, decimal values, leading-zero
+identifiers, and exact subtotal labels. Ask with `/calculate` and exactly one
+version, or `POST /api/workspaces/{id}/calculations` with a question or an
+explicit plan. Results name the version, columns, filters, operation, units,
+included and excluded rows, and the value, and keep a CSV table plus a JSON
+record. Exports escape formula prefixes. Ordinary CSV answers still quote JSON
+arrays of source cells. OCR, DOCX, PPTX and XLSX remain unsupported. See
+[Phase 4 progress](docs/governance/phase4-progress.md).
 
 ## Run checks
 
@@ -243,7 +255,7 @@ public CI. See [development operations](docs/operations/development.md).
 | 2 / P1 | Foundation and scoped original storage | Development implementation tested; production identity and release gates pending |
 | 3 / P2 | Native PDF ingestion, retrieval and cited answers | Local implementation complete; BYOK routing added and live-tested; server/company acceptance pending |
 | 4 / P3 | Arabic/English OCR and Office formats | In progress: bounded CSV ingestion tested; OCR and DOCX/PPTX/XLSX pending |
-| 5 / P4 | Trusted numerical analysis, charts and exports | Pending |
+| 5 / P4 | Trusted numerical analysis, charts and exports | In progress: allowlisted CSV calculations checked locally; charts, joins, XLSX, generated SQL, and an OS cgroup remain pending |
 | 6 / P5 | Complete-document coverage, RTL UX and model qualification | Coverage workflow tested locally on synthetic documents. A development RTL browser shell is served by the enterprise app; Arabic qualification, OCR/vision and model qualification remain pending |
 | 7 / P6 | Hardening, SSO, backup/restore and company pilot | Pending |
 
@@ -262,21 +274,25 @@ that source; [the rule ledger](docs/governance/rule-ledger.json) records gaps.
 
 Phase 4 is in progress: bounded CSV ingestion is implemented; next are OCR and Office fidelity. Company
 hardware discovery and representative Arabic/mixed-language acceptance cases
-remain parallel requirements. Dense retrieval, deterministic calculations,
+remain parallel requirements. Dense retrieval, charts, cross-version joins,
 company SSO, production networking,
 restore drills and pilot approval are still open. The development browser shell
 covers RTL layout and mixed-direction display; it does not close the Arabic
-quality gate. Exhaustive coverage of extracted
-native text is implemented as a development workflow and was checked locally
-before this UI change (208 unit/contract tests and 74 PostgreSQL integration tests).
-The UI change itself passed 216 unit/contract tests and 7 browser component tests
-locally, with lint and policy checks. That run did not
-call a live provider, measure Arabic answer quality, rerun the PostgreSQL suite,
-or qualify production.
+quality gate. Authorized CSV calculations
+are a development slice, not that remaining work. Exhaustive coverage of extracted
+native text remains a separate development workflow. The 27 October 2026 calculation
+run passed 218 unit/contract tests and 80 PostgreSQL integration tests, including
+Arabic and mixed-language calculation cases, exact numeric results, injection
+attempts, limits, and denied access. It used the fixture gateway, did not call a
+live provider, did not measure Arabic answer quality, and is not production
+qualification. The PostgreSQL suite ran on local PostgreSQL 16.15 because Docker
+was not available in that environment. The browser shell check, before this merge,
+passed 216 unit/contract tests and 7 component tests and did not rerun PostgreSQL.
 
 V6.2 answer presentation is unchanged for ordinary answers. Exhaustive coverage
-uses the same Groq-first route when generation mode is OpenRouter, and the same
-fixture gateway in tests. See [coverage progress](docs/governance/coverage-progress.md).
+and CSV calculation planning use the same Groq-first route when generation mode
+is OpenRouter, and the same fixture gateway in tests. An explicit calculation
+plan does not call the model. See [coverage progress](docs/governance/coverage-progress.md).
 
 Further detail: [execution plan](docs/execution-plan.md),
 [seven-phase roadmap](docs/governance/phase-roadmap.md),

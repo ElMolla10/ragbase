@@ -275,6 +275,19 @@ def frame(kind, **value):
 @router.post("/{workspace}/answers")
 async def answer(workspace: UUID, request: Request, principal=Depends(identity)):
     data = await parse_input(request)
+    if data.question.startswith("/calculate"):
+        question = data.question.removeprefix("/calculate").strip()
+        if not question or len(data.version_ids) != 1:
+            raise HTTPException(
+                422, "Use /calculate with a question and exactly one CSV version."
+            )
+        from backend.analysis.chat import stream_calculation
+
+        return StreamingResponse(
+            stream_calculation(request, principal, workspace, data, question),
+            media_type="application/x-ndjson",
+            headers={"X-Accel-Buffering": "no"},
+        )
     actor, database = principal.user_id, request.app.state.database
     hits, coverage = await evidence(request, actor, workspace, data, answer_mode=True)
     gateway = request.app.state.gateway

@@ -33,7 +33,7 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
             if settings.generation_mode == "openrouter"
             else settings.model_digest,
             "adapter": settings.generation_mode,
-            "adapter_version": "exhaustive-coverage-v1",
+            "adapter_version": "csv-calculation-v1",
             "production_qualified": False,
             "external_processing": settings.generation_mode == "openrouter",
             "dynamic_routing": settings.generation_mode == "openrouter",
@@ -51,8 +51,9 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
                 "structured_quote_output",
                 "streaming",
                 "exhaustive_text_coverage",
+                "spreadsheet_calculation",
             ],
-            "disabled_capabilities": ["vision", "tools", "analysis"],
+            "disabled_capabilities": ["vision", "tools", "generated_sql", "charts"],
             "exhaustive_coverage": "development_only_not_production_qualified",
         }
         if gateway is None and settings.generation_mode == "fixture":
@@ -105,6 +106,7 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
     if settings.database_url:
         from sqlalchemy.exc import SQLAlchemyError
 
+        from backend.analysis.api import router as calculations_router
         from backend.answers.api import router as answers_router
         from backend.coverage.api import router as coverage_router
         from backend.library import router
@@ -113,6 +115,7 @@ def create_app(settings: EnterpriseSettings | None = None, *, gateway=None):
         app.include_router(router)
         app.include_router(answers_router)
         app.include_router(coverage_router)
+        app.include_router(calculations_router)
 
         async def unavailable(request, exc):
             return JSONResponse(

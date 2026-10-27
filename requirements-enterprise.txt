@@ -8,3 +8,5 @@ httpx==0.28.1
 sqlalchemy[asyncio]==2.1.4
 asyncpg==0.32.0
 pypdf==6.21.1
+# Local analytical engine for authorized CSV snapshots. Not a model and not network access.
+duckdb==1.4.1

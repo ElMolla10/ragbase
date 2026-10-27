@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-HEAD_REVISION = "0006_coverage_runs"
+HEAD_REVISION = "0007_calculations"
 
 
 class EnterpriseDatabase:

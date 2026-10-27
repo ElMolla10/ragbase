@@ -109,7 +109,8 @@ def main():
             return
         print(
             "Ask a question or an overview such as 'What is this paper about?'. "
-            "Start a question with /coverage for an exhaustive summary. Leave blank to exit."
+            "Start a question with /coverage for an exhaustive summary, or /calculate "
+            "to aggregate one ready CSV version. Leave blank to exit."
         )
         while question := input("Question: ").strip():
             exhaustive = args.coverage or question.startswith("/coverage")

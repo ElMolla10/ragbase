@@ -255,11 +255,11 @@ async def test_every_data_table_has_forced_rls_and_nonowner_serving_role(world):
         rows = (
             await conn.execute(
                 text(
-                    "SELECT relrowsecurity,relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='enterprise' AND c.relname IN ('users','workspaces','memberships','documents','document_versions','ingestion_jobs','extracted_pages','retrieval_indexes','document_chunks','answer_runs','answer_sources','coverage_runs','coverage_sections')"
+                    "SELECT relrowsecurity,relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='enterprise' AND c.relname IN ('users','workspaces','memberships','documents','document_versions','ingestion_jobs','extracted_pages','retrieval_indexes','document_chunks','answer_runs','answer_sources','coverage_runs','coverage_sections','calculations')"
                 )
             )
         ).all()
-        assert len(rows) == 13 and all(enabled and forced for enabled, forced in rows)
+        assert len(rows) == 14 and all(enabled and forced for enabled, forced in rows)
 
 
 @pytest.mark.parametrize(
