@@ -400,6 +400,8 @@ Prepare approved artifacts on a connected staging machine and verify after trans
 
 ## 15. Benchmark and acceptance plan
 
+Status, 27 October 2026: `eval/acceptance/v1` is a machine-drafted synthetic corpus of 246 cases, and `scripts/run_acceptance.py` can score it against the fixture gateway. That groundwork does not replace the reviewed corpus, company samples, hardware measurements, or recovery drill in this section. See [acceptance progress](governance/acceptance-progress.md).
+
 ### Procedure
 
 1. Discover hardware and freeze reproducible case definitions before tuning. Review 20–30 sanitized documents and 30 initial questions/calculations for the first slice.

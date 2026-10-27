@@ -34,5 +34,12 @@ The development graphical UI is served by this app with an Arabic/English toggle
 It can start `/calculate` for one ready CSV and displays the server record,
 result table, clarification, and authenticated CSV/JSON downloads. It does not
 calculate. SSO, dense retrieval, charts, joins, XLSX formulas, Arabic
-qualification and production acceptance remain pending. Never
+qualification and production acceptance remain pending. The acceptance
+groundwork in `acceptance/` and `eval/acceptance/v1` is synthetic and
+machine-drafted (`review_status` is `machine_drafted_pending_human_review`;
+reviewed count is 0). Run it with `python scripts/run_acceptance.py`. The
+default mode is the in-process fixture gateway. Do not pass `--live-provider`
+in CI, and do not download weights. A fixture report, the VAL-003 harness, and
+the VAL-006 checklist do not qualify production, Arabic quality, context, or
+recovery. Keep scanned/OCR and chart cases pending. Never
 add unprotected routes or label local smoke results production qualification.
