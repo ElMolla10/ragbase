@@ -1,0 +1,114 @@
+{
+  "gate": "VAL-003",
+  "decision": "pending_hardware",
+  "production_qualified": false,
+  "qualifies_latency_or_context": false,
+  "hardware_available": false,
+  "weights_downloaded": false,
+  "model_started": false,
+  "stages": [
+    {
+      "name": "4k",
+      "total_context_tokens": 4096,
+      "required_before_promotion": true,
+      "positions": [
+        "beginning",
+        "middle",
+        "end"
+      ],
+      "measurements": {
+        "cold_load_seconds": null,
+        "prompt_processing_seconds": null,
+        "time_to_first_user_visible_token_seconds": null,
+        "generation_seconds": null,
+        "whole_task_seconds": null,
+        "queue_delay_seconds": null,
+        "peak_process_ram_bytes": null,
+        "peak_host_ram_bytes": null,
+        "major_faults": null,
+        "swap_activity": null,
+        "cpu_contention": null
+      },
+      "evidence_positions_tested": false,
+      "decision": "pending_hardware"
+    },
+    {
+      "name": "8k",
+      "total_context_tokens": 8192,
+      "required_before_promotion": true,
+      "positions": [
+        "beginning",
+        "middle",
+        "end"
+      ],
+      "measurements": {
+        "cold_load_seconds": null,
+        "prompt_processing_seconds": null,
+        "time_to_first_user_visible_token_seconds": null,
+        "generation_seconds": null,
+        "whole_task_seconds": null,
+        "queue_delay_seconds": null,
+        "peak_process_ram_bytes": null,
+        "peak_host_ram_bytes": null,
+        "major_faults": null,
+        "swap_activity": null,
+        "cpu_contention": null
+      },
+      "evidence_positions_tested": false,
+      "decision": "pending_hardware"
+    },
+    {
+      "name": "16k",
+      "total_context_tokens": 16384,
+      "required_before_promotion": false,
+      "promotion": "Only after 4K and 8K meet agreed quality, memory, and responsiveness.",
+      "positions": [
+        "beginning",
+        "middle",
+        "end"
+      ],
+      "measurements": {
+        "cold_load_seconds": null,
+        "prompt_processing_seconds": null,
+        "time_to_first_user_visible_token_seconds": null,
+        "generation_seconds": null,
+        "whole_task_seconds": null,
+        "queue_delay_seconds": null,
+        "peak_process_ram_bytes": null,
+        "peak_host_ram_bytes": null,
+        "major_faults": null,
+        "swap_activity": null,
+        "cpu_contention": null
+      },
+      "evidence_positions_tested": false,
+      "decision": "pending_hardware"
+    },
+    {
+      "name": "32k",
+      "total_context_tokens": 32768,
+      "required_before_promotion": false,
+      "promotion": "Only after 16K meets the same gates. Not a pilot requirement by itself.",
+      "positions": [
+        "beginning",
+        "middle",
+        "end"
+      ],
+      "measurements": {
+        "cold_load_seconds": null,
+        "prompt_processing_seconds": null,
+        "time_to_first_user_visible_token_seconds": null,
+        "generation_seconds": null,
+        "whole_task_seconds": null,
+        "queue_delay_seconds": null,
+        "peak_process_ram_bytes": null,
+        "peak_host_ram_bytes": null,
+        "major_faults": null,
+        "swap_activity": null,
+        "cpu_contention": null
+      },
+      "evidence_positions_tested": false,
+      "decision": "pending_hardware"
+    }
+  ],
+  "reason": "Company-server context and serving measurements are pending. Passing startup or fitting weights would not close this gate. No latency, rate, or concurrency figure is claimed."
+}

@@ -1222,11 +1222,22 @@
       "owner": "engineering",
       "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "enforcement_locations": [
+        "acceptance/",
+        "scripts/build_acceptance_corpus.py",
+        "scripts/run_acceptance.py",
+        "eval/acceptance/v1/"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_acceptance_runner.py",
+        "docs/governance/acceptance-progress.md",
+        "eval/acceptance/reports/v1-fixture-baseline.md"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Corpus 1.0.0 has 246 machine-drafted synthetic cases (138 tuning, 108 held-out, 125 Arabic or mixed, 20 matched pairs). reviewed is false for every case. Synthetic fixtures do not establish company readiness.",
+        "The 27 October 2026 fixture-gateway run does not qualify production. The VAL-001 gate decision is not_qualified.",
+        "Human review and representative company samples on internal infrastructure are still required. Scanned and chart cases stay pending."
       ]
     },
     {
@@ -1234,11 +1245,21 @@
       "owner": "engineering",
       "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "enforcement_locations": [
+        "acceptance/metrics.py",
+        "acceptance/report.py",
+        "eval/acceptance/v1/cases.jsonl"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_acceptance_runner.py",
+        "docs/governance/acceptance-progress.md",
+        "eval/acceptance/reports/v1-fixture-baseline.md"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "125 Arabic or mixed cases are machine drafts, not reviewed. Registers present: formal 41, Egyptian 27, mixed terminology 18, Arabic over English 19, plus 20 matched English/Arabic pairs.",
+        "Business slices and Arabic thresholds are unconfirmed. The fixture report keeps failing slices visible (unshared Arabic-over-English 0/8 recall, Egyptian paraphrase 0/6 recall, absent-with-distractor refusal 0/6). They are not averaged into a pass.",
+        "Fixture token overlap is not an Arabic quality measurement. Scanned Arabic stays pending because OCR is not implemented."
       ]
     },
     {
@@ -1246,11 +1267,20 @@
       "owner": "engineering",
       "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "enforcement_locations": [
+        "acceptance/val003.py",
+        "scripts/val003_context_harness.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_val_harness.py",
+        "eval/acceptance/reports/val003-pending.json",
+        "docs/governance/acceptance-progress.md"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Revised CPU-only obligation; hardware discovery, implementation alignment and real benchmarks pending."
+        "The measurement harness records 4K and 8K as required and 16K and 32K as conditional. Every measurement is null. Decision is pending_hardware. No weights are downloaded and no model is started.",
+        "Long-document hits in the fixture runner are lexical overlap. They are not a beginning/middle/end context-window test and they are not a latency result.",
+        "Company-server CPU, memory bandwidth, and serving envelope remain unmeasured."
       ]
     },
     {
@@ -1258,11 +1288,20 @@
       "owner": "engineering",
       "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
-      "enforcement_locations": [],
-      "verification_references": [],
+      "enforcement_locations": [
+        "acceptance/metrics.py",
+        "acceptance/report.py"
+      ],
+      "verification_references": [
+        "enterprise_tests/test_acceptance_runner.py",
+        "eval/acceptance/reports/v1-fixture-baseline.md",
+        "docs/governance/acceptance-progress.md"
+      ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report."
+        "Proposed objectives remain unconfirmed: at least 90% evidence recall@10, at least 95% manual citation precision, and 100% exact critical numerical results. The gate decision is pending_owner_thresholds.",
+        "Fixture citation figures are proxies, not the manual citation assessment. Exact numerical correctness on the synthetic CSVs was 18/18 in fixture mode and is not company qualification.",
+        "Per-slice numerators, denominators, and failures are published. There is no overall pass rate."
       ]
     },
     {
@@ -1292,7 +1331,8 @@
       "last_validated_release": null,
       "known_gaps": [
         "Local lexical/exact-quotation PDF workflow only; full rule, representative Arabic/company cases and target-server/production qualification remain pending.",
-        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification."
+        "Exhaustive coverage is a separate authenticated workflow in backend/coverage and migration 0006. The 27 October 2026 local run passed 208 unit/contract and 74 PostgreSQL checks and is not production qualification.",
+        "The acceptance corpus denial slice scored 12/12 against the fixture scope check. That slice does not close VAL-005. Serving-role, revocation, injection, and network tests remain separate."
       ]
     },
     {
@@ -1303,15 +1343,20 @@
       "enforcement_locations": [
         "backend/gateway/openrouter.py",
         "backend/gateway/openrouter_relay.py",
-        "compose.enterprise-openrouter.yaml"
+        "compose.enterprise-openrouter.yaml",
+        "acceptance/val006.py",
+        "scripts/val006_recovery_checklist.py"
       ],
       "verification_references": [
         "enterprise_tests/test_openrouter.py",
-        "docs/governance/openrouter-option.md"
+        "docs/governance/openrouter-option.md",
+        "enterprise_tests/test_val_harness.py",
+        "eval/acceptance/reports/val006-checklist.md",
+        "docs/governance/acceptance-progress.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report.",
+        "The recovery checklist has 17 items. All are pending. claim_complete is refused. Offline boot, network denial, and backup restore have not been run.",
         "Hosted generation exception authorized in constitution v3; live provider, Arabic/context, production egress and recovery acceptance pending. Mock contracts do not qualify remote models."
       ]
     },
@@ -1321,14 +1366,18 @@
       "work_packages": "P0/P2/P3/P4/P5/P6",
       "state": "specified_not_verified",
       "enforcement_locations": [
-        "backend/gateway/free_models.py"
+        "backend/gateway/free_models.py",
+        "acceptance/report.py",
+        "scripts/run_acceptance.py"
       ],
       "verification_references": [
-        "docs/governance/free-fallbacks.md"
+        "docs/governance/free-fallbacks.md",
+        "eval/acceptance/reports/v1-fixture-baseline.md",
+        "docs/governance/acceptance-progress.md"
       ],
       "last_validated_release": null,
       "known_gaps": [
-        "Full rule verification pending; see foundation progress report.",
+        "The fixture acceptance report publishes denominators, failures, limitations, and explicit gate decisions. production_qualified is false. It does not label the system enterprise-ready.",
         "v4.1 ordered free-model failover is contract-tested only; upstream live failover remains pending while account-wide quota is exhausted."
       ]
     }

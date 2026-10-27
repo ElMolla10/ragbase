@@ -8,8 +8,9 @@ in local development; Phase 4 has started with bounded CSV ingestion. Explicit
 exhaustive coverage of selected authorized versions is now a separate development
 workflow. A development browser shell is served by the same enterprise app, with
 an Arabic/English toggle. The current working setup uses OpenRouter BYOK, with GPT-OSS
-120B through Groq as primary and Gemini 3.8 Flash as fallback. Company-server
-acceptance and production qualification remain open.
+120B through Groq as primary and Gemini 3.8 Flash as fallback. A machine-drafted
+synthetic acceptance corpus and fixture-mode runner exist and do not qualify
+production. Company-server acceptance and production qualification remain open.
 
 The [public app on master](https://github.com/ElMolla10/ragbase/tree/master) has a
 separate deployment and data model. Its UI and Railway deployment are not the
@@ -253,12 +254,12 @@ public CI. See [development operations](docs/operations/development.md).
 
 | Phase | Scope | Current status |
 |---|---|---|
-| 1 / P0 | Hardware discovery, policy and acceptance cases | CPU plan and laptop inventory recorded; company-server inventory and reviewed cases pending |
+| 1 / P0 | Hardware discovery, policy and acceptance cases | CPU plan and laptop inventory recorded. Corpus 1.0.0 has 246 machine-drafted synthetic cases (125 Arabic or mixed) pending human review. Company-server inventory and reviewed company cases remain pending |
 | 2 / P1 | Foundation and scoped original storage | Development implementation tested; production identity and release gates pending |
 | 3 / P2 | Native PDF ingestion, retrieval and cited answers | Local implementation complete; BYOK routing added and live-tested; server/company acceptance pending |
 | 4 / P3 | Arabic/English OCR and Office formats | In progress: bounded CSV ingestion tested; OCR and DOCX/PPTX/XLSX pending |
 | 5 / P4 | Trusted numerical analysis, charts and exports | In progress: allowlisted CSV calculations checked locally; charts, joins, XLSX, generated SQL, and an OS cgroup remain pending |
-| 6 / P5 | Complete-document coverage, RTL UX and model qualification | Coverage workflow tested locally on synthetic documents. A development RTL browser shell is served by the enterprise app and displays server CSV calculation records. Arabic qualification, OCR/vision and model qualification remain pending |
+| 6 / P5 | Complete-document coverage, RTL UX and model qualification | Coverage workflow tested locally on synthetic documents. A development RTL browser shell is served by the enterprise app and displays server CSV calculation records. The fixture acceptance run is not Arabic, model, or production qualification. OCR/vision and model qualification remain pending |
 | 7 / P6 | Hardening, SSO, backup/restore and company pilot | Pending |
 
 The company server has **64 GB system RAM and no GPU**. Its CPU, memory bandwidth
@@ -275,8 +276,21 @@ that every model follows it. [AGENTS.md](AGENTS.md) directs development agents t
 that source; [the rule ledger](docs/governance/rule-ledger.json) records gaps.
 
 Phase 4 is in progress: bounded CSV ingestion is implemented; next are OCR and Office fidelity. Company
-hardware discovery and representative Arabic/mixed-language acceptance cases
-remain parallel requirements. Dense retrieval, charts, cross-version joins,
+hardware discovery and reviewed Arabic/mixed-language acceptance remain parallel
+requirements. Corpus `eval/acceptance/v1` is synthetic, machine-drafted, and
+pending human review (246 cases, 125 Arabic or mixed, 0 reviewed). The default
+runner uses the in-process fixture gateway and does not call a live provider:
+
+```bash
+python scripts/run_acceptance.py
+```
+
+That command writes `eval/acceptance/reports/v1-fixture-baseline.json`. The
+27 October 2026 fixture run left every gate unqualified or pending:
+`production_qualified` is false. VAL-003 stays pending until the company server
+is measured (`python scripts/val003_context_harness.py`). VAL-006 is a pending
+checklist (`python scripts/val006_recovery_checklist.py`). See
+[acceptance progress](docs/governance/acceptance-progress.md). Dense retrieval, charts, cross-version joins,
 company SSO, production networking,
 restore drills and pilot approval are still open. The development browser shell
 covers RTL layout, mixed-direction display, and the server calculation record.

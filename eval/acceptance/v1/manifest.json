@@ -1,0 +1,17 @@
+{
+  "corpus_version": "1.0.0",
+  "constitution_version": "6.2.0",
+  "review_status": "machine_drafted_pending_human_review",
+  "reviewed": false,
+  "synthetic_only": true,
+  "contains_company_documents": false,
+  "case_count": 246,
+  "arabic_or_mixed_count": 125,
+  "tuning_count": 138,
+  "held_out_count": 108,
+  "matched_pair_count": 20,
+  "ocr_pending_count": 14,
+  "chart_pending_count": 6,
+  "cases_sha256": "343d9f0465272899b515c8ad8b7df3aee954a04a56995becc52facb30428f920",
+  "notes": "Machine-drafted synthetic fixtures only. Pending human review. Scanned and chart cases are pending. This corpus does not qualify production."
+}

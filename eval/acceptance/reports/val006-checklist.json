@@ -1,0 +1,129 @@
+{
+  "gate": "VAL-006",
+  "decision": "pending_checklist",
+  "production_qualified": false,
+  "offline_qualified": false,
+  "recovery_qualified": false,
+  "items": [
+    {
+      "id": "local-boot-offline",
+      "mode": "local",
+      "description": "Boot a prepared local-mode release without public internet.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "local-enabled-formats",
+      "mode": "local",
+      "description": "Exercise each enabled document format on the prepared release.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "local-arabic-ocr",
+      "mode": "local",
+      "description": "Run Arabic OCR on the prepared release. OCR is not implemented yet.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "local-evidence-question",
+      "mode": "local",
+      "description": "Ask an evidence-backed question and keep the citation.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "local-workbook-calculation",
+      "mode": "local",
+      "description": "Perform a workbook calculation through the trusted calculator.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "local-open-citation",
+      "mode": "local",
+      "description": "Open a citation from the answer.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "local-export",
+      "mode": "local",
+      "description": "Export a result table.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "local-restart",
+      "mode": "local",
+      "description": "Restart services and confirm authorized data is still available.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "local-restore",
+      "mode": "local",
+      "description": "Restore a backup onto a separate check, including database and files.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "local-network-denial",
+      "mode": "local",
+      "description": "Record network-denial evidence for local mode.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "local-no-public-dependency",
+      "mode": "local",
+      "description": "Show that local mode did not require a public connection.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "remote-relay-only",
+      "mode": "remote",
+      "description": "Show that only the generation relay reaches the approved provider.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "remote-missing-key",
+      "mode": "remote",
+      "description": "Missing or invalid provider keys fail safely.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "remote-upstream-outage",
+      "mode": "remote",
+      "description": "An upstream outage fails safely.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "remote-local-services",
+      "mode": "remote",
+      "description": "Local document services stay usable when generation is down.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "remote-cancellation",
+      "mode": "remote",
+      "description": "Cancellation closes local transports. Remote billing may already have started.",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": "remote-not-offline",
+      "mode": "remote",
+      "description": "Hosted inference is not described as offline-qualified.",
+      "status": "pending",
+      "evidence": null
+    }
+  ],
+  "reason": "The recovery and offline drill has not been run. A checklist is not evidence that the drill passed."
+}

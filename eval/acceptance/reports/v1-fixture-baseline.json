@@ -1,0 +1,4493 @@
+{
+  "report_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "constitution_version": "6.2.0",
+  "cases_sha256": "343d9f0465272899b515c8ad8b7df3aee954a04a56995becc52facb30428f920",
+  "generated_at": "2026-10-27T13:20:37Z",
+  "execution": {
+    "mode": "fixture_gateway_in_process",
+    "gateway": "backend.answers.fixtures.FixtureQuoteGateway",
+    "retrieval": "local_token_overlap_using_backend.search.index.normalize_and_query_terms",
+    "retrieval_limitation": "Fixture retrieval is not PostgreSQL tsvector, dense retrieval, or a context-window position test. VAL-003 remains pending.",
+    "calculation": "trusted_duckdb_after_fixture_planner_or_gold_plan",
+    "coverage": "backend.coverage_planner_and_verdict_with_fixture_gateway",
+    "live_provider_called": false,
+    "weights_downloaded": false,
+    "production_qualified": false,
+    "qualifies_company_readiness": false,
+    "qualifies_arabic_reliability": false,
+    "qualifies_context_or_latency": false
+  },
+  "corpus": {
+    "cases": 246,
+    "arabic_or_mixed": 125,
+    "tuning": 138,
+    "held_out": 108,
+    "matched_pairs": 20,
+    "ocr_pending": 14,
+    "chart_pending": 6,
+    "reviewed": 0,
+    "review_status": "machine_drafted_pending_human_review",
+    "synthetic_only": true,
+    "contains_company_documents": false
+  },
+  "production_qualified": false,
+  "gates": [
+    {
+      "id": "VAL-001",
+      "decision": "not_qualified",
+      "production_qualified": false,
+      "reasons": [
+        "The corpus is machine-drafted and pending human review.",
+        "Fixtures are synthetic. Company samples are not included.",
+        "Scanned and chart cases are pending, not passed.",
+        "A fixture-gateway run is not representative acceptance."
+      ]
+    },
+    {
+      "id": "VAL-002",
+      "decision": "not_qualified",
+      "production_qualified": false,
+      "reasons": [
+        "Arabic and mixed-language cases are machine-drafted, not reviewed.",
+        "Required business slices and thresholds are not agreed.",
+        "Scanned Arabic is pending because OCR is not implemented.",
+        "Fixture lexical proxies are not an Arabic quality measurement.",
+        "Failing Arabic slices stay visible with their own denominators."
+      ]
+    },
+    {
+      "id": "VAL-003",
+      "decision": "pending_hardware",
+      "production_qualified": false,
+      "reasons": [
+        "No company-server context or serving measurement is available.",
+        "The harness records null measurements and does not download weights."
+      ]
+    },
+    {
+      "id": "VAL-004",
+      "decision": "pending_owner_thresholds",
+      "production_qualified": false,
+      "reasons": [
+        "Proposed recall, citation, and numerical objectives are not confirmed.",
+        "Citation precision here is a proxy, not a manual assessment.",
+        "Per-slice rates are reported and are not averaged into a pass."
+      ]
+    },
+    {
+      "id": "VAL-005",
+      "decision": "not_qualified",
+      "production_qualified": false,
+      "reasons": [
+        "Denied-access cases exercise the fixture scope check only.",
+        "They do not replace serving-role, revocation, injection, or network tests."
+      ]
+    },
+    {
+      "id": "VAL-006",
+      "decision": "pending_checklist",
+      "production_qualified": false,
+      "reasons": [
+        "The recovery and offline checklist is pending.",
+        "No offline boot or backup restore was run for this report."
+      ]
+    },
+    {
+      "id": "VAL-007",
+      "decision": "not_qualified",
+      "production_qualified": false,
+      "reasons": [
+        "This report publishes fixture-mode denominators, failures, and open gates.",
+        "It does not label the system enterprise-ready, Arabic-reliable, or offline-validated."
+      ]
+    }
+  ],
+  "slices": [
+    {
+      "slice": "absent",
+      "split": "held_out",
+      "metric": "refusal_correct",
+      "numerator": 4,
+      "denominator": 7,
+      "element_numerator": 4,
+      "element_denominator": 7,
+      "failures": [
+        "acc-v1-0179",
+        "acc-v1-0180",
+        "acc-v1-0184"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "absent",
+      "split": "tuning",
+      "metric": "refusal_correct",
+      "numerator": 6,
+      "denominator": 9,
+      "element_numerator": 6,
+      "element_denominator": 9,
+      "failures": [
+        "acc-v1-0181",
+        "acc-v1-0182",
+        "acc-v1-0183"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "absent_with_distractor",
+      "split": "held_out",
+      "metric": "refusal_correct",
+      "numerator": 0,
+      "denominator": 3,
+      "element_numerator": 0,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0179",
+        "acc-v1-0180",
+        "acc-v1-0184"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "absent_with_distractor",
+      "split": "tuning",
+      "metric": "refusal_correct",
+      "numerator": 0,
+      "denominator": 3,
+      "element_numerator": 0,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0181",
+        "acc-v1-0182",
+        "acc-v1-0183"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_arabic_over_english",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 4,
+      "denominator": 8,
+      "element_numerator": 4,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_arabic_over_english",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 4,
+      "denominator": 8,
+      "element_numerator": 4,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_arabic_over_english",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_arabic_over_english",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 8,
+      "element_numerator": 6,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "held_out",
+      "metric": "denial_correct",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 8,
+      "element_numerator": 6,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "held_out",
+      "metric": "numerical_exact",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "held_out",
+      "metric": "refusal_correct",
+      "numerator": 0,
+      "denominator": 1,
+      "element_numerator": 0,
+      "element_denominator": 1,
+      "failures": [
+        "acc-v1-0184"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "tuning",
+      "metric": "coverage_honesty",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "tuning",
+      "metric": "refusal_correct",
+      "numerator": 2,
+      "denominator": 2,
+      "element_numerator": 2,
+      "element_denominator": 2,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 5,
+      "denominator": 10,
+      "element_numerator": 5,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0002",
+        "acc-v1-0006",
+        "acc-v1-0012",
+        "acc-v1-0016",
+        "acc-v1-0022"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "held_out",
+      "metric": "coverage_honesty",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 10,
+      "denominator": 10,
+      "element_numerator": 10,
+      "element_denominator": 10,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "held_out",
+      "metric": "numerical_exact",
+      "numerator": 4,
+      "denominator": 4,
+      "element_numerator": 4,
+      "element_denominator": 4,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "held_out",
+      "metric": "refusal_correct",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 7,
+      "denominator": 14,
+      "element_numerator": 7,
+      "element_denominator": 14,
+      "failures": [
+        "acc-v1-0004",
+        "acc-v1-0008",
+        "acc-v1-0010",
+        "acc-v1-0014",
+        "acc-v1-0018",
+        "acc-v1-0020",
+        "acc-v1-0024"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "tuning",
+      "metric": "coverage_honesty",
+      "numerator": 2,
+      "denominator": 2,
+      "element_numerator": 2,
+      "element_denominator": 2,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "tuning",
+      "metric": "denial_correct",
+      "numerator": 2,
+      "denominator": 2,
+      "element_numerator": 2,
+      "element_denominator": 2,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 14,
+      "denominator": 14,
+      "element_numerator": 14,
+      "element_denominator": 14,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "tuning",
+      "metric": "numerical_exact",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "tuning",
+      "metric": "refusal_correct",
+      "numerator": 1,
+      "denominator": 2,
+      "element_numerator": 1,
+      "element_denominator": 2,
+      "failures": [
+        "acc-v1-0183"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_matched_pair",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 15,
+      "denominator": 16,
+      "element_numerator": 15,
+      "element_denominator": 16,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_matched_pair",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 15,
+      "denominator": 16,
+      "element_numerator": 15,
+      "element_denominator": 16,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_matched_pair",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 23,
+      "denominator": 24,
+      "element_numerator": 23,
+      "element_denominator": 24,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_matched_pair",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 23,
+      "denominator": 24,
+      "element_numerator": 23,
+      "element_denominator": 24,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 4,
+      "denominator": 4,
+      "element_numerator": 4,
+      "element_denominator": 4,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "held_out",
+      "metric": "denial_correct",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 4,
+      "denominator": 4,
+      "element_numerator": 4,
+      "element_denominator": 4,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "held_out",
+      "metric": "numerical_exact",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 5,
+      "denominator": 8,
+      "element_numerator": 5,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0060",
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "tuning",
+      "metric": "coverage_honesty",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 8,
+      "element_numerator": 6,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "tuning",
+      "metric": "numerical_exact",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 26,
+      "denominator": 38,
+      "element_numerator": 26,
+      "element_denominator": 38,
+      "failures": [
+        "acc-v1-0002",
+        "acc-v1-0006",
+        "acc-v1-0012",
+        "acc-v1-0016",
+        "acc-v1-0022",
+        "acc-v1-0040",
+        "acc-v1-0041",
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079",
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "metric": "coverage_honesty",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "metric": "denial_correct",
+      "numerator": 2,
+      "denominator": 2,
+      "element_numerator": 2,
+      "element_denominator": 2,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 31,
+      "denominator": 38,
+      "element_numerator": 31,
+      "element_denominator": 38,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041",
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079",
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "metric": "numerical_exact",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "metric": "refusal_correct",
+      "numerator": 1,
+      "denominator": 2,
+      "element_numerator": 1,
+      "element_denominator": 2,
+      "failures": [
+        "acc-v1-0184"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 35,
+      "denominator": 54,
+      "element_numerator": 35,
+      "element_denominator": 54,
+      "failures": [
+        "acc-v1-0004",
+        "acc-v1-0008",
+        "acc-v1-0010",
+        "acc-v1-0014",
+        "acc-v1-0018",
+        "acc-v1-0020",
+        "acc-v1-0024",
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042",
+        "acc-v1-0060",
+        "acc-v1-0061",
+        "acc-v1-0062",
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080",
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "metric": "coverage_honesty",
+      "numerator": 4,
+      "denominator": 4,
+      "element_numerator": 4,
+      "element_denominator": 4,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "metric": "denial_correct",
+      "numerator": 2,
+      "denominator": 2,
+      "element_numerator": 2,
+      "element_denominator": 2,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 43,
+      "denominator": 54,
+      "element_numerator": 43,
+      "element_denominator": 54,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042",
+        "acc-v1-0061",
+        "acc-v1-0062",
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080",
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "metric": "numerical_exact",
+      "numerator": 2,
+      "denominator": 2,
+      "element_numerator": 2,
+      "element_denominator": 2,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "metric": "refusal_correct",
+      "numerator": 3,
+      "denominator": 4,
+      "element_numerator": 3,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0183"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 4,
+      "denominator": 8,
+      "element_numerator": 4,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 4,
+      "denominator": 8,
+      "element_numerator": 4,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_shared_token",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 4,
+      "denominator": 4,
+      "element_numerator": 4,
+      "element_denominator": 4,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_shared_token",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 4,
+      "denominator": 4,
+      "element_numerator": 4,
+      "element_denominator": 4,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_shared_token",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_shared_token",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_unshared",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_unshared",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_unshared",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_unshared",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "calculation",
+      "split": "held_out",
+      "metric": "numerical_exact",
+      "numerator": 8,
+      "denominator": 8,
+      "element_numerator": 8,
+      "element_denominator": 8,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "calculation",
+      "split": "tuning",
+      "metric": "numerical_exact",
+      "numerator": 10,
+      "denominator": 10,
+      "element_numerator": 10,
+      "element_denominator": 10,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "coverage",
+      "split": "held_out",
+      "metric": "coverage_honesty",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "coverage",
+      "split": "tuning",
+      "metric": "coverage_honesty",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "denied_access",
+      "split": "held_out",
+      "metric": "denial_correct",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "denied_access",
+      "split": "tuning",
+      "metric": "denial_correct",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "distractor_ambiguity",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 10,
+      "element_numerator": 0,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0002",
+        "acc-v1-0006",
+        "acc-v1-0012",
+        "acc-v1-0016",
+        "acc-v1-0022",
+        "acc-v1-0122",
+        "acc-v1-0126",
+        "acc-v1-0132",
+        "acc-v1-0136",
+        "acc-v1-0142"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "distractor_ambiguity",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 10,
+      "denominator": 10,
+      "element_numerator": 10,
+      "element_denominator": 10,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "distractor_ambiguity",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 14,
+      "element_numerator": 0,
+      "element_denominator": 14,
+      "failures": [
+        "acc-v1-0004",
+        "acc-v1-0008",
+        "acc-v1-0010",
+        "acc-v1-0014",
+        "acc-v1-0018",
+        "acc-v1-0020",
+        "acc-v1-0024",
+        "acc-v1-0124",
+        "acc-v1-0128",
+        "acc-v1-0130",
+        "acc-v1-0134",
+        "acc-v1-0138",
+        "acc-v1-0140",
+        "acc-v1-0144"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "distractor_ambiguity",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 14,
+      "denominator": 14,
+      "element_numerator": 14,
+      "element_denominator": 14,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 8,
+      "element_numerator": 6,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 8,
+      "element_numerator": 6,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian_paraphrase",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 2,
+      "element_numerator": 0,
+      "element_denominator": 2,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian_paraphrase",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 2,
+      "element_numerator": 0,
+      "element_denominator": 2,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian_paraphrase",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian_paraphrase",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "english_evidence",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 5,
+      "denominator": 10,
+      "element_numerator": 5,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0122",
+        "acc-v1-0126",
+        "acc-v1-0132",
+        "acc-v1-0136",
+        "acc-v1-0142"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "english_evidence",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 10,
+      "denominator": 10,
+      "element_numerator": 10,
+      "element_denominator": 10,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "english_evidence",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 7,
+      "denominator": 14,
+      "element_numerator": 7,
+      "element_denominator": 14,
+      "failures": [
+        "acc-v1-0124",
+        "acc-v1-0128",
+        "acc-v1-0130",
+        "acc-v1-0134",
+        "acc-v1-0138",
+        "acc-v1-0140",
+        "acc-v1-0144"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "english_evidence",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 14,
+      "denominator": 14,
+      "element_numerator": 14,
+      "element_denominator": 14,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "evidence",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 49,
+      "denominator": 66,
+      "element_numerator": 49,
+      "element_denominator": 66,
+      "failures": [
+        "acc-v1-0002",
+        "acc-v1-0006",
+        "acc-v1-0012",
+        "acc-v1-0016",
+        "acc-v1-0022",
+        "acc-v1-0040",
+        "acc-v1-0041",
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079",
+        "acc-v1-0116",
+        "acc-v1-0122",
+        "acc-v1-0126",
+        "acc-v1-0132",
+        "acc-v1-0136",
+        "acc-v1-0142"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "evidence",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 59,
+      "denominator": 66,
+      "element_numerator": 59,
+      "element_denominator": 66,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041",
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079",
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "evidence",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 64,
+      "denominator": 90,
+      "element_numerator": 64,
+      "element_denominator": 90,
+      "failures": [
+        "acc-v1-0004",
+        "acc-v1-0008",
+        "acc-v1-0010",
+        "acc-v1-0014",
+        "acc-v1-0018",
+        "acc-v1-0020",
+        "acc-v1-0024",
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042",
+        "acc-v1-0060",
+        "acc-v1-0061",
+        "acc-v1-0062",
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080",
+        "acc-v1-0114",
+        "acc-v1-0124",
+        "acc-v1-0128",
+        "acc-v1-0130",
+        "acc-v1-0134",
+        "acc-v1-0138",
+        "acc-v1-0140",
+        "acc-v1-0144"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "evidence",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 79,
+      "denominator": 90,
+      "element_numerator": 79,
+      "element_denominator": 90,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042",
+        "acc-v1-0061",
+        "acc-v1-0062",
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080",
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "formal_ar",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 5,
+      "denominator": 10,
+      "element_numerator": 5,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0002",
+        "acc-v1-0006",
+        "acc-v1-0012",
+        "acc-v1-0016",
+        "acc-v1-0022"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "formal_ar",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 10,
+      "denominator": 10,
+      "element_numerator": 10,
+      "element_denominator": 10,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "formal_ar",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 7,
+      "denominator": 14,
+      "element_numerator": 7,
+      "element_denominator": 14,
+      "failures": [
+        "acc-v1-0004",
+        "acc-v1-0008",
+        "acc-v1-0010",
+        "acc-v1-0014",
+        "acc-v1-0018",
+        "acc-v1-0020",
+        "acc-v1-0024"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "formal_ar",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 14,
+      "denominator": 14,
+      "element_numerator": 14,
+      "element_denominator": 14,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "long_document",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "long_document",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "long_document",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "long_document",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 15,
+      "denominator": 16,
+      "element_numerator": 15,
+      "element_denominator": 16,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 15,
+      "denominator": 16,
+      "element_numerator": 15,
+      "element_denominator": 16,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 23,
+      "denominator": 24,
+      "element_numerator": 23,
+      "element_denominator": 24,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 23,
+      "denominator": 24,
+      "element_numerator": 23,
+      "element_denominator": 24,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair_paraphrase",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 1,
+      "element_numerator": 0,
+      "element_denominator": 1,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair_paraphrase",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 1,
+      "element_numerator": 0,
+      "element_denominator": 1,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair_paraphrase",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 1,
+      "element_numerator": 0,
+      "element_denominator": 1,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair_paraphrase",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 1,
+      "element_numerator": 0,
+      "element_denominator": 1,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_paraphrase",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_paraphrase",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 1,
+      "denominator": 1,
+      "element_numerator": 1,
+      "element_denominator": 1,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_paraphrase",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 3,
+      "element_numerator": 0,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0060",
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_paraphrase",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 1,
+      "denominator": 3,
+      "element_numerator": 1,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_terminology",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 8,
+      "denominator": 8,
+      "element_numerator": 8,
+      "element_denominator": 8,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_terminology",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 8,
+      "denominator": 8,
+      "element_numerator": 8,
+      "element_denominator": 8,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_terminology",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 9,
+      "denominator": 12,
+      "element_numerator": 9,
+      "element_denominator": 12,
+      "failures": [
+        "acc-v1-0060",
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_terminology",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 10,
+      "denominator": 12,
+      "element_numerator": 10,
+      "element_denominator": 12,
+      "failures": [
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_ambiguous",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 3,
+      "element_numerator": 0,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0158",
+        "acc-v1-0162",
+        "acc-v1-0168"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_ambiguous",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 3,
+      "denominator": 3,
+      "element_numerator": 3,
+      "element_denominator": 3,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_ambiguous",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 3,
+      "element_numerator": 0,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0160",
+        "acc-v1-0164",
+        "acc-v1-0166"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_ambiguous",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 3,
+      "denominator": 3,
+      "element_numerator": 3,
+      "element_denominator": 3,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_conflict",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 3,
+      "denominator": 6,
+      "element_numerator": 3,
+      "element_denominator": 6,
+      "failures": [
+        "acc-v1-0158",
+        "acc-v1-0162",
+        "acc-v1-0168"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_conflict",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_conflict",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 3,
+      "denominator": 6,
+      "element_numerator": 3,
+      "element_denominator": 6,
+      "failures": [
+        "acc-v1-0160",
+        "acc-v1-0164",
+        "acc-v1-0166"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_conflict",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 6,
+      "element_numerator": 6,
+      "element_denominator": 6,
+      "failures": [],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    }
+  ],
+  "slices_with_failures": [
+    {
+      "slice": "absent",
+      "split": "held_out",
+      "metric": "refusal_correct",
+      "numerator": 4,
+      "denominator": 7,
+      "element_numerator": 4,
+      "element_denominator": 7,
+      "failures": [
+        "acc-v1-0179",
+        "acc-v1-0180",
+        "acc-v1-0184"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "absent",
+      "split": "tuning",
+      "metric": "refusal_correct",
+      "numerator": 6,
+      "denominator": 9,
+      "element_numerator": 6,
+      "element_denominator": 9,
+      "failures": [
+        "acc-v1-0181",
+        "acc-v1-0182",
+        "acc-v1-0183"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "absent_with_distractor",
+      "split": "held_out",
+      "metric": "refusal_correct",
+      "numerator": 0,
+      "denominator": 3,
+      "element_numerator": 0,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0179",
+        "acc-v1-0180",
+        "acc-v1-0184"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "absent_with_distractor",
+      "split": "tuning",
+      "metric": "refusal_correct",
+      "numerator": 0,
+      "denominator": 3,
+      "element_numerator": 0,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0181",
+        "acc-v1-0182",
+        "acc-v1-0183"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_arabic_over_english",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 4,
+      "denominator": 8,
+      "element_numerator": 4,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_arabic_over_english",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 4,
+      "denominator": 8,
+      "element_numerator": 4,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_arabic_over_english",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_arabic_over_english",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 8,
+      "element_numerator": 6,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 8,
+      "element_numerator": 6,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "held_out",
+      "metric": "refusal_correct",
+      "numerator": 0,
+      "denominator": 1,
+      "element_numerator": 0,
+      "element_denominator": 1,
+      "failures": [
+        "acc-v1-0184"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 5,
+      "denominator": 10,
+      "element_numerator": 5,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0002",
+        "acc-v1-0006",
+        "acc-v1-0012",
+        "acc-v1-0016",
+        "acc-v1-0022"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 7,
+      "denominator": 14,
+      "element_numerator": 7,
+      "element_denominator": 14,
+      "failures": [
+        "acc-v1-0004",
+        "acc-v1-0008",
+        "acc-v1-0010",
+        "acc-v1-0014",
+        "acc-v1-0018",
+        "acc-v1-0020",
+        "acc-v1-0024"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "tuning",
+      "metric": "refusal_correct",
+      "numerator": 1,
+      "denominator": 2,
+      "element_numerator": 1,
+      "element_denominator": 2,
+      "failures": [
+        "acc-v1-0183"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_matched_pair",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 15,
+      "denominator": 16,
+      "element_numerator": 15,
+      "element_denominator": 16,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_matched_pair",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 15,
+      "denominator": 16,
+      "element_numerator": 15,
+      "element_denominator": 16,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_matched_pair",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 23,
+      "denominator": 24,
+      "element_numerator": 23,
+      "element_denominator": 24,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_matched_pair",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 23,
+      "denominator": 24,
+      "element_numerator": 23,
+      "element_denominator": 24,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 5,
+      "denominator": 8,
+      "element_numerator": 5,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0060",
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 8,
+      "element_numerator": 6,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 26,
+      "denominator": 38,
+      "element_numerator": 26,
+      "element_denominator": 38,
+      "failures": [
+        "acc-v1-0002",
+        "acc-v1-0006",
+        "acc-v1-0012",
+        "acc-v1-0016",
+        "acc-v1-0022",
+        "acc-v1-0040",
+        "acc-v1-0041",
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079",
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 31,
+      "denominator": 38,
+      "element_numerator": 31,
+      "element_denominator": 38,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041",
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079",
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "metric": "refusal_correct",
+      "numerator": 1,
+      "denominator": 2,
+      "element_numerator": 1,
+      "element_denominator": 2,
+      "failures": [
+        "acc-v1-0184"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 35,
+      "denominator": 54,
+      "element_numerator": 35,
+      "element_denominator": 54,
+      "failures": [
+        "acc-v1-0004",
+        "acc-v1-0008",
+        "acc-v1-0010",
+        "acc-v1-0014",
+        "acc-v1-0018",
+        "acc-v1-0020",
+        "acc-v1-0024",
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042",
+        "acc-v1-0060",
+        "acc-v1-0061",
+        "acc-v1-0062",
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080",
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 43,
+      "denominator": 54,
+      "element_numerator": 43,
+      "element_denominator": 54,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042",
+        "acc-v1-0061",
+        "acc-v1-0062",
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080",
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "metric": "refusal_correct",
+      "numerator": 3,
+      "denominator": 4,
+      "element_numerator": 3,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0183"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 4,
+      "denominator": 8,
+      "element_numerator": 4,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 4,
+      "denominator": 8,
+      "element_numerator": 4,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_unshared",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_unshared",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_unshared",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "arabic_over_english_unshared",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "distractor_ambiguity",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 10,
+      "element_numerator": 0,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0002",
+        "acc-v1-0006",
+        "acc-v1-0012",
+        "acc-v1-0016",
+        "acc-v1-0022",
+        "acc-v1-0122",
+        "acc-v1-0126",
+        "acc-v1-0132",
+        "acc-v1-0136",
+        "acc-v1-0142"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "distractor_ambiguity",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 14,
+      "element_numerator": 0,
+      "element_denominator": 14,
+      "failures": [
+        "acc-v1-0004",
+        "acc-v1-0008",
+        "acc-v1-0010",
+        "acc-v1-0014",
+        "acc-v1-0018",
+        "acc-v1-0020",
+        "acc-v1-0024",
+        "acc-v1-0124",
+        "acc-v1-0128",
+        "acc-v1-0130",
+        "acc-v1-0134",
+        "acc-v1-0138",
+        "acc-v1-0140",
+        "acc-v1-0144"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 8,
+      "element_numerator": 6,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 8,
+      "element_numerator": 6,
+      "element_denominator": 8,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 6,
+      "denominator": 10,
+      "element_numerator": 6,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian_paraphrase",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 2,
+      "element_numerator": 0,
+      "element_denominator": 2,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian_paraphrase",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 2,
+      "element_numerator": 0,
+      "element_denominator": 2,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian_paraphrase",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "egyptian_paraphrase",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 4,
+      "element_numerator": 0,
+      "element_denominator": 4,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "english_evidence",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 5,
+      "denominator": 10,
+      "element_numerator": 5,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0122",
+        "acc-v1-0126",
+        "acc-v1-0132",
+        "acc-v1-0136",
+        "acc-v1-0142"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "english_evidence",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 7,
+      "denominator": 14,
+      "element_numerator": 7,
+      "element_denominator": 14,
+      "failures": [
+        "acc-v1-0124",
+        "acc-v1-0128",
+        "acc-v1-0130",
+        "acc-v1-0134",
+        "acc-v1-0138",
+        "acc-v1-0140",
+        "acc-v1-0144"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "evidence",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 49,
+      "denominator": 66,
+      "element_numerator": 49,
+      "element_denominator": 66,
+      "failures": [
+        "acc-v1-0002",
+        "acc-v1-0006",
+        "acc-v1-0012",
+        "acc-v1-0016",
+        "acc-v1-0022",
+        "acc-v1-0040",
+        "acc-v1-0041",
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079",
+        "acc-v1-0116",
+        "acc-v1-0122",
+        "acc-v1-0126",
+        "acc-v1-0132",
+        "acc-v1-0136",
+        "acc-v1-0142"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "evidence",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 59,
+      "denominator": 66,
+      "element_numerator": 59,
+      "element_denominator": 66,
+      "failures": [
+        "acc-v1-0040",
+        "acc-v1-0041",
+        "acc-v1-0073",
+        "acc-v1-0074",
+        "acc-v1-0078",
+        "acc-v1-0079",
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "evidence",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 64,
+      "denominator": 90,
+      "element_numerator": 64,
+      "element_denominator": 90,
+      "failures": [
+        "acc-v1-0004",
+        "acc-v1-0008",
+        "acc-v1-0010",
+        "acc-v1-0014",
+        "acc-v1-0018",
+        "acc-v1-0020",
+        "acc-v1-0024",
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042",
+        "acc-v1-0060",
+        "acc-v1-0061",
+        "acc-v1-0062",
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080",
+        "acc-v1-0114",
+        "acc-v1-0124",
+        "acc-v1-0128",
+        "acc-v1-0130",
+        "acc-v1-0134",
+        "acc-v1-0138",
+        "acc-v1-0140",
+        "acc-v1-0144"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "evidence",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 79,
+      "denominator": 90,
+      "element_numerator": 79,
+      "element_denominator": 90,
+      "failures": [
+        "acc-v1-0037",
+        "acc-v1-0038",
+        "acc-v1-0039",
+        "acc-v1-0042",
+        "acc-v1-0061",
+        "acc-v1-0062",
+        "acc-v1-0075",
+        "acc-v1-0076",
+        "acc-v1-0077",
+        "acc-v1-0080",
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "formal_ar",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 5,
+      "denominator": 10,
+      "element_numerator": 5,
+      "element_denominator": 10,
+      "failures": [
+        "acc-v1-0002",
+        "acc-v1-0006",
+        "acc-v1-0012",
+        "acc-v1-0016",
+        "acc-v1-0022"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "formal_ar",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 7,
+      "denominator": 14,
+      "element_numerator": 7,
+      "element_denominator": 14,
+      "failures": [
+        "acc-v1-0004",
+        "acc-v1-0008",
+        "acc-v1-0010",
+        "acc-v1-0014",
+        "acc-v1-0018",
+        "acc-v1-0020",
+        "acc-v1-0024"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 15,
+      "denominator": 16,
+      "element_numerator": 15,
+      "element_denominator": 16,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 15,
+      "denominator": 16,
+      "element_numerator": 15,
+      "element_denominator": 16,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 23,
+      "denominator": 24,
+      "element_numerator": 23,
+      "element_denominator": 24,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 23,
+      "denominator": 24,
+      "element_numerator": 23,
+      "element_denominator": 24,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair_paraphrase",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 1,
+      "element_numerator": 0,
+      "element_denominator": 1,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair_paraphrase",
+      "split": "held_out",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 1,
+      "element_numerator": 0,
+      "element_denominator": 1,
+      "failures": [
+        "acc-v1-0116"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair_paraphrase",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 1,
+      "element_numerator": 0,
+      "element_denominator": 1,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "matched_pair_paraphrase",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 0,
+      "denominator": 1,
+      "element_numerator": 0,
+      "element_denominator": 1,
+      "failures": [
+        "acc-v1-0114"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_paraphrase",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 3,
+      "element_numerator": 0,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0060",
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_paraphrase",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 1,
+      "denominator": 3,
+      "element_numerator": 1,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_terminology",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 9,
+      "denominator": 12,
+      "element_numerator": 9,
+      "element_denominator": 12,
+      "failures": [
+        "acc-v1-0060",
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "mixed_terminology",
+      "split": "tuning",
+      "metric": "evidence_recall_at_10",
+      "numerator": 10,
+      "denominator": 12,
+      "element_numerator": 10,
+      "element_denominator": 12,
+      "failures": [
+        "acc-v1-0061",
+        "acc-v1-0062"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_ambiguous",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 3,
+      "element_numerator": 0,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0158",
+        "acc-v1-0162",
+        "acc-v1-0168"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_ambiguous",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 0,
+      "denominator": 3,
+      "element_numerator": 0,
+      "element_denominator": 3,
+      "failures": [
+        "acc-v1-0160",
+        "acc-v1-0164",
+        "acc-v1-0166"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_conflict",
+      "split": "held_out",
+      "metric": "citation_precision_proxy",
+      "numerator": 3,
+      "denominator": 6,
+      "element_numerator": 3,
+      "element_denominator": 6,
+      "failures": [
+        "acc-v1-0158",
+        "acc-v1-0162",
+        "acc-v1-0168"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    },
+    {
+      "slice": "version_conflict",
+      "split": "tuning",
+      "metric": "citation_precision_proxy",
+      "numerator": 3,
+      "denominator": 6,
+      "element_numerator": 3,
+      "element_denominator": 6,
+      "failures": [
+        "acc-v1-0160",
+        "acc-v1-0164",
+        "acc-v1-0166"
+      ],
+      "threshold": null,
+      "threshold_status": "unconfirmed",
+      "decision": "not_a_release_decision"
+    }
+  ],
+  "pending_slices": [
+    {
+      "slice": "arabic_arabic_over_english",
+      "split": "held_out",
+      "task": "ocr_pending",
+      "cases": 1,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "OCR is not implemented. Scanned cases are not scored and are not reviewed."
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "held_out",
+      "task": "chart_pending",
+      "cases": 1,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "Visual interpretation is not implemented. Chart cases are not scored."
+    },
+    {
+      "slice": "arabic_egyptian",
+      "split": "tuning",
+      "task": "ocr_pending",
+      "cases": 2,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "OCR is not implemented. Scanned cases are not scored and are not reviewed."
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "held_out",
+      "task": "ocr_pending",
+      "cases": 2,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "OCR is not implemented. Scanned cases are not scored and are not reviewed."
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "tuning",
+      "task": "chart_pending",
+      "cases": 1,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "Visual interpretation is not implemented. Chart cases are not scored."
+    },
+    {
+      "slice": "arabic_formal",
+      "split": "tuning",
+      "task": "ocr_pending",
+      "cases": 1,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "OCR is not implemented. Scanned cases are not scored and are not reviewed."
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "held_out",
+      "task": "ocr_pending",
+      "cases": 1,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "OCR is not implemented. Scanned cases are not scored and are not reviewed."
+    },
+    {
+      "slice": "arabic_mixed_terminology",
+      "split": "tuning",
+      "task": "ocr_pending",
+      "cases": 1,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "OCR is not implemented. Scanned cases are not scored and are not reviewed."
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "task": "chart_pending",
+      "cases": 1,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "Visual interpretation is not implemented. Chart cases are not scored."
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "held_out",
+      "task": "ocr_pending",
+      "cases": 4,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "OCR is not implemented. Scanned cases are not scored and are not reviewed."
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "task": "chart_pending",
+      "cases": 1,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "Visual interpretation is not implemented. Chart cases are not scored."
+    },
+    {
+      "slice": "arabic_or_mixed",
+      "split": "tuning",
+      "task": "ocr_pending",
+      "cases": 4,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "OCR is not implemented. Scanned cases are not scored and are not reviewed."
+    },
+    {
+      "slice": "chart_pending",
+      "split": "held_out",
+      "task": "chart_pending",
+      "cases": 3,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "Visual interpretation is not implemented. Chart cases are not scored."
+    },
+    {
+      "slice": "chart_pending",
+      "split": "tuning",
+      "task": "chart_pending",
+      "cases": 3,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "Visual interpretation is not implemented. Chart cases are not scored."
+    },
+    {
+      "slice": "ocr_pending",
+      "split": "held_out",
+      "task": "ocr_pending",
+      "cases": 6,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "OCR is not implemented. Scanned cases are not scored and are not reviewed."
+    },
+    {
+      "slice": "ocr_pending",
+      "split": "tuning",
+      "task": "ocr_pending",
+      "cases": 8,
+      "scored_denominator": 0,
+      "decision": "pending_not_scored",
+      "reason": "OCR is not implemented. Scanned cases are not scored and are not reviewed."
+    }
+  ],
+  "matched_pair_lexical_gap": {
+    "pairs": 20,
+    "denominator": 20,
+    "differing_pairs": 2,
+    "pairs_with_a_gap": [
+      {
+        "pair": "pair-17",
+        "english_recalled": true,
+        "arabic_recalled": false
+      },
+      {
+        "pair": "pair-18",
+        "english_recalled": true,
+        "arabic_recalled": false
+      }
+    ],
+    "note": "This is a fixture-lexical gap between matched questions, not a reviewed Arabic quality gap and not a release threshold."
+  },
+  "proposed_objectives_not_confirmed": {
+    "evidence_recall_at_10": 0.9,
+    "manual_citation_precision": 0.95,
+    "critical_numerical_exact": 1.0,
+    "status": "proposed_in_VAL-004_not_confirmed"
+  },
+  "cases": [
+    {
+      "id": "acc-v1-0002",
+      "split": "held_out",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0004",
+      "split": "tuning",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0006",
+      "split": "held_out",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0008",
+      "split": "tuning",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0010",
+      "split": "tuning",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0012",
+      "split": "held_out",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0014",
+      "split": "tuning",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0016",
+      "split": "held_out",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0018",
+      "split": "tuning",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0020",
+      "split": "tuning",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0022",
+      "split": "held_out",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0024",
+      "split": "tuning",
+      "family": "formal_ar",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0037",
+      "split": "tuning",
+      "family": "egyptian",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0038",
+      "split": "tuning",
+      "family": "egyptian",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0039",
+      "split": "tuning",
+      "family": "egyptian",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0040",
+      "split": "held_out",
+      "family": "egyptian",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0041",
+      "split": "held_out",
+      "family": "egyptian",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0042",
+      "split": "tuning",
+      "family": "egyptian",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0060",
+      "split": "tuning",
+      "family": "mixed_terminology",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0061",
+      "split": "tuning",
+      "family": "mixed_terminology",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0062",
+      "split": "tuning",
+      "family": "mixed_terminology",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0073",
+      "split": "held_out",
+      "family": "arabic_over_english",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0074",
+      "split": "held_out",
+      "family": "arabic_over_english",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0075",
+      "split": "tuning",
+      "family": "arabic_over_english",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0076",
+      "split": "tuning",
+      "family": "arabic_over_english",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0077",
+      "split": "tuning",
+      "family": "arabic_over_english",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0078",
+      "split": "held_out",
+      "family": "arabic_over_english",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0079",
+      "split": "held_out",
+      "family": "arabic_over_english",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0080",
+      "split": "tuning",
+      "family": "arabic_over_english",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0114",
+      "split": "tuning",
+      "family": "matched_pair",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0116",
+      "split": "held_out",
+      "family": "matched_pair",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "evidence_recall_at_10",
+          "reason": "supporting_element_missing_from_top_10"
+        },
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "no_citation"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0122",
+      "split": "held_out",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0124",
+      "split": "tuning",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0126",
+      "split": "held_out",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0128",
+      "split": "tuning",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0130",
+      "split": "tuning",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0132",
+      "split": "held_out",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0134",
+      "split": "tuning",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0136",
+      "split": "held_out",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0138",
+      "split": "tuning",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0140",
+      "split": "tuning",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0142",
+      "split": "held_out",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0144",
+      "split": "tuning",
+      "family": "english_evidence",
+      "task": "evidence",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0158",
+      "split": "held_out",
+      "family": "version_conflict",
+      "task": "version_conflict",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0160",
+      "split": "tuning",
+      "family": "version_conflict",
+      "task": "version_conflict",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0162",
+      "split": "held_out",
+      "family": "version_conflict",
+      "task": "version_conflict",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0164",
+      "split": "tuning",
+      "family": "version_conflict",
+      "task": "version_conflict",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0166",
+      "split": "tuning",
+      "family": "version_conflict",
+      "task": "version_conflict",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0168",
+      "split": "held_out",
+      "family": "version_conflict",
+      "task": "version_conflict",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "citation_precision_proxy",
+          "reason": "cited_unsupporting"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0179",
+      "split": "held_out",
+      "family": "absent",
+      "task": "absent",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "refusal_correct",
+          "reason": "answered_without_support"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0180",
+      "split": "held_out",
+      "family": "absent",
+      "task": "absent",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "refusal_correct",
+          "reason": "answered_without_support"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0181",
+      "split": "tuning",
+      "family": "absent",
+      "task": "absent",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "refusal_correct",
+          "reason": "answered_without_support"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0182",
+      "split": "tuning",
+      "family": "absent",
+      "task": "absent",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "refusal_correct",
+          "reason": "answered_without_support"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0183",
+      "split": "tuning",
+      "family": "absent",
+      "task": "absent",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "refusal_correct",
+          "reason": "answered_without_support"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0184",
+      "split": "held_out",
+      "family": "absent",
+      "task": "absent",
+      "status": "scored",
+      "failures": [
+        {
+          "metric": "refusal_correct",
+          "reason": "answered_without_support"
+        }
+      ]
+    },
+    {
+      "id": "acc-v1-0227",
+      "split": "held_out",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0228",
+      "split": "held_out",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0229",
+      "split": "tuning",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0230",
+      "split": "tuning",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0231",
+      "split": "tuning",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0232",
+      "split": "held_out",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0233",
+      "split": "held_out",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0234",
+      "split": "tuning",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0235",
+      "split": "tuning",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0236",
+      "split": "tuning",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0237",
+      "split": "held_out",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0238",
+      "split": "held_out",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0239",
+      "split": "tuning",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0240",
+      "split": "tuning",
+      "family": "ocr_pending",
+      "task": "ocr_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0241",
+      "split": "held_out",
+      "family": "chart_pending",
+      "task": "chart_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0242",
+      "split": "held_out",
+      "family": "chart_pending",
+      "task": "chart_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0243",
+      "split": "tuning",
+      "family": "chart_pending",
+      "task": "chart_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0244",
+      "split": "tuning",
+      "family": "chart_pending",
+      "task": "chart_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0245",
+      "split": "tuning",
+      "family": "chart_pending",
+      "task": "chart_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    },
+    {
+      "id": "acc-v1-0246",
+      "split": "held_out",
+      "family": "chart_pending",
+      "task": "chart_pending",
+      "status": "pending_not_scored",
+      "failures": []
+    }
+  ],
+  "open_decisions": [
+    "Confirm VAL-004 definitions, denominators, and per-slice thresholds before any pilot. Proposed figures are at least 90% supporting-evidence recall@10, at least 95% manually assessed citation precision, and 100% exact critical numerical results. They are not confirmed and are not measured results.",
+    "Confirm VAL-002 business slices and acceptable Arabic thresholds, including the matched English/Arabic gap. Do not average a failing slice into a passing total.",
+    "Citation figures in this report are proxies from fixture citations. They are not the manual citation-precision assessment VAL-004 requires.",
+    "Name the reviewer for this machine-drafted corpus. Reviewed status requires a new corpus version. Synthetic fixtures do not establish company readiness; representative company samples stay on internal infrastructure.",
+    "Scanned Arabic and chart cases stay pending until OCR and visual interpretation exist. Do not transcribe them into verified gold.",
+    "VAL-003 stays pending until the company server is measured. No latency, context, or concurrency number should be inferred from this laptop or fixture run.",
+    "VAL-006 stays pending until the offline boot, network-denial record, and backup restore are actually run.",
+    "Held-out cases are separated so they can stay unused for tuning. Confirm that split before anyone tunes prompts or retrieval on this corpus."
+  ]
+}
